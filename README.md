@@ -13,6 +13,7 @@ Mixed reality lessons built with [WebXR](https://immersiveweb.dev/) and [three.j
 | **Bounce Lab** | Physics | [`lessons/bounce-lab/`](lessons/bounce-lab/) |
 | **Radiation Lab** | Physics | [`lessons/radiation-lab/`](lessons/radiation-lab/) |
 | **Circular Motion** | Physics | [`lessons/circular-lab/`](lessons/circular-lab/) |
+| **Kinematics Lab** | Physics / Maths | [`lessons/kinematics-lab/`](lessons/kinematics-lab/) |
 | **PC Builder Lab** | Computer Science | [`lessons/pc-builder/`](lessons/pc-builder/) |
 | **Cell Explorer** | Biology | [`lessons/cell-explorer/`](lessons/cell-explorer/) |
 | **Heart Lab** | Biology | [`lessons/heart-lab/`](lessons/heart-lab/) |
@@ -40,7 +41,7 @@ Every lesson can be opened **solo** or in a **shared session**:
 
 Each person has **their own models**. Everyone else's work appears beside you at their own desk as a live copy: you can see their PC being built part by part, their atom or molecule, or their cell with its knock-outs. Desks sit side by side in the same order for everyone, so if you see someone on your right, they see you on their left. There are **no avatars**: the lessons are mixed reality, so you see the real people.
 
-**Same room:** tick **"We're in the same room"** when starting or joining a session (Acid Lab, Lithium Reactions, Kinetics Lab, Voltaic Lab, Waves Lab, Bounce Lab, Radiation Lab, Circular Motion, Heart Lab, Enzyme Lab, Microscope Lab, Osmosis Lab, Identifying Organs and Reef Dive tick it for you). Everyone then sees the same things in the same real places, with **nothing to press**:
+**Same room:** tick **"We're in the same room"** when starting or joining a session (Acid Lab, Lithium Reactions, Kinetics Lab, Voltaic Lab, Waves Lab, Bounce Lab, Radiation Lab, Circular Motion, Kinematics Lab, Heart Lab, Enzyme Lab, Microscope Lab, Osmosis Lab, Identifying Organs and Reef Dive tick it for you). Everyone then sees the same things in the same real places, with **nothing to press**:
 
 - **Before class, once per headset:** scan the classroom with Quest **Settings › Physical space › Space Setup** (about 2 minutes; mark the walls, door, windows and tables). If the browser asks to use spatial data, allow it.
 - In the lesson, each headset finds the room by itself from its scan (`shared/net/RoomAlign.js`): the room's walls give the directions, and the middle of the room, on the floor, is the shared origin. Which way round is settled by the door, windows, tables and other fittings, which every headset matches against the admin's headset. It checks again every second, so a headset that recentres or loses tracking puts itself right. In a simulation with realistic scan noise, headsets agreed to within about 5 cm and never got the room the wrong way round.
@@ -57,6 +58,7 @@ Each person has **their own models**. Everyone else's work appears beside you at
 - **Kinetics Lab:** **Activity for everyone** (Predict / Experiment / Summary), **Factor for everyone** (temperature, surface area, concentration, catalyst), **Level for everyone**, the **Class board** position (same room) and how many runs each student has done. The board shows the prediction, then the class chart for the factor the teacher is on.
 - **Waves Lab:** **Activity for everyone** (Predict / Rope wave / Ripple tank / Mystery wave), **Level for everyone**, the **Class board** position (same room), and who has answered the question on the board (or each student’s investigation steps, out of 6). The board shows the teacher’s wave and question; the teacher’s own controls choose the prediction, deal a new mystery wave and reveal the answer.
 - **Bounce Lab:** **Activity for everyone** (Predict / Drop + measure / Compare), **Level for everyone**, **Ball on the class chart**, the **Class board** position (same room), and who has answered the prediction (or how many drops each student has recorded). The teacher’s own controls choose the prediction and reveal the answer.
+- **Kinematics Lab:** **Activity for everyone** (Predict / Experiment / Share findings), **Level for everyone**, **Station for everyone** (drop tower, pendulum, spring, ramp; the class board shows the class datasheet for it), the **Class board** position (same room) and how many datasheet rows each student has. The teacher's own controls choose the prediction and reveal the answer.
 - **Circular Motion:** **Activity for everyone** (Predict / Experiment / Real world), **Level for everyone**, the **Class board** position (same room) and how many results each student has recorded. The teacher's own controls choose the prediction and reveal the answer.
 - **Radiation Lab:** **Activity for everyone** (The counter / Test sources / Half-life at Advanced / Class results), **Level for everyone**, **Reveal the answers** (class results), the **Class board** position (same room) and how many sources each student has decided about. The board shows the teacher’s Geiger counter, half-life graph or the class’s verdicts.
 - **Enzyme Lab:** **Activity for everyone** (Starter quiz / Experiment / Class graph), **Level for everyone**, the **Class board** position (same room) and how many temperatures each student has done. The board shows everyone’s quiz scores, then the class graph.
@@ -253,6 +255,27 @@ A row of seven surface mats lies on the **real classroom floor** in front of eac
 | (plenary) Compare results, explain anomalies, real-world applications | **Compare:** the student’s means for every ball and surface, surfaces ranked from bounciest with the reason for each, and **Find odd results** (drops more than 10 points from the student’s other drops of the same ball and surface). The **class chart** on the board shows, for the ball the teacher picks, every student’s mean on each surface as a dot and the class mean as a bar; results that don’t fit the class are circled with the student’s name. |
 
 **Ask the physicist:** 8 pre-written answers (why a ball bounces, where the energy goes, momentum, why never higher, why the ping-pong ball is odd, why repeat and average, anomalies, real-world uses). An AI physicist can be connected later with `physicistEndpoint` in `lessons/bounce-lab/config.js`.
+
+## Kinematics Lab
+
+From the original EngageVR lesson (a tall measuring pole, a glass balcony at 5, 10 and 15 m, a ball to drop, a chart of 20 samples and a datasheet), extended to the pendulums and springs in its lesson plan, plus a ramp. Everything is built in code. One station is on the bench at a time:
+
+- **Drop tower:** a 1:20 model of the pole and balcony. Drops run in real time (15 m takes about 1.75 s). **Watch it life-size** raises the full 16 m pole beside the bench, through the classroom ceiling, and the ball falls beside you. A tennis ball and a bowling ball land together; at Advanced, a feather and a paper parachute show air resistance and terminal velocity.
+- **Pendulum:** lengths 0.2–0.6 m, bobs of 50, 100 and 200 g, release angles 5–60° (or drag the bob out and let go). It times 10 swings by itself. The exact (not small-angle) equation is used, so very big swings take a little longer.
+- **Spring:** a soft, a medium, a stiff and a **mystery** spring, masses 50–300 g, and a ruler for the stretch. Pull the mass down and let go: it times 10 bounces.
+- **Ramp:** a 0.7 m plank at 5–30°; the ball rolls down with a = (5/7) g sin θ.
+
+**The chart** is in the original's style: one graph of 20 samples spread over the run, drawn live, showing displacement, velocity or acceleration against time. **The datasheet** fills in a row for every run (height and fall time, length and time for 10 swings, stretch and time for 10 bounces, angle and roll time); press a row to see the worked calculation of g, the period or the spring constant, and answer the station's question.
+
+| Lesson plan | In the Kinematics Lab |
+| --- | --- |
+| (starter) Examples of motion; key terms: displacement, velocity, acceleration | **Predict:** 4 questions on the class board (heavy and light balls, a longer pendulum, a heavier bob, a ball at the top of its throw), with the key terms defined on each student's panel. |
+| Pendulum and spring simulations; change length, mass, spring constant; predict, then compare; find the period and the spring constant; interpret graphs | **Experiment:** the four stations, the chart and the datasheet; the class board shows the class datasheet for the teacher's station (fall time against height, period against length or mass, acceleration against angle). |
+| (plenary) Groups discuss how variables changed the motion and share a key insight | **Share findings:** each group picks its key insight from a list; the class board tallies them; discussion prompts. |
+
+**Advanced:** the feather and parachute, g from the pendulum (4π²L/T²), k from the bounce period as well as the stretch, the ramp compared with g sin θ, and theory curves on the class datasheet.
+
+**Ask the physicist:** 8 pre-written answers (displacement and distance, speed and velocity, acceleration, g, why mass doesn't matter, simple harmonic motion, reading the graphs, pendulum clocks). An AI physicist can be connected later with `physicistEndpoint` in `lessons/kinematics-lab/config.js`.
 
 ## Circular Motion
 
@@ -538,6 +561,9 @@ lessons/waves-lab/
 lessons/bounce-lab/
   src/data/bounce.js               the balls and surfaces (restitution, mass, air resistance), predictions, answers
   src/model/                       Floor (mats, ruler, the physics of a drop, slow-motion replay), Balls, Board (class chart), sounds
+lessons/kinematics-lab/
+  src/data/kinematics.js           the stations' settings, the physics, key terms, predictions, worksheet questions, insights, answers
+  src/model/                       Bench (drop tower model, pendulum, spring, ramp), Tower (life-size pole), Chart (20-sample chart), Board
 lessons/circular-lab/
   src/data/circular.js             the kit's settings, turns per second from F = mω²r, predictions, real-world examples, answers
   src/model/                       Kit (stand, tube, string, clip, hanging weight, balls, stopwatch, light gate), Plenary (Earth and satellite, car on a bend), Board (class board), sounds
