@@ -8,6 +8,7 @@ Mixed reality lessons built with [WebXR](https://immersiveweb.dev/) and [three.j
 | **Acid Lab** | Chemistry | [`lessons/acid-lab/`](lessons/acid-lab/) |
 | **Lithium Reactions** | Chemistry | [`lessons/lithium-lab/`](lessons/lithium-lab/) |
 | **Kinetics Lab** | Chemistry | [`lessons/kinetics-lab/`](lessons/kinetics-lab/) |
+| **Voltaic Lab** | Chemistry | [`lessons/voltaic-lab/`](lessons/voltaic-lab/) |
 | **Waves Lab** | Physics | [`lessons/waves-lab/`](lessons/waves-lab/) |
 | **Bounce Lab** | Physics | [`lessons/bounce-lab/`](lessons/bounce-lab/) |
 | **Radiation Lab** | Physics | [`lessons/radiation-lab/`](lessons/radiation-lab/) |
@@ -39,7 +40,7 @@ Every lesson can be opened **solo** or in a **shared session**:
 
 Each person has **their own models**. Everyone else's work appears beside you at their own desk as a live copy: you can see their PC being built part by part, their atom or molecule, or their cell with its knock-outs. Desks sit side by side in the same order for everyone, so if you see someone on your right, they see you on their left. There are **no avatars**: the lessons are mixed reality, so you see the real people.
 
-**Same room:** tick **"We're in the same room"** when starting or joining a session (Acid Lab, Lithium Reactions, Kinetics Lab, Waves Lab, Bounce Lab, Radiation Lab, Circular Motion, Heart Lab, Enzyme Lab, Microscope Lab, Osmosis Lab, Identifying Organs and Reef Dive tick it for you). Everyone then sees the same things in the same real places, with **nothing to press**:
+**Same room:** tick **"We're in the same room"** when starting or joining a session (Acid Lab, Lithium Reactions, Kinetics Lab, Voltaic Lab, Waves Lab, Bounce Lab, Radiation Lab, Circular Motion, Heart Lab, Enzyme Lab, Microscope Lab, Osmosis Lab, Identifying Organs and Reef Dive tick it for you). Everyone then sees the same things in the same real places, with **nothing to press**:
 
 - **Before class, once per headset:** scan the classroom with Quest **Settings › Physical space › Space Setup** (about 2 minutes; mark the walls, door, windows and tables). If the browser asks to use spatial data, allow it.
 - In the lesson, each headset finds the room by itself from its scan (`shared/net/RoomAlign.js`): the room's walls give the directions, and the middle of the room, on the floor, is the shared origin. Which way round is settled by the door, windows, tables and other fittings, which every headset matches against the admin's headset. It checks again every second, so a headset that recentres or loses tracking puts itself right. In a simulation with realistic scan noise, headsets agreed to within about 5 cm and never got the room the wrong way round.
@@ -52,6 +53,7 @@ Each person has **their own models**. Everyone else's work appears beside you at
 - **PC Builder:** **Case for everyone** (**Free choice**, the default, or one case that every student must use), **Turn all off** (switches off every computer) and **Empty all cases** (press twice; every student starts again with an empty case).
 - **Acid Lab:** **Activity for everyone**, **Level for everyone**, the **Class board** position (same room) and each student’s progress (results recorded out of 18). Everyone gets the admin’s set of solutions; **New solutions** (in the admin’s own controls) deals a new set to the whole class.
 - **Lithium Reactions:** **Activity for everyone** (Predict / Experiment / Class results), **Level for everyone**, **Reveal the answers** (class results), the **Class board** position (same room) and how many metals each student has tested and identified. Everyone gets the admin’s set of mystery metals; **New mystery metals** (in the admin’s own controls) shuffles them for the whole class.
+- **Voltaic Lab:** **Activity for everyone** (Predict / Experiment / Real batteries), **Level for everyone**, the **Class board** position (same room) and how many readings each student has recorded. The teacher's own controls choose the prediction and reveal the answer.
 - **Kinetics Lab:** **Activity for everyone** (Predict / Experiment / Summary), **Factor for everyone** (temperature, surface area, concentration, catalyst), **Level for everyone**, the **Class board** position (same room) and how many runs each student has done. The board shows the prediction, then the class chart for the factor the teacher is on.
 - **Waves Lab:** **Activity for everyone** (Predict / Rope wave / Ripple tank / Mystery wave), **Level for everyone**, the **Class board** position (same room), and who has answered the question on the board (or each student’s investigation steps, out of 6). The board shows the teacher’s wave and question; the teacher’s own controls choose the prediction, deal a new mystery wave and reveal the answer.
 - **Bounce Lab:** **Activity for everyone** (Predict / Drop + measure / Compare), **Level for everyone**, **Ball on the class chart**, the **Class board** position (same room), and who has answered the prediction (or how many drops each student has recorded). The teacher’s own controls choose the prediction and reveal the answer.
@@ -176,6 +178,26 @@ Rebuilt from the original EngageVR lesson, with the same bench and steps: metal 
 **Advanced:** each metal's electron arrangement on the reference chart and the equation for each reaction with water (2M + 2H₂O → 2MOH + H₂).
 
 **Ask the chemist:** 8 pre-written answers (why reactivity increases, floating and sinking, flame colours, the gas, storage under oil, safety screens, why "Group 1", uses). An AI chemist can be connected later with `chemistEndpoint` in `lessons/lithium-lab/config.js`.
+
+## Voltaic Lab
+
+From the original EngageVR lesson plan: test different combinations of chemicals in a voltaic cell and measure the power they generate. Everything is built in code.
+
+**Core: simple cells.** Four beakers. Drag two metal strips from the tray into a beaker (magnesium, zinc, iron, lead, copper or silver) and drag a bottle over it to pour an electrolyte: salt water, vinegar, lemon juice, dilute sulfuric acid, sugar water or pure water. Tap a cell to put the multimeter's leads on it (black to the left strip, red to the right). The voltage grows with the gap between the metals in the reactivity series (about 0.9 V for zinc and copper in lemon juice, 1.6 V for magnesium and copper in salt water); two strips of the same metal give nothing; sugar water and pure water barely work (no ions); leads the wrong way round give a minus sign. **Link the cells in series** to add their voltages (a cell the wrong way round subtracts).
+
+**Advanced: two-beaker cells.** Drop a metal strip into each beaker and it fills with a solution of that metal's own ions (copper sulfate is blue); nothing flows until a **salt bridge** is laid across. Readings are close to E°cell = E°(right) − E°(left) from the table of standard electrode potentials, and the meter switches to **milliamps** (a few mA, limited by the salt bridge). Two cells can be linked in series.
+
+**Zoom into the particles:** a magnified, animated view of the cell being measured: atoms of the more reactive metal losing electrons and leaving as ions (oxidation), electrons flowing through the wire, hydrogen ions (simple cells) or the other metal's ions (two-beaker cells) gaining them (reduction), and ions moving through the salt bridge, with the half-equations. Nothing moves without ions or without a bridge.
+
+**Run it down:** a 24-hour time-lapse as if the cell were powering a small clock: the negative strip wears away, the positive one gains a coating, copper sulfate fades, and a graph of voltage against time falls. A lemon cell barely changes: its current is too small to use much up.
+
+| Lesson plan | In the Voltaic Lab |
+| --- | --- |
+| (starter) What do you know about batteries, electrochemical reactions and electricity? How do batteries generate power? | **Predict:** 4 questions on the class board (how a battery works, the best metal pair, two strips of the same metal, sugar water against salt water). |
+| Test combinations of chemicals in a voltaic cell; monitor the power; observe, measure and record | **Experiment:** the metals and electrolytes (or half-cells and salt bridges), cells in series, the multimeter, the particle view, running down, and a results table. |
+| (plenary) Share results; explain the reactions and what affected the power; how voltaic cells work and their uses | **Class board:** every reading the class has recorded, biggest first. **Real batteries:** an alkaline AA, a lithium-ion cell and a car battery, cut open, with what is negative, positive and the electrolyte in each, compared on the board; discussion prompts. |
+
+**Ask the chemist:** 8 pre-written answers (how a voltaic cell works, which strip is negative, the electrolyte, the salt bridge, oxidation and reduction, why batteries go flat, cells in series, Volta). An AI chemist can be connected later with `chemistEndpoint` in `lessons/voltaic-lab/config.js`.
 
 ## Kinetics Lab
 
@@ -504,6 +526,9 @@ lessons/acid-lab/
 lessons/lithium-lab/
   src/data/lithium.js              the five alkali metals (density, reactivity, flame colour), the mystery shuffle, predictions, answers
   src/model/                       Bench (metal cubes, Bunsen burner, water tank, safety screen, reactions), Board, sounds
+lessons/voltaic-lab/
+  src/data/voltaic.js              metals and electrode potentials, electrolytes, cell voltage and resistance, predictions, batteries, answers
+  src/model/                       Bench (beakers, strips, bottles, salt bridges, multimeter, wires), Particles (zoomed-in view), Batteries (cut-away models), Board
 lessons/kinetics-lab/
   src/data/kinetics.js             the four factors and their numbers, predictions, summary table, answers
   src/model/                       Bench (timing rig with flasks and timers, gas syringe rig), Board (class chart)

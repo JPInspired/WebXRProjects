@@ -62,6 +62,7 @@ The project's own code has **no licence file yet**: the owner should choose one 
 | Acid Lab (everything) | made in code for this project | yes (it is the project’s own) |
 | Lithium Reactions (everything) | made in code for this project, following the original Inspired Education EngageVR lesson | yes (it is the project’s own) |
 | Kinetics Lab (everything) | made in code for this project, following the original Inspired Education EngageVR lesson | yes (it is the project’s own) |
+| Voltaic Lab (everything) | made in code for this project, following the original Inspired Education EngageVR lesson | yes (it is the project’s own) |
 | Waves Lab (everything) | made in code for this project | yes (it is the project’s own) |
 | Bounce Lab (everything) | made in code for this project | yes (it is the project’s own) |
 | Radiation Lab (everything) | made in code for this project | yes (it is the project’s own) |

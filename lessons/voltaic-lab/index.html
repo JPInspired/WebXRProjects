@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voltaic Lab</title>
+  <meta name="description" content="Voltaic cells in mixed reality (WebXR): build cells from metal strips and electrolytes, measure the voltage, link cells in series, zoom into the particles and open up real batteries.">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <div id="overlay">
+    <h1>Voltaic Lab</h1>
+    <p>Make electricity from chemistry: build cells from metal strips and electrolytes, measure their voltage, link them in series, and see what happens inside.</p>
+    <div class="buttons">
+      <button id="btn-ar" disabled>Checking for mixed reality…</button>
+      <button id="btn-vr" class="secondary" hidden>Enter VR</button>
+    </div>
+    <p class="hint" id="hint"></p>
+  </div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
