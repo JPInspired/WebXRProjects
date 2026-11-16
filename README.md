@@ -11,6 +11,7 @@ Mixed reality lessons built with [WebXR](https://immersiveweb.dev/) and [three.j
 | **Waves Lab** | Physics | [`lessons/waves-lab/`](lessons/waves-lab/) |
 | **Bounce Lab** | Physics | [`lessons/bounce-lab/`](lessons/bounce-lab/) |
 | **Radiation Lab** | Physics | [`lessons/radiation-lab/`](lessons/radiation-lab/) |
+| **Circular Motion** | Physics | [`lessons/circular-lab/`](lessons/circular-lab/) |
 | **PC Builder Lab** | Computer Science | [`lessons/pc-builder/`](lessons/pc-builder/) |
 | **Cell Explorer** | Biology | [`lessons/cell-explorer/`](lessons/cell-explorer/) |
 | **Heart Lab** | Biology | [`lessons/heart-lab/`](lessons/heart-lab/) |
@@ -38,7 +39,7 @@ Every lesson can be opened **solo** or in a **shared session**:
 
 Each person has **their own models**. Everyone else's work appears beside you at their own desk as a live copy: you can see their PC being built part by part, their atom or molecule, or their cell with its knock-outs. Desks sit side by side in the same order for everyone, so if you see someone on your right, they see you on their left. There are **no avatars**: the lessons are mixed reality, so you see the real people.
 
-**Same room:** tick **"We're in the same room"** when starting or joining a session (Acid Lab, Lithium Reactions, Kinetics Lab, Waves Lab, Bounce Lab, Radiation Lab, Heart Lab, Enzyme Lab, Microscope Lab, Osmosis Lab, Identifying Organs and Reef Dive tick it for you). Everyone then sees the same things in the same real places, with **nothing to press**:
+**Same room:** tick **"We're in the same room"** when starting or joining a session (Acid Lab, Lithium Reactions, Kinetics Lab, Waves Lab, Bounce Lab, Radiation Lab, Circular Motion, Heart Lab, Enzyme Lab, Microscope Lab, Osmosis Lab, Identifying Organs and Reef Dive tick it for you). Everyone then sees the same things in the same real places, with **nothing to press**:
 
 - **Before class, once per headset:** scan the classroom with Quest **Settings › Physical space › Space Setup** (about 2 minutes; mark the walls, door, windows and tables). If the browser asks to use spatial data, allow it.
 - In the lesson, each headset finds the room by itself from its scan (`shared/net/RoomAlign.js`): the room's walls give the directions, and the middle of the room, on the floor, is the shared origin. Which way round is settled by the door, windows, tables and other fittings, which every headset matches against the admin's headset. It checks again every second, so a headset that recentres or loses tracking puts itself right. In a simulation with realistic scan noise, headsets agreed to within about 5 cm and never got the room the wrong way round.
@@ -54,6 +55,7 @@ Each person has **their own models**. Everyone else's work appears beside you at
 - **Kinetics Lab:** **Activity for everyone** (Predict / Experiment / Summary), **Factor for everyone** (temperature, surface area, concentration, catalyst), **Level for everyone**, the **Class board** position (same room) and how many runs each student has done. The board shows the prediction, then the class chart for the factor the teacher is on.
 - **Waves Lab:** **Activity for everyone** (Predict / Rope wave / Ripple tank / Mystery wave), **Level for everyone**, the **Class board** position (same room), and who has answered the question on the board (or each student’s investigation steps, out of 6). The board shows the teacher’s wave and question; the teacher’s own controls choose the prediction, deal a new mystery wave and reveal the answer.
 - **Bounce Lab:** **Activity for everyone** (Predict / Drop + measure / Compare), **Level for everyone**, **Ball on the class chart**, the **Class board** position (same room), and who has answered the prediction (or how many drops each student has recorded). The teacher’s own controls choose the prediction and reveal the answer.
+- **Circular Motion:** **Activity for everyone** (Predict / Experiment / Real world), **Level for everyone**, the **Class board** position (same room) and how many results each student has recorded. The teacher's own controls choose the prediction and reveal the answer.
 - **Radiation Lab:** **Activity for everyone** (The counter / Test sources / Half-life at Advanced / Class results), **Level for everyone**, **Reveal the answers** (class results), the **Class board** position (same room) and how many sources each student has decided about. The board shows the teacher’s Geiger counter, half-life graph or the class’s verdicts.
 - **Enzyme Lab:** **Activity for everyone** (Starter quiz / Experiment / Class graph), **Level for everyone**, the **Class board** position (same room) and how many temperatures each student has done. The board shows everyone’s quiz scores, then the class graph.
 - **Microscope Lab:** **Activity for everyone** (Microscope parts / Prepare + view / Quiz), **Level for everyone**, the **Class board** position (same room) and how many labels each student has placed. The board shows the part the teacher taps, the teacher’s view down the microscope, or everyone’s quiz scores.
@@ -229,6 +231,26 @@ A row of seven surface mats lies on the **real classroom floor** in front of eac
 | (plenary) Compare results, explain anomalies, real-world applications | **Compare:** the student’s means for every ball and surface, surfaces ranked from bounciest with the reason for each, and **Find odd results** (drops more than 10 points from the student’s other drops of the same ball and surface). The **class chart** on the board shows, for the ball the teacher picks, every student’s mean on each surface as a dot and the class mean as a bar; results that don’t fit the class are circled with the student’s name. |
 
 **Ask the physicist:** 8 pre-written answers (why a ball bounces, where the energy goes, momentum, why never higher, why the ping-pong ball is odd, why repeat and average, anomalies, real-world uses). An AI physicist can be connected later with `physicistEndpoint` in `lessons/bounce-lab/config.js`.
+
+## Circular Motion
+
+Rebuilt from the original EngageVR lesson (pick up a ball on a string, spin it, measure the rotations per second with a stopwatch, try the other weights: 50 to 250 g), using the standard school **centripetal-force kit** so that the pull stays fixed and mass really changes the speed: a string through an upright tube, the ball on top and a hanging weight below, in a tall clamp stand so the ball goes round **above your head**. Everything is built in code.
+
+**Spinning it:** in a headset, pick up the tube and swirl your hand in small circles, as with the real kit; on a screen, drag the ball round in circles. The ball goes round at the rate you swirl. Buttons too: Faster, Slower, Stop and **Hold steady** (which keeps the clip in place for you, for clean measurements). A red **clip** on the string marks the radius chosen; a light on the tube shows whether you are too fast (clip pulled against the tube), steady, or too slow (clip dropped away), just as students judge it with the real kit.
+
+**The physics:** the hanging weight pulls with a fixed force F = Mg, the centripetal force. The ball settles where F = mω²r, so turns per second = (1/2π)√(F / mr): heavier balls and longer strings go round more slowly. The simulation follows the real kit's dynamics (the string is pulled out if you spin too fast, and drawn back in if too slow), and the ball droops below the tube like a conical pendulum.
+
+**Measuring:** a stopwatch with start/stop, reset and **Count a turn**, as in the original; then a **light gate** whose beam the ball crosses once a turn, reading the turns per second exactly, so students can see how accurate their own timing was. Timings where the clip wasn't kept in place are flagged as less reliable.
+
+| Lesson plan | In Circular Motion |
+| --- | --- |
+| (starter) Everyday circular motion; predict how mass and string length change the speed | **Predict:** 4 questions on the class board (a car on a roundabout, a heavier ball, a longer string, which way the ball flies if the string snaps). |
+| Spin a weight above your head, vary the mass (and the string length), measure rotations per second, record the data | **Experiment:** the five original balls (50–250 g, tap one in the rack to tie it on), four string lengths (0.2–0.5 m), the stopwatch and light gate, and a results table; force and velocity arrows can be switched on. |
+| (plenary) Present findings, spot patterns, relate to satellites and cars | **Class board:** everyone's results, turns per second against mass (coloured by length) and against length (coloured by mass). **Real world:** cut the string and the ball flies off along the tangent (a dashed line shows it) and falls, leaving a trail; a small Earth with an orbiting satellite (switch off gravity) and a car on a bend (put ice on the road) do the same; the board names the centripetal force in each; discussion prompts. |
+
+**Advanced:** choose the hanging weight too (100–300 g), the table works out mω²r to compare with the hanging weight's pull Mg (they match when F = mω²r holds), the theory curves appear on the class board, and each result is compared with theory.
+
+**Ask the physicist:** 8 pre-written answers (centripetal force, "centrifugal" force, why going round is accelerating, where F = mv²/r comes from, why satellites don't fall, sources of error, banked bends, everyday examples). An AI physicist can be connected later with `physicistEndpoint` in `lessons/circular-lab/config.js`.
 
 ## Radiation Lab
 
@@ -491,6 +513,9 @@ lessons/waves-lab/
 lessons/bounce-lab/
   src/data/bounce.js               the balls and surfaces (restitution, mass, air resistance), predictions, answers
   src/model/                       Floor (mats, ruler, the physics of a drop, slow-motion replay), Balls, Board (class chart), sounds
+lessons/circular-lab/
+  src/data/circular.js             the kit's settings, turns per second from F = mω²r, predictions, real-world examples, answers
+  src/model/                       Kit (stand, tube, string, clip, hanging weight, balls, stopwatch, light gate), Plenary (Earth and satellite, car on a bend), Board (class board), sounds
 lessons/radiation-lab/
   src/data/radiation.js            alpha/beta/gamma, sources and their count rates, absorbers, doses, equations, answers
   src/model/                       Bench (sources, absorbers, tongs, Geiger counter), Rays (X-ray vision), Board (class board)
