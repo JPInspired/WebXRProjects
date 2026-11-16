@@ -459,7 +459,7 @@ class App extends LessonApp {
 
   update(dt) {
     const now = performance.now();
-    const real = Math.min(0.1, (now - (this.lastNow ?? now)) / 1000);
+    const real = Math.min(0.25, (now - (this.lastNow ?? now)) / 1000); // keeps real time even if frames are slow
     this.lastNow = now;
     const s = this.state;
     const d = this.demo;
