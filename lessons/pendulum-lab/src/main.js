@@ -7,7 +7,7 @@ import { Rig } from './model/Rig.js';
 import { Energy } from './model/Energy.js';
 import { World } from './model/World.js';
 import { Board } from './model/Board.js';
-import { MODES, drawControls, drawInfo, drawCard } from './ui/panels.js';
+import { MODES, drawControls, drawInfo, drawCard, drawSettings, drawAsk, drawDiscuss } from './ui/panels.js';
 
 // Pendulum Lab, rebuilt from the original EngageVR lesson (a big protractor with the pendulum in front of it:
 // grab the weight, move it to an angle, let go and watch, change the length with the up / down buttons), plus
@@ -31,6 +31,7 @@ class App extends LessonApp {
       revealed: false,
       vote: null,
       gateShown: false,
+      sub: { measure: 'setup', energy: 'bob' }, // the step tab open in each activity
       runs: [], // { L, n, t, T, gate, g, where }
       energyRows: [], // { bob, air, airName, swings }
       world: 'clock',
@@ -110,6 +111,29 @@ class App extends LessonApp {
     if (level === this.state.level) return;
     this.state.level = level;
     this.refresh();
+  }
+
+  // ───────────── menus: step tabs and pop-ups ─────────────
+
+  setSub(mode, id) {
+    this.state.sub[mode] = id;
+    sound.click();
+    this.refresh();
+  }
+
+  openLessonSettings() {
+    if (this.popupOpen === 'Settings') return this.closePopup();
+    this.openSettings((ui) => drawSettings(ui, this));
+  }
+
+  openAsk() {
+    if (this.popupOpen === 'Ask the physicist') return this.closePopup();
+    this.openPopup('Ask the physicist', (ui) => drawAsk(ui, this), { height: 0.72 });
+  }
+
+  openDiscuss() {
+    if (this.popupOpen === 'Discuss') return this.closePopup();
+    this.openPopup('Discuss', (ui) => drawDiscuss(ui), { height: 0.5 });
   }
 
   // ───────────── measuring ─────────────

@@ -207,6 +207,56 @@ export class LessonApp {
     return b;
   }
 
+  // ───────────── pop-up card (settings, "ask the expert", …) ─────────────
+
+  /**
+   * Show a pop-up card in front of the lab. builder(ui) draws its content (below a title and a × button).
+   * Used by lessons that keep their side menus short: settings, questions for the expert, discussion prompts.
+   */
+  openPopup(title, builder, { width = 0.56, height = 0.66 } = {}) {
+    if (!this.popupPanel || this.popupPanel.w !== width || this.popupPanel.h !== height) {
+      if (this.popupPanel) {
+        this.lab.remove(this.popupPanel.mesh);
+        this.panels = this.panels.filter((p) => p !== this.popupPanel);
+      }
+      this.popupPanel = new CanvasPanel({ width, height, name: 'popup' });
+      this.popupPanel.w = width;
+      this.popupPanel.h = height;
+      this.popupPanel.mesh.position.set(0, PANEL_Y + 0.02, 0.3);
+      this.popupPanel.mesh.rotation.x = -0.12;
+      this.popupPanel.mesh.renderOrder = 10;
+      this.lab.add(this.popupPanel.mesh);
+    }
+    if (!this.panels.includes(this.popupPanel)) this.panels.push(this.popupPanel);
+    this.popupTitle = title;
+    this.popupPanel.setBuilder((ui) => {
+      ui.header(this.popupTitle, [{ id: 'popup-close', label: '×', onClick: () => this.closePopup() }]);
+      builder(ui);
+    });
+    this.popupPanel.scroll = 0;
+    this.popupPanel.mesh.visible = true;
+    this.popupOpen = title;
+    this.refresh();
+  }
+
+  closePopup() {
+    if (this.popupPanel) this.popupPanel.mesh.visible = false;
+    this.popupOpen = null;
+    this.refresh();
+  }
+
+  /**
+   * The settings pop-up: lessonSections(ui) draws the lesson's own (e.g. level, class board), then the
+   * general buttons (move the lab, seated, lock, voice, back to the lessons).
+   */
+  openSettings(lessonSections = null) {
+    this.openPopup('Settings', (ui) => {
+      lessonSections?.(ui);
+      ui.heading('This headset', { size: 22 });
+      ui.buttons(this.generalButtons(), { cols: 2, height: 56, size: 21, gap: 10 });
+    });
+  }
+
   /** "← Lessons": back to the lessons page. Press twice (within 3 s) so nobody leaves by accident. */
   lessonsButton() {
     const armed = this.leaveArmed && performance.now() - this.leaveArmed < 3000;

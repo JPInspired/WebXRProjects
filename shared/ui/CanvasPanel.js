@@ -306,6 +306,65 @@ class PanelDrawer {
     this.panel.buttons.push({ id, x, y, w, h, onClick, disabled, fixed: this.fixed });
   }
 
+  /**
+   * The panel's title with small round icon buttons on the right (e.g. ⚙ settings, × close).
+   * icons: [{ id, label, onClick, active }]
+   */
+  header(text, icons = [], { size = 40 } = {}) {
+    const { ctx } = this;
+    const d = 64;
+    const room = icons.length * (d + 12);
+    ctx.font = font(size, 700);
+    let s = size;
+    while (s > 22 && ctx.measureText(text).width > this.contentWidth - room) ctx.font = font(--s, 700);
+    ctx.fillStyle = THEME.text;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillText(text, this.pad, this.y + d / 2);
+    icons.forEach((ic, i) => {
+      const x = this.right - (icons.length - i) * (d + 12) + 12;
+      this.button({ ...ic, id: ic.id }, x, this.y, d, d, 34);
+    });
+    ctx.textBaseline = 'top';
+    this.y += d + 14;
+  }
+
+  /**
+   * A row of tabs: the chosen one is filled, the others outlined. specs: [{ id, label, active, onClick }]
+   */
+  tabs(specs, { height = 58, size = 22, gap = 8, cols = specs.length } = {}) {
+    const { ctx } = this;
+    const w = (this.contentWidth - gap * (cols - 1)) / cols;
+    specs.forEach((spec, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const x = this.pad + col * (w + gap);
+      const y = this.y + row * (height + gap);
+      if (spec.active) this.button(spec, x, y, w, height, size);
+      else {
+        const id = spec.id ?? `auto-${this.auto++}`;
+        const hover = this.panel.hoverId === id;
+        roundRect(ctx, x + 1.5, y + 1.5, w - 3, height - 3, 16);
+        ctx.fillStyle = hover ? THEME.btnHover : 'rgba(255,255,255,0.03)';
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = hover ? '#ffffff' : THEME.border;
+        ctx.stroke();
+        let s = size;
+        ctx.font = font(s, 600);
+        while (s > 15 && ctx.measureText(spec.label).width > w - 16) ctx.font = font(--s, 600);
+        ctx.fillStyle = THEME.dim;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(spec.label, x + w / 2, y + height / 2 + 1);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        this.panel.buttons.push({ id, x, y, w, h: height, onClick: spec.onClick, disabled: !!spec.disabled, fixed: this.fixed });
+      }
+    });
+    this.y += Math.ceil(specs.length / cols) * (height + gap) + 6;
+  }
+
   /** A grid of buttons, `cols` per row (defaults to all in one row). */
   buttons(specs, { cols = specs.length, height = 76, size = 30, gap = 14 } = {}) {
     const w = (this.contentWidth - gap * (cols - 1)) / cols;
