@@ -34,7 +34,11 @@ export function roundRect(ctx, x, y, w, h, r) {
 }
 
 export class CanvasPanel {
-  constructor({ width = 0.5, height = 0.75, pxPerMeter = 1500, name = 'panel' } = {}) {
+  /**
+   * fit: a minimum height (m) to make the panel shrink to fit its content (never taller than `height`, which
+   * is then the most it grows to before it scrolls). Its top edge stays where it is.
+   */
+  constructor({ width = 0.5, height = 0.75, pxPerMeter = 1500, name = 'panel', fit = 0 } = {}) {
     this.canvas = document.createElement('canvas');
     this.canvas.width = Math.round(width * pxPerMeter);
     this.canvas.height = Math.round(height * pxPerMeter);
@@ -54,6 +58,28 @@ export class CanvasPanel {
     // Scrolling: when the content is taller than the panel, it scrolls (scrollbar with ▲ ▼ on the right).
     this.scroll = 0;
     this.maxScroll = 0;
+    this.heightM = height;
+    this.fit = fit ? Math.round(fit * pxPerMeter) : 0;
+    this.shownPx = this.canvas.height; // how much of the canvas is showing (all of it unless it fits)
+    this.onResize = null;
+  }
+
+  /** The panel's height in metres as it is showing now. */
+  get shownHeight() {
+    return (this.heightM * this.shownPx) / this.canvas.height;
+  }
+
+  /** Show only the top `px` of the canvas, keeping the panel's top edge in place. */
+  applyFit(px) {
+    const H = this.canvas.height;
+    const before = this.shownHeight;
+    this.shownPx = px;
+    const f = px / H;
+    this.texture.repeat.set(1, f);
+    this.texture.offset.set(0, 1 - f);
+    this.mesh.scale.y = f;
+    this.mesh.position.y += (before - this.shownHeight) / 2;
+    this.onResize?.(this);
   }
 
   setBuilder(fn) {
@@ -77,8 +103,8 @@ export class CanvasPanel {
   redraw() {
     const { ctx, canvas } = this;
     const W = canvas.width;
-    const H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
+    const H = this.fit ? this.shownPx : canvas.height;
+    ctx.clearRect(0, 0, W, canvas.height);
     roundRect(ctx, 4, 4, W - 8, H - 8, 36);
     ctx.fillStyle = THEME.bg;
     ctx.fill();
@@ -101,6 +127,14 @@ export class CanvasPanel {
     ctx.restore();
     // how tall was it? (content below the panel's bottom edge needs scrolling)
     const contentH = ui.y + 24;
+    if (this.fit) {
+      const want = Math.round(Math.max(this.fit, Math.min(canvas.height, contentH + this.scroll)));
+      if (Math.abs(want - this.shownPx) > 2) {
+        this.applyFit(want);
+        this.redraw();
+        return;
+      }
+    }
     const max = Math.max(0, Math.round(contentH - H));
     const needsBar = max > 0;
     if (needsBar !== this.maxScroll > 0 || Math.min(this.scroll, max) !== this.scroll) {
@@ -118,7 +152,7 @@ export class CanvasPanel {
   drawScrollbar(contentH) {
     const { ctx } = this;
     const W = this.canvas.width;
-    const H = this.canvas.height;
+    const H = this.shownPx;
     const x = W - SCROLLBAR_W - 14;
     const btn = SCROLLBAR_W;
     // soft fade where content continues above / below
@@ -152,7 +186,7 @@ export class CanvasPanel {
 
   buttonAt(uv) {
     const x = uv.x * this.canvas.width;
-    const y = (1 - uv.y) * this.canvas.height;
+    const y = (1 - uv.y) * this.shownPx;
     // the scroll buttons stay put; everything else moves with the scroll
     const fixed = this.buttons.find((b) => b.fixed && x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h);
     if (fixed) return fixed;

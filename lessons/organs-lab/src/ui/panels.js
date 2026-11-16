@@ -12,13 +12,12 @@ const css = (c) => `#${c.toString(16).padStart(6, '0')}`;
 export function drawControls(ui, app) {
   const s = app.state;
   const b = app.body;
-  ui.title('Identifying Organs', { size: 38 });
+  ui.header('Identifying Organs', [app.settingsIcon()]);
   if (app.followsAdmin) {
     ui.text(`${MODES.find(([id]) => id === s.mode)[1]}  ·  ${s.level === 'advanced' ? 'Advanced' : 'Core'}`, { size: 28, weight: 700, color: THEME.accent });
     ui.text(`Chosen by ${app.adminName}`, { size: 21, color: THEME.dim });
   } else {
-    ui.heading('Activity', { size: 24 });
-    ui.buttons(MODES.slice(0, 3).map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 50, size: 18, gap: 8 });
+    ui.tabs(MODES.slice(0, 3).map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 50, size: 18, gap: 8 });
     ui.buttons(MODES.slice(3).map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 50, size: 18, gap: 8 });
   }
 
@@ -49,17 +48,16 @@ export function drawControls(ui, app) {
     ui.text(`${done} of ${QUIZ.length} answered`, { size: 24, weight: 700 });
     ui.buttons([{ id: 'quiz-restart', label: 'Start the quiz again', disabled: !done, onClick: () => app.quizRestart() }], { height: 46, size: 19 });
   }
-  if (app.controlsBoard && (s.mode === 'quiz' || s.mode === 'notes')) {
-    ui.buttons([{ id: 'reveal', label: s.revealed ? 'Hide the answers' : s.mode === 'quiz' ? 'Show the class results' : 'Mark the sticky notes', active: s.revealed, onClick: () => app.reveal() }], { height: 48, size: 19 });
-  }
 
-  if (!app.followsAdmin) {
-    ui.heading('Level', { size: 22 });
-    ui.buttons(LEVELS.map(([id, label]) => ({ id: `level-${id}`, label, active: s.level === id, onClick: () => app.setLevel(id) })), { height: 46, size: 20, gap: 8 });
-  }
-  if (app.controlsBoard) ui.buttons([{ id: 'board', label: s.big ? 'Class board: shown' : 'Class board: hidden', active: s.big, onClick: () => app.toggleBoard() }], { height: 46, size: 20 });
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 52, size: 21, gap: 8 });
+  if (app.soloTeacher) drawTeacher(ui, app);
+}
+
+/** The teacher's own controls: in the Teacher menu in a session, or here when on your own. */
+export function drawTeacher(ui, app) {
+  const s = app.state;
+  if (s.mode !== 'quiz' && s.mode !== 'notes') return;
+  ui.heading(s.mode === 'quiz' ? 'Quiz' : 'Sticky notes', { size: 22 });
+  ui.buttons([{ id: 'reveal', label: s.revealed ? 'Hide the answers' : s.mode === 'quiz' ? 'Show the class results' : 'Mark the sticky notes', active: s.revealed, onClick: () => app.reveal() }], { height: 52, size: 20 });
 }
 
 // ───────────────────────── Right ─────────────────────────
@@ -71,12 +69,13 @@ export function drawInfo(ui, app) {
   else if (s.mode === 'functions') drawFunctions(ui, app);
   else if (s.mode === 'systems') drawSystems(ui, app);
   else drawQuiz(ui, app);
-  ui.divider();
-  ui.heading('Ask the doctor', { size: 24 });
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.doctorEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.doc.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 16, gap: 8 });
-  if (s.doc.answer) ui.box(s.doc.answer, { size: 20 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the doctor', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.doctorEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.doc.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 16, gap: 8 });
+    if (s.doc.answer) ui.box(s.doc.answer, { size: 20 });
+  })], { height: 56, size: 20 });
 }
 
 function drawNotes(ui, app) {

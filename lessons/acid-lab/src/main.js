@@ -6,7 +6,7 @@ import { SUBSTANCES, LETTERS, PAPERS, unknownsFor, litmusShows, describePH, hydr
 import { Bench } from './model/Bench.js';
 import { Sorter } from './model/Sorter.js';
 import { Board } from './model/Board.js';
-import { drawControls, drawInfo, drawCard, MODES } from './ui/panels.js';
+import { drawControls, drawTeacher, drawInfo, drawCard, MODES } from './ui/panels.js';
 
 // Acid Lab: every student has a lab bench (a pH scale to sort everyday substances onto, six unknown solutions,
 // litmus and universal indicator papers, a digital pH meter) and records their own results. A big class board
@@ -369,6 +369,11 @@ class App extends LessonApp {
     }
     this.broadcastAdmin();
     this.refresh();
+  }
+
+  /** The lesson's own controls in the Teacher menu. */
+  teacherControls(ui) {
+    drawTeacher(ui, this);
   }
 
   // ───────────── admin (the teacher) ─────────────

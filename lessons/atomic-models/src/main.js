@@ -14,7 +14,7 @@ import { Effects } from './models/Effects.js';
 import { RoomScan } from './room/RoomScan.js';
 import * as X from './chemist/explain.js';
 import { sound } from '../../../shared/util/sound.js';
-import { drawControls, drawInfo, drawExplain } from './ui/panels.js';
+import { drawControls, drawSettings, drawInfo, drawExplain } from './ui/panels.js';
 import { answerFor, askRemote } from './chemist/Chemist.js';
 
 const DESKTOP_LAB_POS = new THREE.Vector3(0, 1.2, 0);
@@ -177,6 +177,10 @@ class App extends LessonApp {
   }
 
   /** Put the lab on the real table nearest to you (needs room data from the headset). */
+  settingsSections(ui) {
+    drawSettings(ui, this);
+  }
+
   placeOnTable() {
     const cam = new THREE.Vector3();
     this.renderer.xr.getCamera().getWorldPosition(cam);

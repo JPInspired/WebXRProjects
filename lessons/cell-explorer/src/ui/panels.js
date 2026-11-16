@@ -7,20 +7,18 @@ export const MODES = [['explore', 'Explore'], ['label', 'Label it'], ['process',
 
 export function drawControls(ui, app) {
   const s = app.state;
-  ui.title('Cell Explorer', { size: 42 });
+  ui.header('Cell Explorer', [app.settingsIcon()]);
   if (app.followsAdmin) {
     // in a session the admin picks the cell and the activity for everyone
     const mode = MODES.find(([id]) => id === s.mode)[1];
     ui.text(`${s.mode === 'compare' ? 'All cells' : CELLS[s.cellType].short}  ·  ${mode}`, { size: 28, weight: 700, color: THEME.accent });
     ui.text(`Chosen by ${app.adminName}`, { size: 21, color: THEME.dim });
   } else {
-    ui.heading('Choose a cell');
-    ui.buttons(Object.entries(CELLS).map(([id, c]) => ({
+    ui.tabs(Object.entries(CELLS).map(([id, c]) => ({
       id: `cell-${id}`, label: c.short, active: s.cellType === id, disabled: s.mode === 'compare', onClick: () => app.setCell(id),
     })), { height: 62, size: 27 });
 
-    ui.heading('Activity');
-    ui.buttons(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { cols: 2, height: 60, size: 25, gap: 10 });
+    ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { cols: 2, height: 60, size: 25, gap: 10 });
   }
 
   if (s.mode === 'explore') {
@@ -45,8 +43,6 @@ export function drawControls(ui, app) {
     ui.text('Every cell here is shown at the same magnification (10,000×), so you can compare their real sizes. A bacterium is about 10 times smaller than an animal cell.', { size: 23, color: THEME.dim });
   }
 
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 54, size: 22, gap: 10 });
 }
 
 // ───────────────────────── Right: information ─────────────────────────
@@ -85,12 +81,13 @@ export function drawInfo(ui, app) {
     for (const p of app.cell.processes) ui.bar(p.name, p.value * 100, 100, p.value >= 1 ? p.color : p.value > 0 ? '#ffd166' : '#ff6b6b', '%');
   }
 
-  ui.divider();
-  ui.heading('Ask the biologist');
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 50, size: 21, gap: 8 });
-  if (s.bio.answer) ui.box(s.bio.answer, { size: 22 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the biologist', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 50, size: 21, gap: 8 });
+    if (s.bio.answer) ui.box(s.bio.answer, { size: 22 });
+  })], { height: 56, size: 20 });
 }
 
 // ───────────────────────── Floating card ─────────────────────────

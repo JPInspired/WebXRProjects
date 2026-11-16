@@ -15,13 +15,12 @@ export const PLACES = [
 
 export function drawControls(ui, app) {
   const s = app.state;
-  ui.title('Hintze Hall', { size: 42 });
-  ui.text('Natural History Museum, London', { size: 22, color: THEME.dim });
-  ui.heading('Exhibits — take me there');
-  ui.buttons(ORDER.map((id) => ({ id: `go-${id}`, label: EXHIBITS[id].name.replace(' statue', '').replace('Hope the blue whale', 'Hope (whale)'), active: s.selected === id, onClick: () => app.goToExhibit(id) })), { cols: 2, height: 48, size: 20, gap: 8 });
-  ui.heading('Floors');
-  ui.buttons(PLACES.map((p) => ({ id: `place-${p.id}`, label: p.label, onClick: () => app.goToPlace(p) })), { cols: 2, height: 48, size: 20, gap: 8 });
-  ui.heading('Moving');
+  ui.header('Hintze Hall', [app.settingsIcon()]);
+  const tab = menuTab(app, 'hall', 'exhibits');
+  ui.tabs([['exhibits', 'Exhibits'], ['floors', 'Floors'], ['moving', 'Moving']].map(([id, label]) => ({ id: `tab-${id}`, label, active: tab === id, onClick: () => setMenuTab(app, 'hall', id) })), { height: 54, size: 20 });
+  if (tab === 'exhibits') ui.buttons(ORDER.map((id) => ({ id: `go-${id}`, label: EXHIBITS[id].name.replace(' statue', '').replace('Hope the blue whale', 'Hope (whale)'), active: s.selected === id, onClick: () => app.goToExhibit(id) })), { cols: 2, height: 48, size: 20, gap: 8 });
+  else if (tab === 'floors') ui.buttons(PLACES.map((p) => ({ id: `place-${p.id}`, label: p.label, onClick: () => app.goToPlace(p) })), { cols: 2, height: 48, size: 20, gap: 8 });
+  else {
   ui.text(app.presenting
     ? 'Left stick: walk (up and down the stairs too). Right stick: turn. Point at any floor and pull the trigger (or pinch) to jump there. Point at an exhibit or an ⓘ for its story. B / Y: hide or show these panels.'
     : 'W A S D or the arrow keys: walk. Drag to look around. Click a floor to go there; click an exhibit or an ⓘ for its story. H: hide or show these panels.', { size: 21, color: THEME.dim });
@@ -29,9 +28,20 @@ export function drawControls(ui, app) {
     { id: 'turn', label: `Turn: ${app.turnLabel()}`, onClick: () => app.cycleTurn() },
     { id: 'markers', label: s.markers ? 'Markers: on' : 'Markers: off', active: s.markers, onClick: () => app.toggleMarkers() },
   ], { height: 48, size: 20, gap: 8 });
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 50, size: 20, gap: 8 });
+  }
 }
+
+/** Which step tab is open in a menu (kept on the app, not shared). */
+function menuTab(app, key, first) {
+  app.menuTabs ??= {};
+  return app.menuTabs[key] ?? first;
+}
+function setMenuTab(app, key, id) {
+  app.menuTabs ??= {};
+  app.menuTabs[key] = id;
+  app.refresh();
+}
+
 
 export function drawInfo(ui, app) {
   const id = app.state.selected;

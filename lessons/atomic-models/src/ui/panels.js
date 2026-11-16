@@ -15,42 +15,49 @@ import { atomsIn, sci } from '../room/RoomScan.js';
 
 export function drawControls(ui, app) {
   const s = app.state;
-  ui.buttons([
+  ui.header('Atom Scale Lab', [app.settingsIcon()]);
+  ui.tabs([
     { id: 'tab-atom', label: 'Atom', active: s.mode === 'atom', onClick: () => app.setMode('atom') },
     { id: 'tab-mol', label: 'Molecules', active: s.mode === 'molecules', onClick: () => app.setMode('molecules') },
     { id: 'tab-react', label: 'Reactions', active: s.mode === 'reactions', onClick: () => app.setMode('reactions') },
     { id: 'tab-scale', label: 'Scale', active: s.mode === 'scale', onClick: () => app.setMode('scale') },
-  ], { height: 80, size: 30, gap: 10 });
-  ui.gap(8);
+  ], { height: 60, size: 22, gap: 8 });
 
   if (s.mode === 'atom') atomControls(ui, app);
   else if (s.mode === 'molecules') moleculeControls(ui, app);
   else if (s.mode === 'reactions') reactionControls(ui, app);
   else scaleControls(ui, app);
 
-  ui.divider();
-  const general = [{
-    id: 'recenter',
-    label: app.presenting ? 'Bring lab to me' : 'Reset view',
-    onClick: () => app.recenter(),
-  }];
-  if (app.hitTestSource) {
-    general.push({ id: 'place', label: s.placing ? 'Tap to drop here' : 'Place on a surface', active: s.placing, onClick: () => app.togglePlacing() });
-  }
+}
+
+/** The lesson's own part of the settings pop-up. */
+export function drawSettings(ui, app) {
   if (app.presenting && app.room.tableNear(app.lab.position)) {
-    general.push({ id: 'table', label: 'Put lab on my table', onClick: () => app.placeOnTable() });
+    ui.heading('Your table', { size: 22 });
+    ui.buttons([{ id: 'table', label: 'Put lab on my table', onClick: () => app.placeOnTable() }], { height: 56, size: 21 });
   }
-  general.push({ id: 'speak', label: s.speak ? 'Voice: on' : 'Voice: off', active: s.speak, onClick: () => app.toggleSpeak(), disabled: !('speechSynthesis' in window) });
-  general.push(app.lessonsButton());
-  ui.buttons(general, { cols: Math.min(general.length, 2), height: 64, size: 26 });
   ui.text(app.presenting
     ? 'Point and pinch / pull the trigger to press. Squeeze the grip to grab and move the whole lab.'
-    : 'Drag to orbit, scroll to zoom. Use a headset for mixed reality.', { size: 24, color: THEME.dim });
+    : 'Drag to orbit, scroll to zoom. Use a headset for mixed reality.', { size: 20, color: THEME.dim });
 }
+
+/** Which step tab is open in a menu (kept on the app, not shared). */
+function menuTab(app, key, first) {
+  app.menuTabs ??= {};
+  return app.menuTabs[key] ?? first;
+}
+function setMenuTab(app, key, id) {
+  app.menuTabs ??= {};
+  app.menuTabs[key] = id;
+  app.refresh();
+}
+
 
 function atomControls(ui, app) {
   const a = app.state.atom;
-  ui.heading('Build an atom');
+  const tab = menuTab(app, 'atom', 'build');
+  ui.tabs([['build', 'Build'], ['table', 'Elements'], ['view', 'View']].map(([id, label]) => ({ id: `atab-${id}`, label, active: tab === id, onClick: () => setMenuTab(app, 'atom', id) })), { height: 50, size: 20 });
+  if (tab === 'build') {
   ui.stepper('Protons', a.p, { id: 'p', color: '#e5484d', onMinus: () => app.changeAtom('p', -1), onPlus: () => app.changeAtom('p', 1) });
   ui.stepper('Neutrons', a.n, { id: 'n', color: '#9aa4b5', onMinus: () => app.changeAtom('n', -1), onPlus: () => app.changeAtom('n', 1) });
   ui.stepper('Electrons', a.e, { id: 'e', color: '#4cc9ff', onMinus: () => app.changeAtom('e', -1), onPlus: () => app.changeAtom('e', 1) });
@@ -59,13 +66,12 @@ function atomControls(ui, app) {
     { id: 'iso', label: 'Common isotope', onClick: () => app.commonIsotope(), disabled: !a.p },
     { id: 'empty', label: 'Empty', onClick: () => app.setAtom({ p: 0, n: 0, e: 0 }) },
   ], { height: 68, size: 27 });
-  ui.heading('Or pick an element');
-  periodicTable(ui, a.p, (Z) => app.pickElement(Z));
   ui.text(app.presenting
     ? 'Or by hand: pinch a particle to pull it out of the atom, take new ones from the tray below.'
     : 'Or by hand: drag a particle out of the atom, or drag new ones in from the tray below.', { size: 23, color: THEME.dim });
-  ui.heading('Electron view');
-  ui.buttons([
+  } else if (tab === 'table') {
+    periodicTable(ui, a.p, (Z) => app.pickElement(Z));
+  } else ui.buttons([
     { id: 'bohr', label: 'Bohr shells', active: app.state.atomView === 'bohr', onClick: () => app.set({ atomView: 'bohr' }) },
     { id: 'cloud', label: 'Electron cloud', active: app.state.atomView === 'cloud', onClick: () => app.set({ atomView: 'cloud' }) },
     { id: 'spin', label: app.state.spin ? 'Pause' : 'Animate', onClick: () => app.set({ spin: !app.state.spin }) },
@@ -139,14 +145,15 @@ export function drawInfo(ui, app) {
   else if (s.scaleSub === 'myroom') roomInfo(ui, app);
   else scaleInfo(ui, app);
 
-  ui.divider();
-  ui.heading('Ask the Chemist');
-  const qs = questionsFor(s);
-  ui.buttons(qs.map((q) => ({
-    id: `q-${q.id}`, label: q.label, active: s.chemist.qid === q.id, onClick: () => app.ask(q.id),
-  })), { cols: 2, height: 62, size: 25, gap: 12 });
-  if (s.chemist.answer) ui.box(s.chemist.answer, { size: 27 });
-  else ui.text('Tap a question to learn more about what you see.', { size: 26, color: THEME.dim });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the Chemist', (ui) => {
+    const qs = questionsFor(s);
+    ui.buttons(qs.map((q) => ({
+      id: `q-${q.id}`, label: q.label, active: s.chemist.qid === q.id, onClick: () => app.ask(q.id),
+    })), { cols: 2, height: 62, size: 25, gap: 12 });
+    if (s.chemist.answer) ui.box(s.chemist.answer, { size: 24 });
+    else ui.text('Tap a question to learn more about what you see.', { size: 22, color: THEME.dim });
+  })], { height: 56, size: 20 });
 }
 
 function atomInfo(ui, app) {

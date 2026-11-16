@@ -5,7 +5,7 @@ import { sound } from '../../../shared/util/sound.js';
 import { CARDS, SYSTEMS, QUIZ, ANSWERS } from './data/organs.js';
 import { Body, loadBody } from './model/Body.js';
 import { Board } from './model/Board.js';
-import { MODES, drawControls, drawInfo, drawCard } from './ui/panels.js';
+import { MODES, drawControls, drawTeacher, drawInfo, drawCard } from './ui/panels.js';
 
 // Identifying Organs, rebuilt from the original EngageVR lesson: every student has their own life-size
 // skeleton standing beside their desk, and the organs laid out on the desk. Sticky notes (an organ and what it
@@ -369,6 +369,11 @@ class App extends LessonApp {
     }
     this.broadcastAdmin();
     this.refresh();
+  }
+
+  /** The lesson's own controls in the Teacher menu. */
+  teacherControls(ui) {
+    drawTeacher(ui, this);
   }
 
   // ───────────── admin (the teacher) ─────────────

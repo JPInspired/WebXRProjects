@@ -11,7 +11,7 @@ import { Ecg } from './model/Ecg.js';
 import { Arteries } from './model/Arteries.js';
 import { LabelQuiz } from './model/LabelQuiz.js';
 import { HeartSounds } from './model/sounds.js';
-import { drawControls, drawInfo, drawCard, MODES } from './ui/panels.js';
+import { drawControls, drawInfo, drawCard, drawTeacher, MODES } from './ui/panels.js';
 import { NameTags } from './ui/NameTags.js';
 
 // Heart Lab: your own heart on the desk to turn, open up and label, and a big beating heart for the whole
@@ -428,6 +428,11 @@ class App extends LessonApp {
     }
     this.state.bio = { qid, answer: ANSWERS[qid] };
     this.say(ANSWERS[qid]);
+  }
+
+  /** The class heart's controls in the Teacher menu. */
+  teacherControls(ui) {
+    drawTeacher(ui, this);
   }
 
   // ───────────── admin (the teacher) ─────────────

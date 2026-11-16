@@ -9,18 +9,16 @@ const pct = (v) => `${Math.round(v * 100)}%`;
 
 export function drawControls(ui, app) {
   const s = app.state;
-  ui.title('Reef Dive', { size: 42 });
+  ui.header('Reef Dive', [app.settingsIcon()]);
   if (app.presence && !app.isAdmin) {
     // in a session the admin picks the activity for everyone
     ui.text(`Activity: ${MODES.find(([id]) => id === s.mode)[1]}  ·  chosen by ${app.hostName === 'You' ? 'you' : app.hostName}`, { size: 24, weight: 700, color: THEME.accent });
   } else {
-    ui.buttons(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 64, size: 25, gap: 10 });
+    ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 58, size: 22, gap: 8 });
   }
   ui.gap(4);
   if (s.mode === 'dive') diveControls(ui, app);
   else labControls(ui, app);
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 52, size: 21, gap: 8 });
 }
 
 function diveControls(ui, app) {
@@ -88,12 +86,13 @@ export function drawInfo(ui, app) {
     const which = modelStatus.failed.includes('all') ? 'The 3D models' : `${modelStatus.failed.length} 3D model${modelStatus.failed.length > 1 ? 's' : ''} (${modelStatus.failed.join(', ')})`;
     ui.box(`${which} couldn’t load, so simple shapes are shown instead. Reason: ${modelStatus.reason}`, { size: 18, color: '#ffd166' });
   }
-  ui.divider();
-  ui.heading('Ask the marine biologist');
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 20, gap: 8 });
-  if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the marine biologist', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 20, gap: 8 });
+    if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
+  })], { height: 56, size: 20 });
 }
 
 function speciesCard(ui, app, sp) {

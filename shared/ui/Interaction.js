@@ -255,7 +255,7 @@ export class Interaction {
   dragScroll(d) {
     const hit = this.raycaster.intersectObject(d.panel.mesh, false)[0];
     if (!hit) return;
-    const dy = (hit.uv.y - d.v0) * d.panel.canvas.height;
+    const dy = (hit.uv.y - d.v0) * (d.panel.shownPx ?? d.panel.canvas.height);
     if (!d.moving && Math.abs(dy) < DRAG_PX) return;
     d.moving = true;
     const target = Math.max(0, Math.min(d.panel.maxScroll, d.scroll0 + dy));

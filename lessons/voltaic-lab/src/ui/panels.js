@@ -12,17 +12,16 @@ export function drawControls(ui, app) {
   const s = app.state;
   const b = app.bench;
   const adv = s.level === 'advanced';
-  ui.title('Voltaic Lab', { size: 42 });
+  ui.header('Voltaic Lab', [app.settingsIcon()]);
   if (app.followsAdmin) {
     ui.text(`${MODES.find(([id]) => id === s.mode)[1]}  ·  ${adv ? 'Advanced' : 'Core'}`, { size: 28, weight: 700, color: THEME.accent });
     ui.text(`Chosen by ${app.adminName}`, { size: 21, color: THEME.dim });
   } else {
-    ui.heading('Activity', { size: 24 });
-    ui.buttons(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 52, size: 20, gap: 8 });
+    ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 52, size: 20, gap: 8 });
   }
 
   if (s.mode === 'predict') {
-    if (app.controlsBoard) {
+    if (app.soloTeacher) {
       const ch = app.challenge();
       ui.text('Read the question out and let everyone pick, then reveal the answer.', { size: 21, color: THEME.dim });
       ui.buttons(app.predictions().map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, height: 50, size: 20, gap: 8 });
@@ -56,13 +55,6 @@ export function drawControls(ui, app) {
     ui.text('Tap each battery on the bench to read about it. How is each one like the cells you built?', { size: 21, color: THEME.dim });
   }
 
-  if (!app.followsAdmin) {
-    ui.heading('Level', { size: 22 });
-    ui.buttons(LEVELS.map(([id, label]) => ({ id: `level-${id}`, label, active: s.level === id, onClick: () => app.setLevel(id) })), { height: 46, size: 20, gap: 8 });
-  }
-  if (app.controlsBoard) ui.buttons([{ id: 'board', label: s.big ? 'Class board: shown' : 'Class board: hidden', active: s.big, onClick: () => app.toggleBoard() }], { height: 46, size: 20 });
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 52, size: 21, gap: 8 });
 }
 
 // ───────────────────────── Right ─────────────────────────
@@ -72,12 +64,13 @@ export function drawInfo(ui, app) {
   if (s.mode === 'predict') drawPredict(ui, app);
   else if (s.mode === 'lab') drawLab(ui, app);
   else drawBatteries(ui, app);
-  ui.divider();
-  ui.heading('Ask the chemist', { size: 24 });
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.chem.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 16, gap: 8 });
-  if (s.chem.answer) ui.box(s.chem.answer, { size: 20 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the chemist', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.chem.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 16, gap: 8 });
+    if (s.chem.answer) ui.box(s.chem.answer, { size: 20 });
+  })], { height: 56, size: 20 });
 }
 
 function drawPredict(ui, app) {

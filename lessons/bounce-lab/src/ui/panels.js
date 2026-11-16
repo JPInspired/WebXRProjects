@@ -11,18 +11,17 @@ const short = (id) => SURFACES[id].short ?? SURFACES[id].name;
 
 export function drawControls(ui, app) {
   const s = app.state;
-  ui.title('Bounce Lab', { size: 42 });
+  ui.header('Bounce Lab', [app.settingsIcon()]);
   if (app.followsAdmin) {
     ui.text(`${MODES.find(([id]) => id === s.mode)[1]}  ·  ${s.level === 'advanced' ? 'Advanced' : 'Core'}`, { size: 28, weight: 700, color: THEME.accent });
     ui.text(`Chosen by ${app.adminName}`, { size: 21, color: THEME.dim });
   } else {
-    ui.heading('Activity');
-    ui.buttons(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 54, size: 22, gap: 8 });
+    ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 54, size: 22, gap: 8 });
   }
   ui.gap(4);
 
   if (s.mode === 'predict') {
-    if (app.controlsBoard) {
+    if (app.soloTeacher) {
       const ch = app.challenge();
       ui.text('Read the question out and let everyone pick, then reveal the answer and test it by dropping the balls.', { size: 21, color: THEME.dim });
       ui.buttons(PREDICTIONS.map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, height: 52, size: 21, gap: 8 });
@@ -45,13 +44,6 @@ export function drawControls(ui, app) {
     }
   }
 
-  if (!app.followsAdmin) {
-    ui.heading('Level', { size: 24 });
-    ui.buttons(LEVELS.map(([id, label]) => ({ id: `level-${id}`, label, active: s.level === id, onClick: () => app.setLevel(id) })), { height: 48, size: 22, gap: 8 });
-  }
-  if (app.controlsBoard) ui.buttons([{ id: 'board', label: s.big ? 'Class board: shown' : 'Class board: hidden', active: s.big, onClick: () => app.toggleBoard() }], { height: 48, size: 21 });
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 52, size: 21, gap: 8 });
 }
 
 // ───────────────────────── Right: reading, results, questions ─────────────────────────
@@ -75,12 +67,13 @@ export function drawInfo(ui, app) {
     drawDrops(ui, app);
   } else drawCompare(ui, app);
 
-  ui.divider();
-  ui.heading('Ask the physicist');
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 19, gap: 8 });
-  if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the physicist', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 19, gap: 8 });
+    if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
+  })], { height: 56, size: 20 });
 }
 
 function drawPredict(ui, app) {

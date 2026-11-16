@@ -11,17 +11,16 @@ const CURVES = ['#7ee2a8', '#9ad0ff', '#ffd166', '#ff9ecb', '#c99bff'];
 
 export function drawControls(ui, app) {
   const s = app.state;
-  ui.title('Kinetics Lab', { size: 40 });
+  ui.header('Kinetics Lab', [app.settingsIcon()]);
   if (app.followsAdmin) {
     ui.text(`${MODES.find(([id]) => id === s.mode)[1]}${s.mode === 'lab' ? ` · ${FACTORS[s.factor].name}` : ''}  ·  ${s.level === 'advanced' ? 'Advanced' : 'Core'}`, { size: 26, weight: 700, color: THEME.accent });
     ui.text(`Chosen by ${app.adminName}`, { size: 21, color: THEME.dim });
   } else {
-    ui.heading('Activity', { size: 24 });
-    ui.buttons(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 52, size: 20, gap: 8 });
+    ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 52, size: 20, gap: 8 });
   }
 
   if (s.mode === 'predict') {
-    if (app.controlsBoard) {
+    if (app.soloTeacher) {
       const ch = app.challenge();
       ui.text('Read the question out and let everyone pick, then reveal the answer.', { size: 21, color: THEME.dim });
       ui.buttons(app.predictions().map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, height: 52, size: 20, gap: 8 });
@@ -42,19 +41,17 @@ export function drawControls(ui, app) {
     ui.buttons(f.options.map(([opt, label]) => ({ id: `quick-${opt}`, label, onClick: () => app.quick(opt) })), { cols: 3, height: 44, size: 17, gap: 6 });
   } else {
     ui.text('Fill in the summary table on the right: how did each factor change the rate, and why?', { size: 21, color: THEME.dim });
-    if (app.controlsBoard) {
-      ui.heading('Board shows', { size: 22 });
-      ui.buttons(FACTOR_IDS.map((id) => ({ id: `bfactor-${id}`, label: FACTORS[id].name, active: s.factor === id, onClick: () => app.setFactor(id, true) })), { cols: 2, height: 46, size: 19, gap: 8 });
-    }
   }
 
-  if (!app.followsAdmin) {
-    ui.heading('Level', { size: 24 });
-    ui.buttons(LEVELS.map(([id, label]) => ({ id: `level-${id}`, label, active: s.level === id, onClick: () => app.setLevel(id) })), { height: 46, size: 21, gap: 8 });
-  }
-  if (app.controlsBoard) ui.buttons([{ id: 'board', label: s.big ? 'Class board: shown' : 'Class board: hidden', active: s.big, onClick: () => app.toggleBoard() }], { height: 46, size: 20 });
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 52, size: 21, gap: 8 });
+  if (app.soloTeacher) drawTeacher(ui, app);
+}
+
+/** The teacher's own controls: in the Teacher menu in a session, or here when on your own. */
+export function drawTeacher(ui, app) {
+  const s = app.state;
+  if (s.mode !== 'summary') return;
+  ui.heading('Board shows', { size: 22 });
+  ui.buttons(FACTOR_IDS.map((id) => ({ id: `bfactor-${id}`, label: FACTORS[id].name, active: s.factor === id, onClick: () => app.setFactor(id, true) })), { cols: 2, height: 46, size: 19, gap: 8 });
 }
 
 // ───────────────────────── Right ─────────────────────────
@@ -64,12 +61,13 @@ export function drawInfo(ui, app) {
   if (s.mode === 'predict') drawPredict(ui, app);
   else if (s.mode === 'lab') drawLab(ui, app);
   else drawSummary(ui, app);
-  ui.divider();
-  ui.heading('Ask the chemist', { size: 24 });
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 17, gap: 8 });
-  if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the chemist', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 17, gap: 8 });
+    if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
+  })], { height: 56, size: 20 });
 }
 
 function drawPredict(ui, app) {

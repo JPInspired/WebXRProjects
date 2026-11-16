@@ -12,17 +12,16 @@ const SLOTS = ['A', 'B', 'C', 'D', 'E'];
 
 export function drawControls(ui, app) {
   const s = app.state;
-  ui.title('Lithium Reactions', { size: 38 });
+  ui.header('Lithium Reactions', [app.settingsIcon()]);
   if (app.followsAdmin) {
     ui.text(`${MODES.find(([id]) => id === s.mode)[1]}  ·  ${s.level === 'advanced' ? 'Advanced' : 'Core'}`, { size: 28, weight: 700, color: THEME.accent });
     ui.text(`Chosen by ${app.adminName}`, { size: 21, color: THEME.dim });
   } else {
-    ui.heading('Activity', { size: 24 });
-    ui.buttons(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 52, size: 20, gap: 8 });
+    ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 52, size: 20, gap: 8 });
   }
 
   if (s.mode === 'predict') {
-    if (app.controlsBoard) {
+    if (app.soloTeacher) {
       const ch = app.challenge();
       ui.text('Read the question out and let everyone pick, then reveal the answer.', { size: 21, color: THEME.dim });
       ui.buttons(app.predictions().map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, height: 52, size: 19, gap: 8 });
@@ -40,22 +39,22 @@ export function drawControls(ui, app) {
     ui.heading('Without the mouse', { size: 22 });
     ui.buttons(SLOTS.map((sl) => ({ id: `drop-${sl}`, label: `${sl} in water`, disabled: !!app.bench.reaction, onClick: () => app.quickDrop(sl) })), { cols: 3, height: 42, size: 17, gap: 6 });
     ui.buttons(SLOTS.map((sl) => ({ id: `flame-${sl}`, label: `${sl} in flame`, onClick: () => app.bench.flameTest(sl) })), { cols: 3, height: 42, size: 17, gap: 6 });
-    if (app.controlsBoard) {
-      const armed = app.newArmed && performance.now() - app.newArmed < 3000;
-      ui.buttons([{ id: 'new', label: armed ? 'Sure? Clears results' : 'New mystery metals', active: armed, onClick: () => app.newMystery() }], { height: 46, size: 20 });
-    }
-  } else if (app.controlsBoard) {
-    ui.text('Everyone’s identifications are on the board. Discuss them, then reveal the answers.', { size: 21, color: THEME.dim });
-    ui.buttons([{ id: 'reveal-ans', label: s.revealed ? 'Hide the answers' : 'Reveal the answers', active: s.revealed, onClick: () => app.reveal() }], { height: 56, size: 23 });
-  } else ui.text('Look at the class board: does the class agree? Your teacher will reveal the answers.', { size: 21, color: THEME.dim });
+  } else if (!app.soloTeacher) ui.text('Look at the class board: does the class agree? Your teacher will reveal the answers.', { size: 21, color: THEME.dim });
 
-  if (!app.followsAdmin) {
-    ui.heading('Level', { size: 24 });
-    ui.buttons(LEVELS.map(([id, label]) => ({ id: `level-${id}`, label, active: s.level === id, onClick: () => app.setLevel(id) })), { height: 46, size: 21, gap: 8 });
+  if (app.soloTeacher) drawTeacher(ui, app);
+}
+
+/** The teacher's own controls: in the Teacher menu in a session, or here when on your own. */
+export function drawTeacher(ui, app) {
+  const s = app.state;
+  if (s.mode === 'lab') {
+    const armed = app.newArmed && performance.now() - app.newArmed < 3000;
+    ui.heading('Mystery metals', { size: 22 });
+    ui.buttons([{ id: 'new', label: armed ? 'Sure? Clears results' : 'New mystery metals', active: armed, onClick: () => app.newMystery() }], { height: 52, size: 20 });
+  } else if (s.mode === 'results') {
+    ui.heading('Answers', { size: 22 });
+    ui.buttons([{ id: 'reveal-ans', label: s.revealed ? 'Hide the answers' : 'Reveal the answers', active: s.revealed, onClick: () => app.reveal() }], { height: 56, size: 22 });
   }
-  if (app.controlsBoard) ui.buttons([{ id: 'board', label: s.big ? 'Class board: shown' : 'Class board: hidden', active: s.big, onClick: () => app.toggleBoard() }], { height: 46, size: 20 });
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 52, size: 21, gap: 8 });
 }
 
 // ───────────────────────── Right ─────────────────────────
@@ -65,12 +64,13 @@ export function drawInfo(ui, app) {
   if (s.mode === 'predict') drawPredict(ui, app);
   else if (s.mode === 'lab') drawLab(ui, app);
   else drawResults(ui, app);
-  ui.divider();
-  ui.heading('Ask the chemist', { size: 24 });
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 17, gap: 8 });
-  if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the chemist', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 17, gap: 8 });
+    if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
+  })], { height: 56, size: 20 });
 }
 
 function drawPredict(ui, app) {

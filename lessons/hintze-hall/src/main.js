@@ -14,6 +14,11 @@ import { drawControls, drawInfo, drawCard } from './ui/panels.js';
 const TURNS = [{ label: 'snap 30°', angle: Math.PI / 6 }, { label: 'snap 45°', angle: Math.PI / 4 }, { label: 'smooth', angle: 0 }];
 
 class App extends LessonApp {
+  refresh() {
+    this.explainPanel.mesh.visible = !!this.state.explain;
+    this.redrawPanels();
+  }
+
   constructor() {
     super({ labPos: new THREE.Vector3(0, 2.6, -19), camPos: new THREE.Vector3(0, 2.85, -21), background: 0x15171c });
     this.state = {

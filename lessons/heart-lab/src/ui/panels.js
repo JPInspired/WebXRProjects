@@ -7,14 +7,13 @@ export const MODES = [['explore', 'Explore'], ['flow', 'Blood flow'], ['cycle', 
 
 export function drawControls(ui, app) {
   const s = app.state;
-  ui.title('Heart Lab', { size: 42 });
+  ui.header('Heart Lab', [app.settingsIcon()]);
   if (app.followsAdmin) {
     const mode = MODES.find(([id]) => id === s.mode)[1];
     ui.text(`${mode}  ·  ${s.level === 'advanced' ? 'Advanced' : 'Core'}`, { size: 28, weight: 700, color: THEME.accent });
     ui.text(`Chosen by ${app.adminName}`, { size: 21, color: THEME.dim });
   } else {
-    ui.heading('Activity');
-    ui.buttons(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { cols: 3, height: 56, size: 23, gap: 8 });
+    ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { cols: 3, height: 56, size: 23, gap: 8 });
   }
 
   ui.heading('Your heart');
@@ -53,21 +52,19 @@ export function drawControls(ui, app) {
     ui.text('Drag each name onto the right part of your heart. Open it up to reach the valves and the septum.', { size: 21, color: THEME.dim });
   }
 
-  if (!app.followsAdmin) {
-    ui.heading('Level');
-    ui.buttons(LEVELS.map(([id, label]) => ({ id: `level-${id}`, label: id === 'core' ? 'Core (14–16)' : 'Advanced (16–18)', active: s.level === id, onClick: () => app.setLevel(id) })), { height: 50, size: 22, gap: 8 });
-  }
-  if (app.controlsBigHeart) {
-    ui.heading('Big heart');
-    ui.buttons([
-      { id: 'big-left', label: '◀ Turn', onClick: () => app.turnBig(-1) },
-      { id: 'big-right', label: 'Turn ▶', onClick: () => app.turnBig(1) },
-      { id: 'big-show', label: s.big ? 'Shown' : 'Hidden', active: s.big, onClick: () => app.toggleBig() },
-    ], { height: 50, size: 22, gap: 8 });
-  }
+  if (app.soloTeacher) drawTeacher(ui, app);
 
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 52, size: 21, gap: 8 });
+}
+
+/** The class heart's controls: in the Teacher menu in a session, or here when on your own. */
+export function drawTeacher(ui, app) {
+  const s = app.state;
+  ui.heading('Big class heart', { size: 22 });
+  ui.buttons([
+    { id: 'big-left', label: '◀ Turn', onClick: () => app.turnBig(-1) },
+    { id: 'big-right', label: 'Turn ▶', onClick: () => app.turnBig(1) },
+    { id: 'big-show', label: s.big ? 'Shown' : 'Hidden', active: s.big, onClick: () => app.toggleBig() },
+  ], { height: 52, size: 21, gap: 8 });
 }
 
 // ───────────────────────── Right: information ─────────────────────────
@@ -120,12 +117,13 @@ export function drawInfo(ui, app) {
     ui.text('About the size of your fist, it beats around 100,000 times a day and pumps about 7,000 litres of blood. It is really two pumps side by side: the right side pumps blood to the lungs, the left side to the rest of the body.', { size: 22 });
   }
 
-  ui.divider();
-  ui.heading('Ask the cardiologist');
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.cardiologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 20, gap: 8 });
-  if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the cardiologist', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.cardiologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 20, gap: 8 });
+    if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
+  })], { height: 56, size: 20 });
 }
 
 // ───────────────────────── Floating card ─────────────────────────

@@ -9,13 +9,12 @@ const WARN = '#ffd166';
 
 export function drawControls(ui, app) {
   const s = app.state;
-  ui.title('Microscope Lab', { size: 40 });
+  ui.header('Microscope Lab', [app.settingsIcon()]);
   if (app.followsAdmin) {
     ui.text(`${MODES.find(([id]) => id === s.mode)[1]}  ·  ${s.level === 'advanced' ? 'Advanced' : 'Core'}`, { size: 28, weight: 700, color: THEME.accent });
     ui.text(`Chosen by ${app.adminName}`, { size: 21, color: THEME.dim });
   } else {
-    ui.heading('Activity', { size: 24 });
-    ui.buttons(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 52, size: 20, gap: 8 });
+    ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 52, size: 20, gap: 8 });
   }
   if (s.mode === 'parts') {
     ui.text(`Tap each part of the microscope to find out what it does. ${s.seen.length} of ${PART_IDS.length} found.`, { size: 21, color: THEME.dim });
@@ -36,13 +35,6 @@ export function drawControls(ui, app) {
   } else {
     ui.text('Answer the quiz on the right. Your score goes on the class board.', { size: 21, color: THEME.dim });
   }
-  if (!app.followsAdmin) {
-    ui.heading('Level', { size: 24 });
-    ui.buttons(LEVELS.map(([id, label]) => ({ id: `level-${id}`, label, active: s.level === id, onClick: () => app.setLevel(id) })), { height: 46, size: 21, gap: 8 });
-  }
-  if (app.controlsBoard) ui.buttons([{ id: 'board', label: s.big ? 'Class board: shown' : 'Class board: hidden', active: s.big, onClick: () => app.toggleBoard() }], { height: 46, size: 20 });
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 52, size: 21, gap: 8 });
 }
 
 // ───────────────────────── Right ─────────────────────────
@@ -55,12 +47,13 @@ export function drawInfo(ui, app) {
     ui.text(p ? p.job : 'Tap a part of your microscope (or a button on the left).', { size: 23 });
   } else if (s.mode === 'lab') drawLab(ui, app);
   else drawQuiz(ui, app);
-  ui.divider();
-  ui.heading('Ask the biologist', { size: 24 });
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 17, gap: 8 });
-  if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the biologist', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 17, gap: 8 });
+    if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
+  })], { height: 56, size: 20 });
 }
 
 function drawLab(ui, app) {

@@ -121,9 +121,8 @@ class App extends LessonApp {
     this.refresh();
   }
 
-  openLessonSettings() {
-    if (this.popupOpen === 'Settings') return this.closePopup();
-    this.openSettings((ui) => drawSettings(ui, this));
+  settingsSections(ui) {
+    drawSettings(ui, this);
   }
 
   openAsk() {

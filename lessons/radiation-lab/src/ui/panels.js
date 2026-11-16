@@ -14,14 +14,13 @@ const css = (c) => `#${c.toString(16).padStart(6, '0')}`;
 export function drawControls(ui, app) {
   const s = app.state;
   const b = app.bench;
-  ui.title('Radiation Lab', { size: 40 });
+  ui.header('Radiation Lab', [app.settingsIcon()]);
   if (app.followsAdmin) {
     ui.text(`${ALL_MODES.find(([id]) => id === s.mode)[1]}  ·  ${s.level === 'advanced' ? 'Advanced' : 'Core'}`, { size: 28, weight: 700, color: THEME.accent });
     ui.text(`Chosen by ${app.adminName}`, { size: 21, color: THEME.dim });
   } else {
-    ui.heading('Activity', { size: 24 });
     const modes = modesFor(s.level);
-    ui.buttons(modes.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { cols: 2, height: 50, size: 21, gap: 8 });
+    ui.tabs(modes.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { cols: 2, height: 50, size: 21, gap: 8 });
   }
 
   // the counter
@@ -49,18 +48,17 @@ export function drawControls(ui, app) {
       { id: 'shake', label: app.bench.pa.on ? 'Shake again (restart)' : 'Shake the bottle: start', onClick: () => app.shake() },
       { id: 'fast', label: s.fast ? 'Time: ×4' : 'Time: real', active: s.fast, onClick: () => app.toggleFast() },
     ], { height: 52, size: 20, gap: 8 });
-  } else if (app.controlsBoard) {
-    ui.text('Everyone’s verdicts are on the class board. Discuss them, then reveal the answers.', { size: 21, color: THEME.dim });
-    ui.buttons([{ id: 'reveal', label: s.revealed ? 'Hide the answers' : 'Reveal the answers', active: s.revealed, onClick: () => app.reveal() }], { height: 56, size: 23 });
-  } else ui.text('Look at the class board: does the class agree about each source? Your teacher will reveal the answers.', { size: 21, color: THEME.dim });
+  } else if (!app.soloTeacher) ui.text('Look at the class board: does the class agree about each source? Your teacher will reveal the answers.', { size: 21, color: THEME.dim });
 
-  if (!app.followsAdmin) {
-    ui.heading('Level', { size: 24 });
-    ui.buttons(LEVELS.map(([id, label]) => ({ id: `level-${id}`, label, active: s.level === id, onClick: () => app.setLevel(id) })), { height: 46, size: 21, gap: 8 });
-  }
-  if (app.controlsBoard) ui.buttons([{ id: 'board', label: s.big ? 'Class board: shown' : 'Class board: hidden', active: s.big, onClick: () => app.toggleBoard() }], { height: 46, size: 20 });
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 52, size: 21, gap: 8 });
+  if (app.soloTeacher) drawTeacher(ui, app);
+}
+
+/** The teacher's own controls: in the Teacher menu in a session, or here when on your own. */
+export function drawTeacher(ui, app) {
+  const s = app.state;
+  if (s.mode !== 'results') return;
+  ui.heading('Answers', { size: 22 });
+  ui.buttons([{ id: 'reveal', label: s.revealed ? 'Hide the answers' : 'Reveal the answers', active: s.revealed, onClick: () => app.reveal() }], { height: 56, size: 22 });
 }
 
 // ───────────────────────── Right: results, safety, questions ─────────────────────────
@@ -72,12 +70,13 @@ export function drawInfo(ui, app) {
   else if (s.mode === 'test') drawTest(ui, app);
   else if (s.mode === 'halflife') drawHalfLife(ui, app);
   else drawMyVerdicts(ui, app);
-  ui.divider();
-  ui.heading('Ask the physicist', { size: 24 });
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 18, gap: 8 });
-  if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the physicist', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 18, gap: 8 });
+    if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
+  })], { height: 56, size: 20 });
 }
 
 function drawDose(ui, app) {

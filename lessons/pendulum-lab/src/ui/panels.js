@@ -24,7 +24,7 @@ export function drawControls(ui, app) {
   } else ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 56, size: 19 });
 
   if (s.mode === 'predict') {
-    if (app.controlsBoard) {
+    if (app.soloTeacher) {
       const ch = app.challenge();
       ui.text('Question on the class board:', { size: 20, color: THEME.dim });
       ui.buttons(app.predictions().map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, ...MID });
@@ -104,17 +104,9 @@ function drawRelease(ui, app) {
   ui.buttons([{ id: 'release', label: r.active.running ? 'Swinging…' : 'Let go', disabled: r.active.running, onClick: () => app.release() }, { id: 'stop', label: 'Stop', onClick: () => app.stopSwing() }], BIG);
 }
 
-/** The lesson's own part of the settings pop-up. */
+/** The lesson's own part of the settings pop-up (after the level and class board). */
 export function drawSettings(ui, app) {
   const s = app.state;
-  if (!app.followsAdmin) {
-    ui.heading('Level', { size: 22 });
-    ui.buttons(LEVELS.map(([id, label]) => ({ id: `level-${id}`, label, active: s.level === id, onClick: () => app.setLevel(id) })), { height: 56, size: 21, gap: 10 });
-  }
-  if (app.controlsBoard) {
-    ui.heading('Class board', { size: 22 });
-    ui.buttons([{ id: 'board', label: s.big ? 'Shown (tap to hide)' : 'Hidden (tap to show)', active: s.big, onClick: () => app.toggleBoard() }], { height: 56, size: 21 });
-  }
   if (s.mode === 'measure') {
     ui.heading('Light gate', { size: 22 });
     ui.buttons([{ id: 'gate', label: s.gateShown ? 'Reading shown' : 'Reading hidden', active: s.gateShown, onClick: () => app.toggleGate() }], { height: 56, size: 21 });

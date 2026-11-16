@@ -16,8 +16,10 @@ function hasPart(build, cat) {
 export function drawControls(ui, app) {
   const s = app.state;
   const b = s.build;
-  ui.title('Build a PC', { size: 42 });
-  ui.heading('1 · Choose a case');
+  ui.header('Build a PC', [app.settingsIcon()]);
+  const tab = menuTab(app, 'pc', 'case');
+  ui.tabs([['case', '1  Case'], ['parts', '2  Parts'], ['test', '3  Test']].map(([id, label]) => ({ id: `tab-${id}`, label, active: tab === id, onClick: () => setMenuTab(app, 'pc', id) })), { height: 54, size: 20 });
+  if (tab === 'case') {
   if (app.followsAdmin && app.pcAdmin.case) {
     // the admin has picked one case for everyone
     ui.text(`${CASES[b.case].short}  ·  chosen by ${app.adminName}`, { size: 26, weight: 700, color: THEME.accent });
@@ -27,7 +29,8 @@ export function drawControls(ui, app) {
     })), { height: 62, size: 27 });
   }
 
-  ui.heading('2 · Take parts from the tray');
+  ui.buttons([{ id: 'next-parts', label: 'Next: parts  ›', onClick: () => setMenuTab(app, 'pc', 'parts') }], { height: 50, size: 20 });
+  } else if (tab === 'parts') {
   ui.buttons(TRAY_CATS.map(([cat, label]) => ({
     id: `tray-${cat}`, label: `${hasPart(b, cat) ? '✓ ' : ''}${label}`, active: s.trayCat === cat, onClick: () => app.set({ trayCat: cat }),
   })), { cols: 3, height: 60, size: 25, gap: 10 });
@@ -35,7 +38,8 @@ export function drawControls(ui, app) {
     ? 'Pinch or grab a part on the tray and bring it to the case. When the preview turns green, let go. Pull a part out to remove it.'
     : 'Drag a part from the tray into the case. When the preview turns green, let go. Drag a part out to remove it.', { size: 22, color: THEME.dim });
 
-  ui.heading('3 · Test it');
+  ui.buttons([{ id: 'next-test', label: 'Next: test it  ›', onClick: () => setMenuTab(app, 'pc', 'test') }], { height: 50, size: 20 });
+  } else {
   const on = s.power !== 'off';
   ui.buttons([
     { id: 'power', label: on ? 'Power off' : 'Power on ⏻', active: on, onClick: () => app.togglePower() },
@@ -43,14 +47,20 @@ export function drawControls(ui, app) {
     { id: 'labels', label: s.labels ? 'Labels: on' : 'Labels: off', active: s.labels, onClick: () => app.toggleLabels() },
   ], { height: 62, size: 26 });
   ui.buttons([{ id: 'empty', label: 'Empty the case', onClick: () => app.emptyCase() }], { height: 54, size: 24 });
-
-  ui.divider();
-  const general = [{ id: 'recenter', label: app.presenting ? 'Bring lab to me' : 'Reset view', onClick: () => app.recenter() }];
-  if (app.hitTestSource) general.push({ id: 'place', label: s.placing ? 'Tap to drop here' : 'Place on a surface', active: s.placing, onClick: () => app.togglePlacing() });
-  general.push({ id: 'speak', label: s.speak ? 'Voice: on' : 'Voice: off', active: s.speak, onClick: () => app.toggleSpeak(), disabled: !('speechSynthesis' in window) });
-  general.push(app.lessonsButton());
-  ui.buttons(general, { cols: Math.min(general.length, 3), height: 56, size: 24 });
+  }
 }
+
+/** Which step tab is open in a menu (kept on the app, not shared). */
+function menuTab(app, key, first) {
+  app.menuTabs ??= {};
+  return app.menuTabs[key] ?? first;
+}
+function setMenuTab(app, key, id) {
+  app.menuTabs ??= {};
+  app.menuTabs[key] = id;
+  app.refresh();
+}
+
 
 // ───────────────────────── Right: the build ─────────────────────────
 
@@ -83,10 +93,11 @@ export function drawInfo(ui, app) {
   const color = { ok: '#7ee2a8', warn: '#ffd166', bad: '#ff6b6b', todo: THEME.dim };
   for (const c of checklist(b).slice(0, 5)) ui.text(`${icon[c.level]}  ${c.text}`, { size: 22, color: color[c.level] });
 
-  ui.divider();
-  ui.heading('Ask the technician');
-  ui.buttons(QUESTIONS.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.tech.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 54, size: 22, gap: 10 });
-  if (s.tech.answer) ui.box(s.tech.answer, { size: 23 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the technician', (ui) => {
+    ui.buttons(QUESTIONS.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.tech.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 54, size: 20, gap: 8 });
+    if (s.tech.answer) ui.box(s.tech.answer, { size: 21 });
+  })], { height: 56, size: 20 });
 }
 
 // ───────────────────────── Floating card / monitor ─────────────────────────

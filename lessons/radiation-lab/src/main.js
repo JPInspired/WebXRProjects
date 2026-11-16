@@ -6,7 +6,7 @@ import { SOURCES, SOURCE_IDS, ABSORBERS, ANSWERS, HALF_LIFE, verdictText } from 
 import { Bench } from './model/Bench.js';
 import { Rays } from './model/Rays.js';
 import { Board } from './model/Board.js';
-import { drawControls, drawInfo, drawCard, ALL_MODES, modesFor } from './ui/panels.js';
+import { drawControls, drawTeacher, drawInfo, drawCard, ALL_MODES, modesFor } from './ui/panels.js';
 
 // Radiation Lab: every student has a bench with sealed school sources (in a lead box), everyday things that
 // are a little radioactive, absorbers, tongs and a Geiger counter whose probe they can pick up. Ten-second
@@ -363,6 +363,11 @@ class App extends LessonApp {
     }
     this.broadcastAdmin();
     this.refresh();
+  }
+
+  /** The lesson's own controls in the Teacher menu. */
+  teacherControls(ui) {
+    drawTeacher(ui, this);
   }
 
   // ───────────── admin (the teacher) ─────────────

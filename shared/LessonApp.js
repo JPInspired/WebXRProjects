@@ -127,8 +127,11 @@ export class LessonApp {
     this.lab.position.copy(this.labPos);
     this.scene.add(this.lab);
 
-    this.controlPanel = new CanvasPanel({ width: 0.5, height: 0.72, name: 'controls' });
-    this.infoPanel = new CanvasPanel({ width: 0.5, height: 0.72, name: 'info' });
+    this.controlPanel = new CanvasPanel({ width: 0.5, height: 0.72, name: 'controls', fit: 0.3 });
+    this.infoPanel = new CanvasPanel({ width: 0.5, height: 0.72, name: 'info', fit: 0.3 });
+    // the panels below each side menu follow its bottom edge as it grows and shrinks
+    this.controlPanel.onResize = () => this.layoutStacks();
+    this.infoPanel.onResize = () => this.layoutStacks();
     this.controlPanel.mesh.position.set(-this.panelX, PANEL_Y, PANEL_Z);
     this.controlPanel.mesh.rotation.y = 0.42;
     this.infoPanel.mesh.position.set(this.panelX, PANEL_Y, PANEL_Z);
@@ -139,6 +142,18 @@ export class LessonApp {
     this.explainPanel.mesh.rotation.x = 0.22;
     this.lab.add(this.controlPanel.mesh, this.infoPanel.mesh, this.explainPanel.mesh);
     this.panels = [this.controlPanel, this.infoPanel, this.explainPanel];
+  }
+
+  /** Keep the session panel just under the controls, and the players button and list just under the info panel. */
+  layoutStacks() {
+    const bottom = (p) => p.mesh.position.y - p.shownHeight / 2;
+    const below = (above, panel, gap = 0.02) => {
+      if (!panel) return;
+      panel.mesh.position.y = bottom(above) - gap - panel.heightM / 2;
+    };
+    below(this.controlPanel, this.sessionPanel);
+    below(this.infoPanel, this.playersPanel);
+    if (this.playersPanel) below(this.playersPanel, this.playersListPanel, 0.01);
   }
 
   // ───────────── hooks (override in a lesson) ─────────────
@@ -205,6 +220,51 @@ export class LessonApp {
     b.push({ id: 'speak', label: s.speak ? 'Voice: on' : 'Voice: off', active: s.speak, onClick: () => this.toggleSpeak(), disabled: !('speechSynthesis' in window) });
     b.push(this.lessonsButton());
     return b;
+  }
+
+  // ───────────── menu helpers shared by every lesson ─────────────
+
+  /**
+   * No shared session: whoever is using it runs the lesson themselves, so the teacher's own controls (which
+   * prediction is on the board, revealing answers…) appear in their menu. In a session they are only in the
+   * Teacher menu, which only the teacher sees.
+   */
+  get soloTeacher() {
+    return !this.presence;
+  }
+
+  /** The ⚙ button for the top corner of a lesson's controls. */
+  settingsIcon() {
+    return { id: 'settings', label: '⚙', active: this.popupOpen === 'Settings', onClick: () => this.openLessonSettings() };
+  }
+
+  /** The settings pop-up: the level (unless the teacher chooses it), the class board (solo), the lesson's own extras, the headset's buttons. */
+  openLessonSettings() {
+    if (this.popupOpen === 'Settings') return this.closePopup();
+    this.openSettings((ui) => {
+      const s = this.state;
+      const levels = this.levelOptions?.() ?? [['core', 'Core'], ['advanced', 'Advanced']];
+      if ('level' in s && this.setLevel && !this.followsAdmin && levels.length) {
+        ui.heading('Level', { size: 22 });
+        ui.buttons(levels.map(([id, label]) => ({ id: `level-${id}`, label, active: s.level === id, onClick: () => this.setLevel(id) })), { height: 56, size: 21, gap: 10 });
+      }
+      if (this.soloTeacher && this.toggleBoard && 'big' in s) {
+        ui.heading('Class board', { size: 22 });
+        ui.buttons([{ id: 'board', label: s.big ? 'Shown (tap to hide)' : 'Hidden (tap to show)', active: s.big, onClick: () => this.toggleBoard() }], { height: 56, size: 21 });
+      }
+      this.settingsSections?.(ui);
+    });
+  }
+
+  /** A pop-up opened by a button, closed by pressing it again. */
+  togglePopup(title, builder, opts) {
+    if (this.popupOpen === title) return this.closePopup();
+    this.openPopup(title, builder, opts);
+  }
+
+  /** The "Ask the …" button for the bottom of a lesson's info panel; the questions open in a pop-up. */
+  askButton(title, builder) {
+    return { id: 'ask', label: title, active: this.popupOpen === title, onClick: () => this.togglePopup(title, builder, { height: 0.72 }) };
   }
 
   // ───────────── pop-up card (settings, "ask the expert", …) ─────────────
@@ -526,9 +586,10 @@ export class LessonApp {
   initAdmin() {
     this.admin = { lock: false }; // what the admin has set for everyone
     this.lockedByAdmin = false; // (students) the admin has locked my menus
-    this.adminPanel = new CanvasPanel({ width: 0.5, height: 0.72, name: 'admin' });
-    this.adminPanel.mesh.position.set(-1.0 - (this.panelX - 0.62), PANEL_Y, 0.46);
-    this.adminPanel.mesh.rotation.y = 0.95;
+    this.adminPanel = new CanvasPanel({ width: 0.5, height: 0.8, name: 'admin', fit: 0.3 });
+    this.adminPanel.mesh.position.set(-this.panelX - 0.56, PANEL_Y + 0.04, PANEL_Z + 0.08); // just beyond the controls, turned to face you
+    this.adminPanel.mesh.rotation.y = 0.62;
+    this.adminTab = 'lesson';
     this.adminPanel.mesh.visible = false;
     this.adminPanel.setBuilder((ui) => this.drawAdmin(ui));
     this.lab.add(this.adminPanel.mesh);
@@ -537,15 +598,43 @@ export class LessonApp {
     this.adminClock = 0;
   }
 
+  /**
+   * The Teacher menu: only the teacher (whoever opened the session) sees it. Tabs:
+   *   Lesson   – the activity and level for everyone, the prediction on the board and revealing it, and any of
+   *              the lesson's own teacher controls;
+   *   Board    – where the class board is and whether it is showing;
+   *   Students – their progress, locking their menus, finding the room again, removing someone.
+   */
   drawAdmin(ui) {
-    ui.title('Admin', { size: 40 });
-    ui.text('You opened this session, so you run it for everyone.', { size: 21, color: THEME.dim });
-    for (const section of this.adminLessonButtons?.() ?? []) {
-      ui.heading(section.heading);
+    ui.header('Teacher', []);
+    const tab = this.adminTab;
+    ui.tabs([['lesson', 'Lesson'], ['board', 'Board'], ['students', 'Students']].map(([id, label]) => ({ id: `admin-tab-${id}`, label, active: tab === id, onClick: () => { this.adminTab = id; this.refresh(); } })), { height: 54, size: 20 });
+    const sections = this.adminLessonButtons?.() ?? [];
+    const isBoard = (s) => /board/i.test(s.heading);
+    const isProgress = (s) => /progress/i.test(s.heading);
+    const draw = (section) => {
+      ui.heading(section.heading, { size: 22 });
       if (section.text) ui.text(section.text, { size: 20, color: THEME.dim });
-      ui.buttons(section.buttons, { cols: section.cols ?? 2, height: 52, size: 21, gap: 8 });
+      if (section.buttons.length) ui.buttons(section.buttons, { cols: section.cols ?? 2, height: 52, size: 20, gap: 8 });
+    };
+    if (tab === 'lesson') {
+      const y0 = ui.y;
+      for (const s of sections.filter((x) => !isBoard(x) && !isProgress(x))) draw(s);
+      this.drawTeacherPrediction(ui);
+      this.teacherControls?.(ui);
+      if (ui.y === y0) ui.text('Everyone explores this lesson at their own pace: there is nothing to choose for the class here. See the Students tab.', { size: 21, color: THEME.dim });
+      return;
     }
-    ui.heading('Students');
+    if (tab === 'board') {
+      if (this.toggleBoard && 'big' in this.state) {
+        ui.heading('Class board', { size: 22 });
+        ui.buttons([{ id: 'admin-board', label: this.state.big ? 'Showing (tap to hide)' : 'Hidden (tap to show)', active: this.state.big, onClick: () => this.toggleBoard() }], { height: 52, size: 20 });
+      }
+      for (const s of sections.filter(isBoard)) draw(s);
+      return;
+    }
+    for (const s of sections.filter(isProgress)) draw(s);
+    ui.heading('Students', { size: 22 });
     ui.buttons([
       { id: 'lock-students', label: this.admin.lock ? 'Menus: locked' : 'Menus: unlocked', active: this.admin.lock, onClick: () => this.toggleStudentLock() },
       ...(this.presence.sameRoom ? [{ id: 'refind', label: 'Re-find room (all)', onClick: () => this.adminSend({ k: 'refind' }) }] : []),
@@ -558,6 +647,20 @@ export class LessonApp {
       ui.button({ id: `kick-${person.id}`, label: armed ? 'Sure?' : 'Remove', active: armed, color: '#5a2f3a', onClick: () => this.kick(person.id) }, ui.right - 150, ui.y + 6, 150, 50, 21);
       ui.y += 66;
     }
+  }
+
+  /** In the Teacher menu (or a solo user's own menu): which prediction is on the board, and revealing it. */
+  drawTeacherPrediction(ui) {
+    if (!this.predictions || !this.challenge || !this.setRound || this.customTeacherPrediction) return;
+    const d = this.myDemo?.() ?? this.state;
+    if ((d.mode ?? this.state.mode) !== 'predict') return;
+    const ch = this.challenge();
+    if (!ch) return;
+    ui.heading('Prediction on the board', { size: 22 });
+    ui.buttons(this.predictions().map((p, i) => ({ id: `t-round-${i}`, label: `${i + 1}. ${p.name}`, active: this.state.round === i, onClick: () => { this.setRound(i); this.refresh(); } })), { cols: 2, height: 50, size: 19, gap: 8 });
+    ui.buttons([{ id: 't-reveal', label: ch.revealed ? 'Hide the answer' : 'Reveal the answer', active: ch.revealed, onClick: () => { this.reveal(); this.refresh(); } }], { height: 58, size: 22 });
+    const t = this.tally?.(ch);
+    if (t) ui.text(`${t.votes} answer${t.votes === 1 ? '' : 's'} in so far.`, { size: 20, weight: 700 });
   }
 
   adminSend(d, to) {
@@ -881,6 +984,7 @@ export class LessonApp {
       this.updateAdmin(dt);
     }
     this.hideMenus();
+    this.layoutStacks();
     this.renderer.render(this.scene, this.camera);
   }
 }

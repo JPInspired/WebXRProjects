@@ -12,17 +12,16 @@ export function drawControls(ui, app) {
   const s = app.state;
   const k = app.kit;
   const adv = s.level === 'advanced';
-  ui.title('Circular Motion', { size: 40 });
+  ui.header('Circular Motion', [app.settingsIcon()]);
   if (app.followsAdmin) {
     ui.text(`${MODES.find(([id]) => id === s.mode)[1]}  ·  ${adv ? 'Advanced' : 'Core'}`, { size: 28, weight: 700, color: THEME.accent });
     ui.text(`Chosen by ${app.adminName}`, { size: 21, color: THEME.dim });
   } else {
-    ui.heading('Activity', { size: 24 });
-    ui.buttons(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 52, size: 21, gap: 8 });
+    ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 52, size: 21, gap: 8 });
   }
 
   if (s.mode === 'predict') {
-    if (app.controlsBoard) {
+    if (app.soloTeacher) {
       const ch = app.challenge();
       ui.text('Read the question out and let everyone pick, then reveal the answer.', { size: 21, color: THEME.dim });
       ui.buttons(app.predictions().map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, height: 50, size: 20, gap: 8 });
@@ -61,13 +60,6 @@ export function drawControls(ui, app) {
     if (!k.cut && Math.abs(k.omega) < 2) ui.text('Get the ball spinning first (Faster, or swirl it), then cut the string.', { size: 19, color: WARN });
   }
 
-  if (!app.followsAdmin) {
-    ui.heading('Level', { size: 22 });
-    ui.buttons(LEVELS.map(([id, label]) => ({ id: `level-${id}`, label, active: s.level === id, onClick: () => app.setLevel(id) })), { height: 46, size: 20, gap: 8 });
-  }
-  if (app.controlsBoard) ui.buttons([{ id: 'board', label: s.big ? 'Class board: shown' : 'Class board: hidden', active: s.big, onClick: () => app.toggleBoard() }], { height: 46, size: 20 });
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 52, size: 21, gap: 8 });
 }
 
 // ───────────────────────── Right ─────────────────────────
@@ -77,12 +69,13 @@ export function drawInfo(ui, app) {
   if (s.mode === 'predict') drawPredict(ui, app);
   else if (s.mode === 'lab') drawLab(ui, app);
   else drawWorld(ui, app);
-  ui.divider();
-  ui.heading('Ask the physicist', { size: 24 });
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.phys.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 16, gap: 8 });
-  if (s.phys.answer) ui.box(s.phys.answer, { size: 20 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the physicist', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.phys.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 16, gap: 8 });
+    if (s.phys.answer) ui.box(s.phys.answer, { size: 20 });
+  })], { height: 56, size: 20 });
 }
 
 function drawPredict(ui, app) {

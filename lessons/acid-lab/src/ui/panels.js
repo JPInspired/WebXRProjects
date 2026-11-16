@@ -10,13 +10,12 @@ const WARN = '#ffd166';
 
 export function drawControls(ui, app) {
   const s = app.state;
-  ui.title('Acid Lab', { size: 42 });
+  ui.header('Acid Lab', [app.settingsIcon()]);
   if (app.followsAdmin) {
     ui.text(`${MODES.find(([id]) => id === s.mode)[1]}  ·  ${s.level === 'advanced' ? 'Advanced' : 'Core'}`, { size: 28, weight: 700, color: THEME.accent });
     ui.text(`Chosen by ${app.adminName}`, { size: 21, color: THEME.dim });
   } else {
-    ui.heading('Activity');
-    ui.buttons(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { cols: 2, height: 56, size: 23, gap: 8 });
+    ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { cols: 2, height: 56, size: 23, gap: 8 });
   }
   ui.gap(6);
 
@@ -48,20 +47,16 @@ export function drawControls(ui, app) {
     ui.text('See how close each method got to the real pH, then decide: which would you trust, and when?', { size: 21, color: THEME.dim });
   }
 
-  if (!app.followsAdmin) {
-    ui.heading('Level');
-    ui.buttons(LEVELS.map(([id]) => ({ id: `level-${id}`, label: id === 'core' ? 'Core' : 'Advanced', active: s.level === id, onClick: () => app.setLevel(id) })), { height: 50, size: 22, gap: 8 });
-  }
-  if (app.controlsBoard) {
-    ui.heading('Class');
-    const armed = app.newArmed && performance.now() - app.newArmed < 3000;
-    ui.buttons([
-      { id: 'board', label: s.big ? 'Board: shown' : 'Board: hidden', active: s.big, onClick: () => app.toggleBoard() },
-      { id: 'new', label: armed ? 'Sure? Clears results' : 'New solutions', active: armed, onClick: () => app.newSolutions() },
-    ], { height: 50, size: 21, gap: 8 });
-  }
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 52, size: 21, gap: 8 });
+  if (app.soloTeacher) drawTeacher(ui, app);
+}
+
+/** The teacher's own controls: in the Teacher menu in a session, or here when on your own. */
+export function drawTeacher(ui, app) {
+  const s = app.state;
+  const armed = app.newArmed && performance.now() - app.newArmed < 3000;
+  ui.heading('Unknown solutions', { size: 22 });
+  ui.buttons([{ id: 'new', label: armed ? 'Sure? Clears results' : 'New solutions', active: armed, onClick: () => app.newSolutions() }], { height: 52, size: 20 });
+  void s;
 }
 
 // ───────────────────────── Right: information and recording ─────────────────────────
@@ -134,12 +129,13 @@ export function drawInfo(ui, app) {
     }
   }
 
-  ui.divider();
-  ui.heading('Ask the chemist');
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 19, gap: 8 });
-  if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the chemist', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 19, gap: 8 });
+    if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
+  })], { height: 56, size: 20 });
 }
 
 /** The results table: one row per solution; with `reveal`, the real pH and whether each result was right. */

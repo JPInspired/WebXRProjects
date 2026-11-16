@@ -5,7 +5,7 @@ import { sound } from '../../../shared/util/sound.js';
 import { FACTORS, FACTOR_IDS, PREDICTIONS, ANSWERS, RUN } from './data/kinetics.js';
 import { Bench } from './model/Bench.js';
 import { Board } from './model/Board.js';
-import { drawControls, drawInfo, drawCard, MODES } from './ui/panels.js';
+import { drawControls, drawTeacher, drawInfo, drawCard, MODES } from './ui/panels.js';
 
 // Kinetics Lab, rebuilt from the original lesson: the flasks of acid at five temperatures, the magnesium
 // strips and the timers, extended to the four factors of the lesson plan. Temperature and surface area are
@@ -279,6 +279,11 @@ class App extends LessonApp {
     }
     this.broadcastAdmin();
     this.refresh();
+  }
+
+  /** The lesson's own controls in the Teacher menu. */
+  teacherControls(ui) {
+    drawTeacher(ui, this);
   }
 
   // ───────────── admin (the teacher) ─────────────

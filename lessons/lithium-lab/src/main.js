@@ -5,7 +5,7 @@ import { sound } from '../../../shared/util/sound.js';
 import { METALS, METAL_IDS, LABELS, PREDICTIONS, ANSWERS, mysteryFor } from './data/lithium.js';
 import { Bench } from './model/Bench.js';
 import { Board } from './model/Board.js';
-import { drawControls, drawInfo, drawCard, MODES } from './ui/panels.js';
+import { drawControls, drawTeacher, drawInfo, drawCard, MODES } from './ui/panels.js';
 
 // Lithium Reactions Lab, rebuilt from the original lesson: the same bench (metal cubes, a Bunsen burner, a
 // tank of water) and steps (drop a cube in the water and watch; hold a cube over the flame and watch). Lithium
@@ -308,6 +308,11 @@ class App extends LessonApp {
     }
     this.broadcastAdmin();
     this.refresh();
+  }
+
+  /** The lesson's own controls in the Teacher menu. */
+  teacherControls(ui) {
+    drawTeacher(ui, this);
   }
 
   // ───────────── admin (the teacher) ─────────────

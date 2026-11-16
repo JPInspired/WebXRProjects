@@ -44,13 +44,12 @@ function slider(ui, label, level, text, id, onChange, color = THEME.accent) {
 export function drawControls(ui, app) {
   const s = app.state;
   const adv = s.level === 'advanced';
-  ui.title('Waves Lab', { size: 42 });
+  ui.header('Waves Lab', [app.settingsIcon()]);
   if (app.followsAdmin) {
     ui.text(`${MODES.find(([id]) => id === s.mode)[1]}  ·  ${adv ? 'Advanced' : 'Core'}`, { size: 28, weight: 700, color: THEME.accent });
     ui.text(`Chosen by ${app.adminName}`, { size: 21, color: THEME.dim });
   } else {
-    ui.heading('Activity');
-    ui.buttons(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { cols: 2, height: 54, size: 23, gap: 8 });
+    ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { cols: 2, height: 54, size: 23, gap: 8 });
   }
   ui.gap(6);
 
@@ -75,32 +74,31 @@ export function drawControls(ui, app) {
     const row = [{ id: 'freeze', label: s.frozen ? 'Unfreeze' : 'Freeze + measure', active: s.frozen, onClick: () => app.toggleFreeze() }];
     if (s.setup === 'gap') row.push({ id: 'gap', label: s.gap === 'wide' ? 'Gap: wide' : 'Gap: narrow', onClick: () => app.toggleGap() });
     ui.buttons(row, { height: 54, size: 21, gap: 8 });
-  } else if (app.controlsBoard && app.challenge()) {
-    const ch = app.challenge();
-    if (s.mode === 'predict') {
-      ui.text('1. Read the question out and let everyone pick.\n2. Press “Test it” to unfreeze the wave and see who was right.', { size: 21, color: THEME.dim });
-      ui.buttons(PREDICTIONS.map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { height: 54, size: 21, gap: 8 });
-      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Freeze it again' : 'Test it: unfreeze the wave', active: ch.revealed, onClick: () => app.reveal() }], { height: 62, size: 24 });
-    } else {
-      ui.text('Two waves, BEFORE and AFTER. One thing was changed. Let everyone answer, then reveal.', { size: 21, color: THEME.dim });
-      ui.buttons([
-        { id: 'new-quiz', label: 'New mystery wave', onClick: () => app.newQuiz() },
-        { id: 'reveal', label: ch.revealed ? 'Hide the answer' : 'Reveal the answer', active: ch.revealed, onClick: () => app.reveal() },
-      ], { height: 62, size: 22, gap: 8 });
-    }
-    const t = app.tally(ch);
-    ui.text(`${t.votes} answer${t.votes === 1 ? '' : 's'} in so far.`, { size: 22, weight: 700 });
-  } else {
+  } else if (!app.soloTeacher) {
     ui.text(s.mode === 'predict' ? 'Look at the class board, read the question and pick your prediction on the right. Your teacher will unfreeze the wave.' : 'Watch the two waves on the class board. Work out what was changed and pick your answer on the right.', { size: 22, color: THEME.dim });
   }
 
-  if (!app.followsAdmin) {
-    ui.heading('Level', { size: 24 });
-    ui.buttons(LEVELS.map(([id, label]) => ({ id: `level-${id}`, label, active: s.level === id, onClick: () => app.setLevel(id) })), { height: 48, size: 22, gap: 8 });
+  if (app.soloTeacher) drawTeacher(ui, app);
+}
+
+/** The teacher's own controls: in the Teacher menu in a session, or here when on your own. */
+export function drawTeacher(ui, app) {
+  const s = app.state;
+  const ch = (s.mode === 'predict' || s.mode === 'quiz') && app.challenge();
+  if (!ch) return;
+  if (s.mode === 'predict') {
+    ui.heading('Prediction on the board', { size: 22 });
+    ui.buttons(PREDICTIONS.map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { height: 52, size: 20, gap: 8 });
+    ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Freeze it again' : 'Test it: unfreeze the wave', active: ch.revealed, onClick: () => app.reveal() }], { height: 58, size: 22 });
+  } else {
+    ui.heading('Mystery wave', { size: 22 });
+    ui.buttons([
+      { id: 'new-quiz', label: 'New mystery wave', onClick: () => app.newQuiz() },
+      { id: 'reveal', label: ch.revealed ? 'Hide the answer' : 'Reveal the answer', active: ch.revealed, onClick: () => app.reveal() },
+    ], { height: 58, size: 21, gap: 8 });
   }
-  if (app.controlsBoard) ui.buttons([{ id: 'board', label: s.big ? 'Class board: shown' : 'Class board: hidden', active: s.big, onClick: () => app.toggleBoard() }], { height: 48, size: 21 });
-  ui.divider();
-  ui.buttons(app.generalButtons(), { cols: 3, height: 52, size: 21, gap: 8 });
+  const t = app.tally(ch);
+  ui.text(`${t.votes} answer${t.votes === 1 ? '' : 's'} in so far.`, { size: 20, weight: 700 });
 }
 
 // ───────────────────────── Right: readings, answers, questions ─────────────────────────
@@ -184,12 +182,13 @@ export function drawInfo(ui, app) {
     }
   }
 
-  ui.divider();
-  ui.heading('Ask the physicist');
-  const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
-  ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 19, gap: 8 });
-  if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
+  ui.gap(8);
+  ui.buttons([app.askButton('Ask the physicist', (ui) => {
+    const qs = [...QUESTIONS];
+    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 19, gap: 8 });
+    if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
+  })], { height: 56, size: 20 });
 }
 
 function drawTasks(ui, app) {

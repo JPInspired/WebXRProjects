@@ -8,7 +8,7 @@ import { Tank } from './model/Tank.js';
 import { RopeRulers, TankRuler } from './model/Rulers.js';
 import { Board } from './model/Board.js';
 import { Tone } from './model/tone.js';
-import { drawControls, drawInfo, drawCard, MODES } from './ui/panels.js';
+import { drawControls, drawTeacher, drawInfo, drawCard, MODES } from './ui/panels.js';
 
 // Waves Lab: every student has a rope to shake (frequency, amplitude, how tight it is) and a ripple tank,
 // with rulers for measuring a frozen wave and snapshots for comparing settings. A big class board shows the
@@ -356,6 +356,15 @@ class App extends LessonApp {
     } else if (d.mode === 'tank') v.tank = { k: d.k, setup: d.setup, gap: d.gap, frozen: !!d.fz };
     else v.ropes[0] = { w: d.w, link: d.link, frozen: !!d.fz };
     return v;
+  }
+
+  /** The lesson's own controls in the Teacher menu. */
+  get customTeacherPrediction() {
+    return true;
+  }
+
+  teacherControls(ui) {
+    drawTeacher(ui, this);
   }
 
   // ───────────── admin (the teacher) ─────────────
