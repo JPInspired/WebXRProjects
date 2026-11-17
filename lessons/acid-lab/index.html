@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Acid Lab</title>
   <meta name="description" content="Measure pH in mixed reality (WebXR): sort everyday substances on the pH scale, test mystery solutions with litmus, universal indicator and a digital pH meter, and compare the methods.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/acid-lab.webp" data-loop="../../assets/lessons/acid-lab-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="chemistry">Chemistry</span>
     <h1>Acid Lab</h1>
     <p>Your own lab bench: sort everyday substances on the pH scale, test six mystery solutions with indicator papers and a digital pH meter, record your results, and decide which method you trust.</p>
     <div class="buttons">

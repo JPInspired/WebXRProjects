@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Reef Dive</title>
   <meta name="description" content="Step onto a coral reef in mixed reality: identify marine life and test how temperature, pH, nutrients and light affect the reef.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/reef-dive.webp" data-loop="../../assets/lessons/reef-dive-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="biology">Biology</span>
     <h1>Reef Dive</h1>
     <p>Your classroom becomes the sea floor. Identify marine life, and test how temperature, pH, nutrients and light affect it.</p>
     <div class="buttons">

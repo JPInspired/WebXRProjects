@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Enzyme Lab</title>
   <meta name="description" content="Enzymes in mixed reality (WebXR): liver and hydrogen peroxide, collecting the oxygen over water, and the effect of temperature on catalase.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/enzyme-lab.webp" data-loop="../../assets/lessons/enzyme-lab-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="biology">Biology</span>
     <h1>Enzyme Lab</h1>
     <p>Cut the liver, drop it into hydrogen peroxide and put the stopper on: the oxygen made by the enzyme catalase pushes the water down a measuring cylinder. How does temperature change it?</p>
     <div class="buttons">

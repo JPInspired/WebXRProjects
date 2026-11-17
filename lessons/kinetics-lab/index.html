@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Kinetics Lab</title>
   <meta name="description" content="Rates of reaction in mixed reality (WebXR): temperature, surface area, concentration and catalysts, timed and measured with a gas syringe.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/kinetics-lab.webp" data-loop="../../assets/lessons/kinetics-lab-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="chemistry">Chemistry</span>
     <h1>Kinetics Lab</h1>
     <p>What makes a reaction go faster? Time magnesium and marble disappearing in acid, collect gas in a gas syringe, and compare temperature, surface area, concentration and catalysts.</p>
     <div class="buttons">

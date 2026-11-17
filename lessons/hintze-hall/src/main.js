@@ -3,6 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { initStartScreen } from '../../../shared/ui/StartScreen.js';
 import { Walker } from './Walker.js';
 import { EXHIBITS, ORDER, START } from './data/exhibits.js';
 import { drawControls, drawInfo, drawCard } from './ui/panels.js';
@@ -172,11 +173,13 @@ class App extends LessonApp {
     btn.textContent = 'Checking for VR…';
     if (!('xr' in navigator)) {
       btn.textContent = 'VR not available';
+      btn.classList.add('unavailable');
       return;
     }
     navigator.xr.isSessionSupported('immersive-vr').catch(() => false).then((vr) => {
       this.vrSupported = vr;
       btn.textContent = vr ? 'Enter VR' : 'VR not supported here';
+      btn.classList.toggle('unavailable', !vr);
       btn.disabled = !vr || !this.ready;
       btn.onclick = () => this.startSession('immersive-vr');
       if (this.ready && hint) hint.textContent = vr ? 'Put on your headset and press “Enter VR”.' : hint.textContent;
@@ -185,14 +188,8 @@ class App extends LessonApp {
 
   initSessionUI() {
     // a museum visit is solo: just the way back to the lessons
-    const overlay = document.getElementById('overlay');
+    const overlay = initStartScreen(this.lessonsURL());
     if (!overlay) return;
-    const back = document.createElement('a');
-    back.href = this.lessonsURL();
-    back.className = 'back-link';
-    back.textContent = '← All lessons';
-    back.style.cssText = 'display:inline-block;margin:0 0 10px;color:#9aa8ff;font-size:14px;text-decoration:none';
-    overlay.prepend(back);
   }
 
   onXRStart() {
@@ -285,7 +282,7 @@ class App extends LessonApp {
   initDesktopControls() {
     const dom = this.renderer.domElement;
     // once you start exploring, shrink the start box to its title and buttons so it doesn't cover the view
-    const shrink = () => document.getElementById('overlay')?.classList.add('mini');
+    const shrink = () => document.getElementById('overlay')?.setMini?.(true);
     addEventListener('keydown', shrink, { once: true });
     dom.addEventListener('pointerdown', shrink, { once: true });
     addEventListener('keydown', (e) => {

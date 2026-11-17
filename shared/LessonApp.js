@@ -6,6 +6,7 @@ import { THEME } from './ui/CanvasPanel.js';
 import { Presence, sessionFromURL } from './net/Presence.js';
 import { RoomScan, solveRoom, fingerprint } from './net/RoomAlign.js';
 import { newSessionCode } from './net/code.js';
+import { initStartScreen } from './ui/StartScreen.js';
 
 // Everything every WebXR lesson needs, so each lesson only adds its own content:
 //  • three.js scene, desktop camera + orbit controls, lights, floor grid
@@ -775,14 +776,8 @@ export class LessonApp {
 
   /** The 2D start screen: show the session code, or offer to start / join one. */
   initSessionUI(session) {
-    const overlay = document.getElementById('overlay');
+    const overlay = initStartScreen(this.lessonsURL());
     if (!overlay) return;
-    const back = document.createElement('a');
-    back.href = this.lessonsURL();
-    back.className = 'back-link';
-    back.textContent = '← All lessons';
-    back.style.cssText = 'display:inline-block;margin:0 0 10px;color:#9aa8ff;font-size:14px;text-decoration:none';
-    overlay.prepend(back);
     const box = document.createElement('div');
     box.className = 'session-box';
     const url = new URL(location.href);
@@ -832,6 +827,7 @@ export class LessonApp {
     const hint = document.getElementById('hint');
     if (!('xr' in navigator)) {
       arBtn.textContent = 'Mixed reality not available';
+      arBtn.classList.add('unavailable');
       hint.textContent = window.isSecureContext
         ? 'This browser has no WebXR. Open this page in the Meta Quest Browser (or Chrome on Android) for mixed reality — you can still explore on screen.'
         : 'WebXR needs a secure (https://) page. You can still explore on screen.';
@@ -847,6 +843,7 @@ export class LessonApp {
       arBtn.onclick = () => this.startSession('immersive-ar');
     } else {
       arBtn.textContent = 'Mixed reality not supported here';
+      arBtn.classList.add('unavailable');
     }
     if (vr) {
       vrBtn.hidden = false;

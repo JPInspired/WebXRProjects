@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Lithium Reactions</title>
   <meta name="description" content="Group 1 alkali metals in mixed reality (WebXR): drop lithium and four mystery metals into water, flame-test them, and identify each from its reactivity.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/lithium-lab.webp" data-loop="../../assets/lessons/lithium-lab-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="chemistry">Chemistry</span>
     <h1>Lithium Reactions</h1>
     <p>Drop lithium and four mystery alkali metals into water and hold them in a Bunsen flame. Float or sink, fizz or explode, flame colour: identify each metal, and keep the safety screen across.</p>
     <div class="buttons">

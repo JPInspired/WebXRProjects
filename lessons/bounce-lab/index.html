@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Bounce Lab</title>
   <meta name="description" content="Bouncing balls in mixed reality (WebXR): drop six real-size balls onto surface mats on your classroom floor, measure the rebound, and compare energy and momentum losses.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/bounce-lab.webp" data-loop="../../assets/lessons/bounce-lab-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="physics">Physics</span>
     <h1>Bounce Lab</h1>
     <p>Surface mats on your real floor and six real-size balls: drop them by hand, read the rebound height from a slow-motion replay, record your results and compare them with the whole class.</p>
     <div class="buttons">

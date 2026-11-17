@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Kinematics Lab</title>
   <meta name="description" content="Kinematics in mixed reality (WebXR): drop things from a tower, swing pendulums, bounce springs and roll balls down a ramp, with displacement, velocity and acceleration charts and a datasheet.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/kinematics-lab.webp" data-loop="../../assets/lessons/kinematics-lab-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="physics">Physics</span>
     <h1>Kinematics Lab</h1>
     <p>Drop things from a tower, swing a pendulum, bounce a spring and roll a ball down a ramp. Chart the motion, fill in the datasheet, and find out what changes it.</p>
     <div class="buttons">

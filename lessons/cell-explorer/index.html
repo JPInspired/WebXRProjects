@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Cell Explorer</title>
   <meta name="description" content="Investigate accurate 3D animal, plant and bacterial cells in mixed reality (WebXR).">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/cell-explorer.webp" data-loop="../../assets/lessons/cell-explorer-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="biology">Biology</span>
     <h1>Cell Explorer</h1>
     <p>Investigate animal, plant and bacterial cells thousands of times bigger than life: name every part, pull organelles out, and see what happens when one goes missing.</p>
     <div class="buttons">

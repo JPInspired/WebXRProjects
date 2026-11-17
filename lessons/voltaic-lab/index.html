@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Voltaic Lab</title>
   <meta name="description" content="Voltaic cells in mixed reality (WebXR): build cells from metal strips and electrolytes, measure the voltage, link cells in series, zoom into the particles and open up real batteries.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/voltaic-lab.webp" data-loop="../../assets/lessons/voltaic-lab-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="chemistry">Chemistry</span>
     <h1>Voltaic Lab</h1>
     <p>Make electricity from chemistry: build cells from metal strips and electrolytes, measure their voltage, link them in series, and see what happens inside.</p>
     <div class="buttons">

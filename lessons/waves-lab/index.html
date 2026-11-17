@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Waves Lab</title>
   <meta name="description" content="Waves in mixed reality (WebXR): change the frequency, amplitude and speed of a wave on a rope and in a ripple tank, measure it, and link it to sound, light and the sea.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/waves-lab.webp" data-loop="../../assets/lessons/waves-lab-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="physics">Physics</span>
     <h1>Waves Lab</h1>
     <p>Your own rope and ripple tank: change the frequency, the amplitude and the speed of a wave, freeze it to measure it, see it as sound, light or the sea, and work out which variable was changed.</p>
     <div class="buttons">

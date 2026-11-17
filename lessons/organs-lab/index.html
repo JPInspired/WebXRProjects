@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Identifying Organs</title>
   <meta name="description" content="Identifying organs in mixed reality (WebXR): fill your own life-size skeleton with organs in the right places, match each organ to its job, and see how the body systems depend on each other.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/organs-lab.webp" data-loop="../../assets/lessons/organs-lab-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="biology">Biology</span>
     <h1>Identifying Organs</h1>
     <p>Your own life-size skeleton is missing its organs. Put each one in its place, match it to its job, then see how the body systems work together.</p>
     <div class="buttons">

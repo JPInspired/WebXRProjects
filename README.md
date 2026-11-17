@@ -35,6 +35,8 @@ Mixed reality lessons built with [WebXR](https://immersiveweb.dev/) and [three.j
 
 `index.html` is the front page: a light design (with a dark mode, remembered per device), the Heart Lab’s real heart turning and beating at the top (a still picture if 3D isn’t available), how it works in three steps, and a card for every lesson with a picture captured from the lesson itself. Hovering over a card (or, on a phone, scrolling it into view) plays a short loop from the lesson. The pictures are in `assets/lessons/`; `tools/lesson-images/` captures them again after adding or changing a lesson (see its README). Headings use the elegant serif fonts already on every device, so nothing is downloaded.
 
+**Lesson start screens** share the same look (`shared/ui/start.css` and `shared/ui/StartScreen.js`; each lesson’s `style.css` just imports the shared one): the lesson’s picture and hover loop from `assets/lessons/`, its subject, a light/dark switch (the same choice as the lessons page), and **Explore on screen**, which folds the box away (the – / + button brings it back). Where the device has no headset, Explore on screen becomes the main button. A new lesson needs its picture in `assets/lessons/` and, in its `index.html`, the `<figure class="shot">` and `<span class="eyebrow">` lines copied from any other lesson.
+
 ## Shared sessions (work alongside colleagues)
 
 Every lesson can be opened **solo** or in a **shared session**:
@@ -566,7 +568,7 @@ shared/                            used by every lesson
   net/                             shared sessions: transport (P2P / same-device), presence (people, desks, copies),
                                    RoomAlign (each headset finds the shared room frame from its room scan), config
   vendor/                          Trystero (MIT) bundled as one file
-  ui/                              canvas panels, labels, mouse/touch/controller/hand input
+  ui/                              canvas panels, labels, mouse/touch/controller/hand input, and the lesson start screen (start.css, StartScreen.js)
   util/sound.js                    synthesised sound effects
   fx/Flows.js                      animated flows between points (used for processes)
 lessons/acid-lab/

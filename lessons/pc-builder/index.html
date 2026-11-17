@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>PC Builder Lab</title>
   <meta name="description" content="Build your own computer from real parts in mixed reality (WebXR) and check that everything is compatible.">
   <link rel="stylesheet" href="style.css">
@@ -17,6 +18,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/pc-builder.webp" data-loop="../../assets/lessons/pc-builder-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="computing">Computing</span>
     <h1>PC Builder Lab</h1>
     <p>Build your own computer from real parts, make sure everything is compatible, then power it on and see how it all works together.</p>
     <div class="buttons">

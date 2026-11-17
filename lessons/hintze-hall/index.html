@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Hintze Hall</title>
   <meta name="description" content="Walk through Hintze Hall at the Natural History Museum, London, in virtual reality: climb the stairs, explore both balconies and discover the stories of Hope the blue whale, Darwin's statue and more.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/hintze-hall.webp" data-loop="../../assets/lessons/hintze-hall-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="museum">Museum</span>
     <h1>Hintze Hall</h1>
     <p>Step inside the great hall of the Natural History Museum in London. Climb the stairs to Charles Darwin, walk both balconies, stand beneath Hope the blue whale and discover the story behind every exhibit.</p>
     <div class="buttons">

@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Circular Motion</title>
   <meta name="description" content="Circular motion in mixed reality (WebXR): spin a ball on a string above your head with a fixed pull, time its turns, and find how mass and radius change the speed.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/circular-lab.webp" data-loop="../../assets/lessons/circular-lab-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="physics">Physics</span>
     <h1>Circular Motion</h1>
     <p>Spin a ball on a string above your head, keep the clip in place, and time the turns. How do the mass of the ball and the length of the string change the speed?</p>
     <div class="buttons">

@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
   <title>Osmosis Lab</title>
   <meta name="description" content="Osmosis in mixed reality (WebXR): cut and weigh potato pieces, soak them in salt solutions of different strengths, and plot mass change against concentration.">
   <link rel="stylesheet" href="style.css">
@@ -18,6 +19,8 @@
 </head>
 <body>
   <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/osmosis-lab.webp" data-loop="../../assets/lessons/osmosis-lab-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="biology">Biology</span>
     <h1>Osmosis Lab</h1>
     <p>Cut equal pieces from a potato, weigh them, soak them in five strengths of salt solution over a simulated 24 hours, then weigh them again to see how osmosis changes their mass.</p>
     <div class="buttons">
