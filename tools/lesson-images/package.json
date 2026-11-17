@@ -1,0 +1,10 @@
+{
+  "name": "lesson-images",
+  "private": true,
+  "description": "Captures each lesson for the lessons page (assets/lessons/). Not needed to run the lessons.",
+  "type": "module",
+  "dependencies": {
+    "puppeteer-core": "^24.0.0",
+    "sharp": "^0.34.0"
+  }
+}

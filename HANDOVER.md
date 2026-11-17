@@ -74,6 +74,7 @@ The project's own code has **no licence file yet**: the owner should choose one 
 | Osmosis Lab (everything) | made in code for this project, following the original Inspired Education EngageVR lesson | yes (it is the project’s own) |
 | Heart Lab sounds, blood flow, ECG, backup heart | made in code for this project | yes (it is the project’s own) |
 | **Reef Dive hammerhead** (`hammer.glb`) | CC BY-NC 4.0 | **no**: replace it before any commercial use |
+| Lessons page pictures (`assets/lessons/`) | screenshots of the lessons; those showing third-party models carry their licences (see `assets/lessons/CREDITS.md`) | yes, except `reef-dive*` (shows the non-commercial hammerhead): re-capture it once the hammerhead is replaced |
 | **Reef Dive manta ray** (`manta.glb`) | CC BY-NC-SA 4.0 | **no**: replace it before any commercial use |
 | **Reef Dive parrotfish** (`parrotfish.glb`) | Sketchfab Standard, used with the owner's permission | get that permission confirmed for the new owner, or replace it |
 

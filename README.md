@@ -31,6 +31,10 @@ Mixed reality lessons built with [WebXR](https://immersiveweb.dev/) and [three.j
 
 **Moving the project** to another GitHub account, organisation or computer, the outside services it uses, and which licences to check before commercial use: see [HANDOVER.md](HANDOVER.md).
 
+## The lessons page
+
+`index.html` is the front page: a light design (with a dark mode, remembered per device), the Heart Lab’s real heart turning and beating at the top (a still picture if 3D isn’t available), how it works in three steps, and a card for every lesson with a picture captured from the lesson itself. Hovering over a card (or, on a phone, scrolling it into view) plays a short loop from the lesson. The pictures are in `assets/lessons/`; `tools/lesson-images/` captures them again after adding or changing a lesson (see its README). Headings use the elegant serif fonts already on every device, so nothing is downloaded.
+
 ## Shared sessions (work alongside colleagues)
 
 Every lesson can be opened **solo** or in a **shared session**:
@@ -555,7 +559,8 @@ and returns `{ "answer": "..." }`. An **Ask AI about this** button then appears.
 ## Project layout
 
 ```
-index.html                         landing page listing the lessons
+index.html                         the lessons page
+assets/lessons/                    each lesson’s picture and hover loop for the lessons page (credits in CREDITS.md)
 shared/                            used by every lesson
   LessonApp.js                     three.js + WebXR setup, lab + panels, placement, render loop
   net/                             shared sessions: transport (P2P / same-device), presence (people, desks, copies),
@@ -613,6 +618,7 @@ lessons/organs-lab/
   src/data/organs.js               organs and where they go, function cards, body systems, sticky notes, quiz, answers
   src/model/                       Body (skeleton, desk, organs, function cards), Board (class board)
 tools/organs-model/                rebuilds body.glb from the BodyParts3D files (not needed to run anything)
+tools/lesson-images/               captures the lessons page pictures from the lessons (not needed to run anything)
 lessons/pc-builder/
   src/data/parts.js, rules.js      the parts catalogue and compatibility rules
   src/model/                       life-size part models, the case + slots, tray, power-on + tour

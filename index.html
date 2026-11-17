@@ -4,244 +4,474 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>WebXR Library</title>
+  <meta name="description" content="Mixed reality science lessons that run in the browser: open them on a Meta Quest or any screen, alone or as a whole class.">
+  <script>
+    // the chosen theme, before anything is drawn (no flash)
+    try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+  </script>
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+  </script>
   <style>
-    :root { color-scheme: dark; --accent: #7c8cff; }
-    body { margin: 0; background: #0d1020; color: #eef1ff; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-    .banner { background: linear-gradient(120deg, #2a2f7a 0%, #4b3fa8 45%, #1f6f9c 100%); padding: 44px 16px 40px; border-bottom: 1px solid rgba(154, 168, 255, 0.4); }
-    .banner-in { max-width: 980px; margin: 0 auto; display: flex; align-items: center; gap: 18px; }
-    .banner svg { width: 64px; height: 64px; flex: none; }
-    .banner h1 { margin: 0; font-size: clamp(34px, 6vw, 54px); letter-spacing: -0.01em; line-height: 1.05; }
-    main { max-width: 980px; margin: 0 auto; padding: 24px 16px 56px; }
-    p { color: #c4cbef; line-height: 1.5; margin: 0 0 12px; }
-    .intro { font-size: 17px; max-width: 760px; }
-    .name { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 16px 0 4px; color: #c4cbef; }
-    input { font: 600 16px system-ui, sans-serif; padding: 10px 12px; border-radius: 10px; border: 1px solid #3a4470; background: #121831; color: #fff; }
-    #code { font-family: ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: 0.15em; width: 7em; }
+    :root {
+      color-scheme: light;
+      --bg: #f6f5f1;
+      --bg-2: #ecebe5;
+      --surface: #ffffff;
+      --ink: #15171c;
+      --ink-2: #4a4f5c;
+      --ink-3: #7a8090;
+      --line: rgba(21, 23, 28, 0.1);
+      --line-2: rgba(21, 23, 28, 0.18);
+      --brand: #2f4bd8;
+      --brand-ink: #ffffff;
+      --shadow: 0 1px 2px rgba(20, 24, 40, 0.05), 0 8px 24px rgba(20, 24, 40, 0.06);
+      --shadow-hover: 0 2px 4px rgba(20, 24, 40, 0.06), 0 18px 44px rgba(20, 24, 40, 0.13);
+      --chemistry: #b45309;
+      --physics: #be185d;
+      --biology: #047857;
+      --computing: #1d4ed8;
+      --museum: #7c3aed;
+      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Noto Serif", Georgia, serif;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0e1015;
+      --bg-2: #151821;
+      --surface: #171a23;
+      --ink: #eef0f5;
+      --ink-2: #b7bdcc;
+      --ink-3: #8a91a3;
+      --line: rgba(255, 255, 255, 0.08);
+      --line-2: rgba(255, 255, 255, 0.16);
+      --brand: #8ea2ff;
+      --brand-ink: #0e1015;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+      --shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.35), 0 18px 44px rgba(0, 0, 0, 0.45);
+      --chemistry: #f5a524;
+      --physics: #f472b6;
+      --biology: #34d399;
+      --computing: #7aa2ff;
+      --museum: #c4a1ff;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
 
-    /* subject filter */
-    .filters { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 4px; position: sticky; top: 0; z-index: 2; padding: 12px 0; background: rgba(13, 16, 32, 0.94); }
-    .filters button { font: 600 16px system-ui, sans-serif; padding: 11px 18px; border-radius: 999px; border: 1px solid #3a4470; background: #161b33; color: #dfe4ff; cursor: pointer; }
-    .filters button:hover, .filters button:focus-visible { border-color: #9aa8ff; outline: none; }
-    .filters button[aria-pressed="true"] { background: #5b6cff; border-color: #5b6cff; color: #fff; }
-    .filters .count { opacity: 0.7; font-weight: 400; margin-left: 6px; }
+    /* ── top bar ── */
+    .top { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--line); }
+    .top .wrap { display: flex; align-items: center; gap: 18px; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 600 21px/1 var(--serif); letter-spacing: -0.01em; }
+    .brand svg { width: 30px; height: 30px; }
+    .top nav { display: flex; gap: 22px; margin-left: auto; }
+    .top nav a { text-decoration: none; color: var(--ink-2); font-size: 15px; }
+    .top nav a:hover { color: var(--ink); }
+    .theme { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+    .theme svg { width: 18px; height: 18px; }
+    .theme .moon { display: none; }
+    :root[data-theme="dark"] .theme .sun { display: none; }
+    :root[data-theme="dark"] .theme .moon { display: block; }
 
-    /* sections */
-    section { margin-top: 30px; --accent: #7c8cff; }
-    section[hidden] { display: none; }
-    section[data-subject="chemistry"] { --accent: #ffb454; }
-    section[data-subject="physics"] { --accent: #ff7eb6; }
-    section[data-subject="biology"] { --accent: #58d68d; }
-    section[data-subject="computing"] { --accent: #5bc0ff; }
-    section[data-subject="museum"] { --accent: #d59bff; }
-    section > h2 { display: flex; align-items: center; gap: 12px; margin: 0 0 4px; font-size: 26px; }
-    section > h2::before { content: ""; width: 8px; height: 28px; border-radius: 4px; background: var(--accent); }
-    section > h2 small { font-size: 15px; font-weight: 400; color: #a3abd1; }
-    section > p { margin: 0 0 2px 20px; color: #a3abd1; font-size: 15px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 16px; margin-top: 14px; }
-    .card { display: flex; flex-direction: column; width: 100%; box-sizing: border-box; text-align: left; padding: 20px; border-radius: 16px; background: #161b33; border: 1px solid rgba(124, 140, 255, 0.3); border-top: 4px solid var(--accent); color: inherit; font: inherit; cursor: pointer; }
-    .card:hover, .card:focus-visible { background: #1d2445; outline: none; border-color: var(--accent); }
-    .card h3 { margin: 10px 0 6px; font-size: 22px; }
-    .card p { margin: 0; font-size: 15px; }
+    /* ── opening ── */
+    .hero { position: relative; overflow: hidden; }
+    .hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 24px; min-height: min(78vh, 720px); padding-top: 40px; padding-bottom: 40px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+    .eyebrow::before { content: ""; width: 22px; height: 1px; background: currentColor; }
+    h1 { font: 500 clamp(44px, 6.4vw, 84px)/1.0 var(--serif); letter-spacing: -0.025em; margin: 18px 0 22px; }
+    h1 em { font-style: italic; color: var(--brand); }
+    .lede { font-size: clamp(17px, 1.6vw, 20px); color: var(--ink-2); max-width: 34em; margin: 0 0 30px; }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 999px; font: 600 15px var(--sans); text-decoration: none; border: 1px solid var(--line-2); color: var(--ink); background: var(--surface); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+    .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .facts { display: flex; flex-wrap: wrap; gap: 26px; margin-top: 42px; padding-top: 22px; border-top: 1px solid var(--line); max-width: 560px; }
+    .facts div { font-size: 14px; color: var(--ink-3); }
+    .facts b { display: block; font: 500 30px/1.1 var(--serif); color: var(--ink); }
+    .stage { position: relative; aspect-ratio: 1 / 1; max-height: 640px; width: 100%; }
+    .stage::before { content: ""; position: absolute; inset: 8%; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, #e05a5a 16%, transparent), transparent 70%); }
+    .stage canvas, .stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+    .stage figcaption { position: absolute; right: 0; bottom: 0; font-size: 12px; color: var(--ink-3); text-align: right; }
+    .stage figcaption b { color: var(--ink-2); font-weight: 600; }
+
+    /* ── how it works ── */
+    .how { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--bg-2); }
+    .how .wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+    .step { padding: 34px 28px 34px 0; }
+    .step + .step { padding-left: 28px; border-left: 1px solid var(--line); }
+    .step .n { font: italic 500 18px var(--serif); color: var(--brand); }
+    .step h3 { font: 500 23px/1.2 var(--serif); margin: 8px 0 8px; letter-spacing: -0.01em; }
+    .step p { margin: 0; color: var(--ink-2); font-size: 15px; }
+
+    /* ── lessons ── */
+    .lessons { padding: 70px 0 30px; }
+    .head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 8px; }
+    h2 { font: 500 clamp(34px, 4vw, 48px)/1.05 var(--serif); letter-spacing: -0.02em; margin: 0; }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; position: sticky; top: 64px; z-index: 5; padding: 14px 0; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .filters button { font: 600 14px var(--sans); padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+    .filters button::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--dot, var(--ink-3)); }
+    .filters button[data-subject="all"]::before { display: none; }
+    .filters button:hover { color: var(--ink); border-color: var(--ink-3); }
+    .filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .filters .count { opacity: 0.6; font-weight: 500; }
+    section.subject { margin-top: 44px; --accent: var(--brand); }
+    section.subject[hidden] { display: none; }
+    section[data-subject="chemistry"] { --accent: var(--chemistry); }
+    section[data-subject="physics"] { --accent: var(--physics); }
+    section[data-subject="biology"] { --accent: var(--biology); }
+    section[data-subject="computing"] { --accent: var(--computing); }
+    section[data-subject="museum"] { --accent: var(--museum); }
+    .subject > header { display: flex; align-items: baseline; gap: 14px; padding-bottom: 14px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
+    .subject > header h3 { font: 500 28px/1.1 var(--serif); margin: 0; letter-spacing: -0.01em; }
+    .subject > header h3::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin-right: 12px; vertical-align: 4px; }
+    .subject > header p { margin: 0; color: var(--ink-3); font-size: 15px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 22px; }
+    .card { display: flex; flex-direction: column; text-align: left; padding: 0; border-radius: 18px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); color: inherit; font: inherit; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .card:hover, .card:focus-visible { transform: translateY(-3px); box-shadow: var(--shadow-hover); outline: none; }
+    .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .media { position: relative; display: block; aspect-ratio: 16 / 10; background: #c9d3e2; overflow: hidden; }
+    .media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+    .card:hover .media img { transform: scale(1.03); }
+    .media .play { position: absolute; left: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 8px; border-radius: 999px; background: rgba(12, 14, 20, 0.62); color: #fff; font-size: 12px; font-weight: 600; opacity: 0; transform: translateY(4px); transition: opacity 0.2s, transform 0.2s; backdrop-filter: blur(6px); }
+    .media .play::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #ff5f57; box-shadow: 0 0 0 3px rgba(255, 95, 87, 0.3); }
+    .card.live .play { opacity: 1; transform: none; }
+    .body { display: flex; flex-direction: column; flex: 1; padding: 18px 20px 20px; }
     .tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .tag { display: inline-block; padding: 3px 10px; border-radius: 999px; background: #2b3260; font-size: 13px; color: #dfe4ff; }
-    .tag.subject { background: var(--accent); color: #10142a; font-weight: 700; }
-    .open { margin-top: auto; padding-top: 14px; color: var(--accent); font-weight: 700; font-size: 15px; }
+    .tag { font-size: 12px; font-weight: 600; color: var(--ink-3); padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line-2); }
+    .tag.subject { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); background: color-mix(in srgb, var(--accent) 9%, transparent); }
+    .card h4 { font: 500 25px/1.15 var(--serif); letter-spacing: -0.01em; margin: 12px 0 6px; }
+    .card p { margin: 0; color: var(--ink-2); font-size: 15px; }
+    .open { margin-top: auto; padding-top: 16px; font-size: 14px; font-weight: 600; color: var(--accent); }
+    .open::after { content: " →"; transition: margin 0.2s; }
+    .card:hover .open::after { margin-left: 4px; }
 
-    dialog { max-width: 440px; width: calc(100% - 32px); box-sizing: border-box; border: 1px solid rgba(124, 140, 255, 0.5); border-radius: 18px; background: #141a33; color: #eef1ff; padding: 24px; }
-    dialog::backdrop { background: rgba(5, 7, 15, 0.7); }
-    dialog h2 { margin: 0 0 4px; }
+    footer { margin-top: 70px; border-top: 1px solid var(--line); padding: 30px 0 46px; color: var(--ink-3); font-size: 13px; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 10px 30px; justify-content: space-between; }
+    footer b { color: var(--ink-2); font: 600 15px var(--serif); }
+
+    /* ── start dialog ── */
+    dialog { max-width: 460px; width: calc(100% - 32px); border: 1px solid var(--line-2); border-radius: 22px; background: var(--surface); color: var(--ink); padding: 28px; box-shadow: var(--shadow-hover); }
+    dialog::backdrop { background: rgba(10, 12, 18, 0.45); backdrop-filter: blur(4px); }
+    dialog h2 { font-size: 34px; }
+    dialog p { color: var(--ink-2); margin: 6px 0 0; }
+    .field { display: grid; gap: 6px; margin: 18px 0 4px; font-size: 13px; font-weight: 600; color: var(--ink-3); }
+    input { font: 500 16px var(--sans); padding: 11px 13px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); }
+    input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+    #code { font-family: ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: 0.18em; width: 7.5em; }
     .choices { display: grid; gap: 10px; margin-top: 16px; }
-    button.big { font: 600 17px system-ui, sans-serif; padding: 14px 16px; border-radius: 12px; border: 0; cursor: pointer; background: #5b6cff; color: #fff; text-align: left; }
-    button.big small { display: block; font-weight: 400; font-size: 13px; opacity: 0.85; margin-top: 2px; }
-    button.big.secondary { background: #2b3560; }
+    button.big { font: 600 16px var(--sans); padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line-2); cursor: pointer; background: var(--bg); color: var(--ink); text-align: left; }
+    button.big:hover { border-color: var(--ink-3); }
+    button.big.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    button.big small { display: block; font-weight: 400; font-size: 13px; opacity: 0.75; margin-top: 2px; }
     .join { display: flex; gap: 8px; flex-wrap: wrap; }
     .join button { flex: 1; min-width: 120px; }
-    .same { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; padding: 10px 2px; color: #eef1ff; font-weight: 600; }
-    .same input { width: 20px; height: 20px; margin: 0; }
-    .same small { grid-column: 2; font-weight: 400; color: #a3abd1; font-size: 13px; }
-    .close { margin-top: 14px; background: none; border: 0; color: #9aa8ff; cursor: pointer; font: inherit; text-decoration: underline; padding: 0; }
-    .error { color: #ff8a8a; min-height: 1.2em; margin: 6px 0 0; font-size: 14px; }
+    .same { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; padding: 6px 2px; font-weight: 600; }
+    .same input { width: 18px; height: 18px; margin: 0; }
+    .same small { grid-column: 2; font-weight: 400; color: var(--ink-3); font-size: 13px; }
+    .close { margin-top: 16px; background: none; border: 0; color: var(--ink-3); cursor: pointer; font: inherit; text-decoration: underline; padding: 0; }
+    .error { color: #d23f3f; min-height: 1.2em; margin: 6px 0 0; font-size: 14px; }
+
+    @media (max-width: 860px) {
+      .hero .wrap { grid-template-columns: 1fr; min-height: 0; padding-top: 24px; }
+      .stage { order: -1; max-height: 340px; aspect-ratio: 16 / 11; }
+      .how .wrap { grid-template-columns: 1fr; }
+      .step, .step + .step { padding: 22px 0; border-left: 0; }
+      .step + .step { border-top: 1px solid var(--line); }
+      .top nav { display: none; }
+      .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -24px; padding: 12px 24px; }
+      .filters::-webkit-scrollbar { display: none; }
+      .filters button { flex: none; }
+      .facts { gap: 20px; }
+      .stage figcaption { left: 0; text-align: center; }
+      h1 { margin-top: 12px; }
+      .theme { margin-left: auto; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .card, .btn, .media img { transition: none; }
+    }
   </style>
 </head>
 <body>
-  <header class="banner">
-    <div class="banner-in">
-      <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="5" y="31" width="54" height="28" rx="11" fill="none" stroke="#fff" stroke-width="4"/><circle cx="21.5" cy="45" r="6.5" fill="#fff"/><circle cx="42.5" cy="45" r="6.5" fill="#fff"/><path d="M27.5 59c1.8-4.6 7.2-4.6 9 0" fill="none" stroke="#fff" stroke-width="4"/><path d="M20 17v9c3 3.4 21 3.4 24 0v-9" fill="#fff"/><path d="M32 3 60 13 32 23 4 13z" fill="#fff" stroke="#3a3794" stroke-width="1.5" stroke-linejoin="round"/><path d="M56 14.5v10" fill="none" stroke="#ffd166" stroke-width="2.5" stroke-linecap="round"/><circle cx="56" cy="26.5" r="2.6" fill="#ffd166"/></svg>
-      <h1>WebXR Library</h1>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="#top" aria-label="WebXR Library">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="10" width="28" height="15" rx="6" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="10.5" cy="17.5" r="3.2" fill="currentColor"/><circle cx="21.5" cy="17.5" r="3.2" fill="currentColor"/><path d="M13.5 25c1-2.3 4-2.3 5 0" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16 2 28 6.5 16 11 4 6.5z" fill="var(--brand)"/></svg>
+        WebXR Library
+      </a>
+      <nav aria-label="Page"><a href="#how">How it works</a><a href="#lessons">Lessons</a></nav>
+      <button class="theme" id="theme" type="button" aria-label="Switch between light and dark">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      </button>
     </div>
   </header>
-  <main>
-    <p class="intro">Mixed reality lessons that run in the browser. Open them on a Meta Quest (or another WebXR headset), or explore on any screen. Work alone, or start a shared session so colleagues can work beside you.</p>
-    <label class="name">Your name (shown to the others in shared sessions) <input id="name" maxlength="24" placeholder="e.g. Alex" autocomplete="nickname"></label>
 
-    <nav class="filters" aria-label="Subjects" id="filters"></nav>
-
-    <section data-subject="chemistry" id="chemistry">
-      <h2>Chemistry <small>5 lessons</small></h2>
-      <p>Atoms, molecules, reactions and measuring in the lab.</p>
-      <div class="grid">
-        <button class="card" data-lesson="atomic-models">
-          <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span></span>
-          <h3>Atom Scale Lab</h3>
-          <p>Build and explore atomic models, compare the sizes of atoms and molecules, perform reactions by hand and discover the real scale of an atom — all you need to do is look out of the window.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="acid-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Acid Lab</h3>
-          <p>A lab bench for every student: sort everyday substances on the pH scale, test mystery solutions with litmus, universal indicator paper and a digital pH meter, record the results and compare how accurate each method is.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="lithium-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Lithium Reactions</h3>
-          <p>Drop lithium and four mystery alkali metals into water and hold them in a Bunsen flame: float or sink, fizz or explode, flame colour. Identify each metal from a reference chart, and keep the safety screen across.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="kinetics-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Kinetics Lab</h3>
-          <p>What makes a reaction go faster? Time magnesium and marble disappearing in acid, read a gas syringe, and compare the effects of temperature, surface area, concentration and catalysts.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="voltaic-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Voltaic Lab</h3>
-          <p>Make electricity from chemistry: put metal strips in electrolytes (or build two-beaker cells with a salt bridge), measure the voltage, link cells in series, zoom in to see the electrons flow, and open up real batteries.</p>
-          <span class="open">Open lesson →</span>
-        </button>
+  <main id="top">
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <span class="eyebrow">Mixed reality lessons for the classroom</span>
+          <h1>Science you can <em>step into</em>.</h1>
+          <p class="lede">Hold a beating heart, fill a life-size skeleton, swirl a ball above your head and time it with a light gate. 20 hands-on lessons that run straight in the headset’s browser, for one student or a whole class at once.</p>
+          <div class="cta">
+            <a class="btn primary" href="#lessons">Browse the lessons</a>
+            <a class="btn" href="#how">How it works</a>
+          </div>
+          <div class="facts">
+            <div><b>20</b>lessons</div>
+            <div><b>5</b>subjects</div>
+            <div><b>0</b>installs: open a link</div>
+          </div>
+        </div>
+        <figure class="stage" id="stage">
+          <img src="assets/lessons/heart-lab.webp" alt="The Heart Lab’s anatomical heart" id="stage-fallback">
+          <figcaption><b>Heart Lab</b> · real anatomy from BodyParts3D</figcaption>
+        </figure>
       </div>
     </section>
 
-    <section data-subject="physics" id="physics">
-      <h2>Physics <small>6 lessons</small></h2>
-      <p>Forces, energy and waves.</p>
-      <div class="grid">
-        <button class="card" data-lesson="waves-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Waves Lab</h3>
-          <p>A rope and a ripple tank for every student: change the frequency, amplitude and speed of a wave, freeze it and measure it, hear it as sound, see it as light and the sea, and work out which variable was changed.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="bounce-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Bounce Lab</h3>
-          <p>Surface mats on the real classroom floor and six real-size balls: drop them by hand onto concrete, grass, sand, a trampoline or the Moon, read the rebound from a slow-motion replay, and compare the whole class’s results.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="radiation-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Radiation Lab</h3>
-          <p>A Geiger counter, sealed school sources and everyday things that are slightly radioactive: use paper, aluminium and lead to find out which give off alpha, beta and gamma, handle them safely with tongs, and watch your own dose.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="circular-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Circular Motion</h3>
-          <p>Swirl a ball on a string above your head, pulled by a hanging weight, and time its turns with a stopwatch and a light gate. How do mass and string length change the speed? Then cut the string and see which way it flies.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="kinematics-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Physics</span><span class="tag">Maths</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Kinematics Lab</h3>
-          <p>Drop things from a tower (and watch it life-size through the ceiling), swing a pendulum, bounce a spring and roll a ball down a ramp. Chart displacement, velocity and acceleration, and work out g, periods and spring constants.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="pendulum-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Pendulum Lab</h3>
-          <p>How does length change a pendulum's swing? Time swings with a stopwatch and a light gate, try a giant pendulum from the ceiling, watch its energy drain away, then regulate a grandfather clock and push a swing.</p>
-          <span class="open">Open lesson →</span>
-        </button>
+    <section class="how" id="how" aria-label="How it works">
+      <div class="wrap">
+        <div class="step"><span class="n">i.</span><h3>Open it on a headset</h3><p>Visit this page in the Meta Quest browser (or any WebXR headset). No app store, no installs. It works on any computer screen too.</p></div>
+        <div class="step"><span class="n">ii.</span><h3>Start a class session</h3><p>Pick a lesson and start a shared session. Students join with a four-letter code; in the same room, everyone’s lab lines up with the real classroom.</p></div>
+        <div class="step"><span class="n">iii.</span><h3>Teach from your own menu</h3><p>Choose the activity and level for everyone, put predictions on the class board and reveal the answers, while each student works on their own bench.</p></div>
       </div>
     </section>
 
-    <section data-subject="biology" id="biology">
-      <h2>Biology <small>7 lessons</small></h2>
-      <p>Cells, the human body and ecosystems.</p>
-      <div class="grid">
-        <button class="card" data-lesson="cell-explorer">
-          <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span></span>
-          <h3>Cell Explorer</h3>
-          <p>Investigate animal, plant and bacterial cells thousands of times bigger than life — name every part, pull organelles out to examine them, and see what happens to the cell when one goes missing.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="heart-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class heart</span></span>
-          <h3>Heart Lab</h3>
-          <p>A beating human heart on every desk and a big one for the whole class: name every part, follow the blood through the chambers and valves, step through the cardiac cycle with a live ECG, and see what exercise and heart disease do.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="enzyme-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Enzyme Lab</h3>
-          <p>Cut the liver, drop it into hydrogen peroxide and put the stopper on: the oxygen made by the enzyme catalase pushes the water down a measuring cylinder. Read the volume every 30 seconds and build a class graph of how temperature changes it.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="microscope-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Microscope Lab</h3>
-          <p>Learn the parts of a light microscope, prepare slides of onion, cheek cells, pondweed, blood, pond water and gut tissue, focus at ×40, ×100 and ×400, and label the cells you see.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="osmosis-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Osmosis Lab</h3>
-          <p>Cut equal pieces from a potato with a digital scalpel, dry and weigh them, then soak them in five strengths of salt solution. Watch a simulated 24-hour time-lapse, weigh them again, and plot the class's mass change against concentration.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="organs-lab" data-same-room="1">
-          <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
-          <h3>Identifying Organs</h3>
-          <p>Every student gets their own life-size skeleton with its organs missing. Put the brain, heart, lungs and the rest in their places, match each organ to its job, then see how the body systems depend on each other.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-        <button class="card" data-lesson="reef-dive" data-same-room="1">
-          <span class="tags"><span class="tag subject">Biology</span><span class="tag">IB</span><span class="tag">Mixed reality</span><span class="tag">Whole room</span></span>
-          <h3>Reef Dive</h3>
-          <p>The classroom becomes the sea floor: identify marine life swimming around the room at real size, and test how temperature, pH, nutrients and light change the reef.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-      </div>
-    </section>
-
-    <section data-subject="computing" id="computing">
-      <h2>Computer Science <small>1 lesson</small></h2>
-      <p>Hardware and how computers work.</p>
-      <div class="grid">
-        <button class="card" data-lesson="pc-builder">
-          <span class="tags"><span class="tag subject">Computer Science</span><span class="tag">Mixed reality</span></span>
-          <h3>PC Builder Lab</h3>
-          <p>Build your own computer from real, life-size parts like Lego — check that everything is compatible, power it on, and follow the power and data to see how the components work together.</p>
-          <span class="open">Open lesson →</span>
-        </button>
-      </div>
-    </section>
-
-    <section data-subject="museum" id="museum">
-      <h2>Museum visits <small>1 lesson</small></h2>
-      <p>Walk through real places in virtual reality.</p>
-      <div class="grid">
-        <button class="card" data-lesson="hintze-hall" data-solo="1">
-          <span class="tags"><span class="tag subject">Museum visit</span><span class="tag">VR</span><span class="tag">Solo</span></span>
-          <h3>Hintze Hall</h3>
-          <p>Step inside the Natural History Museum in London: climb the stairs to Charles Darwin, walk both balconies, stand beneath Hope the blue whale and discover the story behind every exhibit.</p>
-          <span class="open">Open lesson →</span>
-        </button>
+    <section class="lessons" id="lessons" aria-label="Lessons">
+      <div class="wrap">
+        <div class="head"><h2>The lessons</h2></div>
+        <nav class="filters" aria-label="Subjects" id="filters"></nav>
+        <section class="subject" data-subject="chemistry" id="chemistry">
+          <header><h3>Chemistry</h3><p>Atoms, molecules, reactions and measuring in the lab.</p></header>
+          <div class="grid">
+            <button class="card" data-lesson="atomic-models">
+              <span class="media"><img src="assets/lessons/atomic-models.webp" data-loop="assets/lessons/atomic-models-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span></span>
+                <h4>Atom Scale Lab</h4>
+                <p>Build and explore atomic models, compare the sizes of atoms and molecules, perform reactions by hand and discover the real scale of an atom — all you need to do is look out of the window.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="acid-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/acid-lab.webp" data-loop="assets/lessons/acid-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Acid Lab</h4>
+                <p>A lab bench for every student: sort everyday substances on the pH scale, test mystery solutions with litmus, universal indicator paper and a digital pH meter, record the results and compare how accurate each method is.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="lithium-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/lithium-lab.webp" data-loop="assets/lessons/lithium-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Lithium Reactions</h4>
+                <p>Drop lithium and four mystery alkali metals into water and hold them in a Bunsen flame: float or sink, fizz or explode, flame colour. Identify each metal from a reference chart, and keep the safety screen across.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="kinetics-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/kinetics-lab.webp" data-loop="assets/lessons/kinetics-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Kinetics Lab</h4>
+                <p>What makes a reaction go faster? Time magnesium and marble disappearing in acid, read a gas syringe, and compare the effects of temperature, surface area, concentration and catalysts.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="voltaic-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/voltaic-lab.webp" data-loop="assets/lessons/voltaic-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Voltaic Lab</h4>
+                <p>Make electricity from chemistry: put metal strips in electrolytes (or build two-beaker cells with a salt bridge), measure the voltage, link cells in series, zoom in to see the electrons flow, and open up real batteries.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+          </div>
+        </section>
+        <section class="subject" data-subject="physics" id="physics">
+          <header><h3>Physics</h3><p>Forces, energy and waves.</p></header>
+          <div class="grid">
+            <button class="card" data-lesson="waves-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/waves-lab.webp" data-loop="assets/lessons/waves-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Waves Lab</h4>
+                <p>A rope and a ripple tank for every student: change the frequency, amplitude and speed of a wave, freeze it and measure it, hear it as sound, see it as light and the sea, and work out which variable was changed.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="bounce-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/bounce-lab.webp" data-loop="assets/lessons/bounce-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Bounce Lab</h4>
+                <p>Surface mats on the real classroom floor and six real-size balls: drop them by hand onto concrete, grass, sand, a trampoline or the Moon, read the rebound from a slow-motion replay, and compare the whole class’s results.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="radiation-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/radiation-lab.webp" data-loop="assets/lessons/radiation-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Radiation Lab</h4>
+                <p>A Geiger counter, sealed school sources and everyday things that are slightly radioactive: use paper, aluminium and lead to find out which give off alpha, beta and gamma, handle them safely with tongs, and watch your own dose.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="circular-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/circular-lab.webp" data-loop="assets/lessons/circular-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Circular Motion</h4>
+                <p>Swirl a ball on a string above your head, pulled by a hanging weight, and time its turns with a stopwatch and a light gate. How do mass and string length change the speed? Then cut the string and see which way it flies.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="kinematics-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/kinematics-lab.webp" data-loop="assets/lessons/kinematics-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Physics</span><span class="tag">Maths</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Kinematics Lab</h4>
+                <p>Drop things from a tower (and watch it life-size through the ceiling), swing a pendulum, bounce a spring and roll a ball down a ramp. Chart displacement, velocity and acceleration, and work out g, periods and spring constants.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="pendulum-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/pendulum-lab.webp" data-loop="assets/lessons/pendulum-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Pendulum Lab</h4>
+                <p>How does length change a pendulum's swing? Time swings with a stopwatch and a light gate, try a giant pendulum from the ceiling, watch its energy drain away, then regulate a grandfather clock and push a swing.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+          </div>
+        </section>
+        <section class="subject" data-subject="biology" id="biology">
+          <header><h3>Biology</h3><p>Cells, the human body and ecosystems.</p></header>
+          <div class="grid">
+            <button class="card" data-lesson="cell-explorer">
+              <span class="media"><img src="assets/lessons/cell-explorer.webp" data-loop="assets/lessons/cell-explorer-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span></span>
+                <h4>Cell Explorer</h4>
+                <p>Investigate animal, plant and bacterial cells thousands of times bigger than life — name every part, pull organelles out to examine them, and see what happens to the cell when one goes missing.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="heart-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/heart-lab.webp" data-loop="assets/lessons/heart-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class heart</span></span>
+                <h4>Heart Lab</h4>
+                <p>A beating human heart on every desk and a big one for the whole class: name every part, follow the blood through the chambers and valves, step through the cardiac cycle with a live ECG, and see what exercise and heart disease do.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="enzyme-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/enzyme-lab.webp" data-loop="assets/lessons/enzyme-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Enzyme Lab</h4>
+                <p>Cut the liver, drop it into hydrogen peroxide and put the stopper on: the oxygen made by the enzyme catalase pushes the water down a measuring cylinder. Read the volume every 30 seconds and build a class graph of how temperature changes it.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="microscope-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/microscope-lab.webp" data-loop="assets/lessons/microscope-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Microscope Lab</h4>
+                <p>Learn the parts of a light microscope, prepare slides of onion, cheek cells, pondweed, blood, pond water and gut tissue, focus at ×40, ×100 and ×400, and label the cells you see.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="osmosis-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/osmosis-lab.webp" data-loop="assets/lessons/osmosis-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Osmosis Lab</h4>
+                <p>Cut equal pieces from a potato with a digital scalpel, dry and weigh them, then soak them in five strengths of salt solution. Watch a simulated 24-hour time-lapse, weigh them again, and plot the class's mass change against concentration.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="organs-lab" data-same-room="1">
+              <span class="media"><img src="assets/lessons/organs-lab.webp" data-loop="assets/lessons/organs-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
+                <h4>Identifying Organs</h4>
+                <p>Every student gets their own life-size skeleton with its organs missing. Put the brain, heart, lungs and the rest in their places, match each organ to its job, then see how the body systems depend on each other.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+            <button class="card" data-lesson="reef-dive" data-same-room="1">
+              <span class="media"><img src="assets/lessons/reef-dive.webp" data-loop="assets/lessons/reef-dive-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Biology</span><span class="tag">IB</span><span class="tag">Mixed reality</span><span class="tag">Whole room</span></span>
+                <h4>Reef Dive</h4>
+                <p>The classroom becomes the sea floor: identify marine life swimming around the room at real size, and test how temperature, pH, nutrients and light change the reef.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+          </div>
+        </section>
+        <section class="subject" data-subject="computing" id="computing">
+          <header><h3>Computer Science</h3><p>Hardware and how computers work.</p></header>
+          <div class="grid">
+            <button class="card" data-lesson="pc-builder">
+              <span class="media"><img src="assets/lessons/pc-builder.webp" data-loop="assets/lessons/pc-builder-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Computer Science</span><span class="tag">Mixed reality</span></span>
+                <h4>PC Builder Lab</h4>
+                <p>Build your own computer from real, life-size parts like Lego — check that everything is compatible, power it on, and follow the power and data to see how the components work together.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+          </div>
+        </section>
+        <section class="subject" data-subject="museum" id="museum">
+          <header><h3>Museum visits</h3><p>Walk through real places in virtual reality.</p></header>
+          <div class="grid">
+            <button class="card" data-lesson="hintze-hall" data-solo="1">
+              <span class="media"><img src="assets/lessons/hintze-hall.webp" data-loop="assets/lessons/hintze-hall-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Museum visit</span><span class="tag">VR</span><span class="tag">Solo</span></span>
+                <h4>Hintze Hall</h4>
+                <p>Step inside the Natural History Museum in London: climb the stairs to Charles Darwin, walk both balconies, stand beneath Hope the blue whale and discover the story behind every exhibit.</p>
+                <span class="open">Open lesson</span>
+              </span>
+            </button>
+          </div>
+        </section>
       </div>
     </section>
   </main>
 
+  <footer>
+    <div class="wrap">
+      <div><b>WebXR Library</b><br>Mixed reality lessons that run in the browser.</div>
+      <div>Heart model: BodyParts3D, © The Database Center for Life Science, CC BY-SA 2.1 Japan.<br>Other third-party models and scans are credited in each lesson’s CREDITS.md.</div>
+    </div>
+  </footer>
+
   <dialog id="start">
     <h2 id="lesson-title">Lesson</h2>
     <p>How do you want to open it?</p>
+    <label class="field">Your name (shown to others in shared sessions)<input id="name" maxlength="24" placeholder="e.g. Alex" autocomplete="nickname"></label>
     <div class="choices">
-      <button class="big" id="solo">Open solo<small>Just you</small></button>
-      <button class="big secondary" id="create">Start a shared session<small>Get a code a colleague can join. You each build your own, and see each other.</small></button>
+      <button class="big primary" id="solo">Open on my own<small>Just you</small></button>
+      <button class="big" id="create">Start a shared session<small>Get a code a colleague or class can join. Everyone builds their own and sees each other.</small></button>
       <label class="same"><input type="checkbox" id="same-room"> We’re in the same room<small>Everyone sees the same things in the same places in the room. Each headset lines itself up from its scan of the room (Space Setup), with nothing to press.</small></label>
       <form class="join" id="join">
         <input id="code" maxlength="8" placeholder="CODE" autocomplete="off" aria-label="Session code">
-        <button class="big secondary">Join with code</button>
+        <button class="big">Join with code</button>
       </form>
       <p class="error" id="error"></p>
     </div>
@@ -251,15 +481,24 @@
   <script type="module">
     import { newSessionCode } from './shared/net/code.js';
 
+    // ── light / dark ──
+    const root = document.documentElement;
+    document.getElementById('theme').onclick = () => {
+      const dark = root.dataset.theme !== 'dark';
+      root.dataset.theme = dark ? 'dark' : 'light';
+      try { localStorage.setItem('webxr-classes:theme', root.dataset.theme); } catch {}
+    };
+
+    // ── your name ──
     const nameInput = document.getElementById('name');
     try { nameInput.value = localStorage.getItem('webxr-classes:name') || ''; } catch {}
     nameInput.addEventListener('input', () => {
       try { localStorage.setItem('webxr-classes:name', nameInput.value.trim()); } catch {}
     });
 
-    // subject filter: one button per section (made from the sections, so adding a section adds its button)
+    // ── subject filter: one button per section (made from the sections, so adding a section adds its button) ──
     const filters = document.getElementById('filters');
-    const sections = [...document.querySelectorAll('main section')];
+    const sections = [...document.querySelectorAll('section.subject')];
     const show = (subject) => {
       for (const sec of sections) sec.hidden = subject !== 'all' && sec.dataset.subject !== subject;
       for (const b of filters.children) b.setAttribute('aria-pressed', String(b.dataset.subject === subject));
@@ -269,25 +508,52 @@
       const b = document.createElement('button');
       b.type = 'button';
       b.dataset.subject = subject;
+      b.style.setProperty('--dot', `var(--${subject})`);
       b.innerHTML = `${label}<span class="count">${n}</span>`;
       b.onclick = () => show(subject);
       filters.appendChild(b);
     };
     addFilter('all', 'All lessons', document.querySelectorAll('.card').length);
-    for (const sec of sections) addFilter(sec.dataset.subject, sec.querySelector('h2').firstChild.textContent.trim(), sec.querySelectorAll('.card').length);
+    for (const sec of sections) addFilter(sec.dataset.subject, sec.querySelector('h3').textContent.trim(), sec.querySelectorAll('.card').length);
     let saved = 'all';
     try { saved = sessionStorage.getItem('webxr-classes:subject') || 'all'; } catch {}
     show(sections.some((x) => x.dataset.subject === saved) ? saved : 'all');
 
+    // ── cards come alive: the loop plays on hover (or, on touch screens, while the card is in view) ──
+    const cards = [...document.querySelectorAll('.card')];
+    const play = (card, on) => {
+      const img = card.querySelector('.media img');
+      if (!img?.dataset.loop) return;
+      card.classList.toggle('live', on);
+      const want = on ? img.dataset.loop : img.dataset.still;
+      if (img.getAttribute('src') !== want) img.src = want;
+    };
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const touch = matchMedia('(hover: none)').matches;
+    for (const card of cards) {
+      const img = card.querySelector('.media img');
+      if (img) img.dataset.still = img.getAttribute('src');
+      if (reduced) continue;
+      card.addEventListener('pointerenter', () => play(card, true));
+      card.addEventListener('pointerleave', () => play(card, false));
+      card.addEventListener('focus', () => play(card, true));
+      card.addEventListener('blur', () => play(card, false));
+    }
+    if (touch && !reduced && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => { for (const e of entries) play(e.target, e.intersectionRatio > 0.75); }, { threshold: [0, 0.75, 1] });
+      for (const card of cards) io.observe(card);
+    }
+
+    // ── opening a lesson ──
     const dialog = document.getElementById('start');
     let lesson = null;
-    for (const card of document.querySelectorAll('.card')) {
+    for (const card of cards) {
       card.addEventListener('click', () => {
         lesson = card.dataset.lesson;
         if (card.dataset.solo) return go(null); // a solo visit: straight in
-        document.getElementById('lesson-title').textContent = card.querySelector('h3').textContent;
+        document.getElementById('lesson-title').textContent = card.querySelector('h4').textContent;
         document.getElementById('error').textContent = '';
-        document.getElementById('same-room').checked = card.dataset.sameRoom === '1'; // Reef Dive is designed for one shared room
+        document.getElementById('same-room').checked = card.dataset.sameRoom === '1';
         dialog.showModal();
       });
     }
@@ -311,6 +577,91 @@
     };
     document.getElementById('cancel').onclick = () => dialog.close();
   </script>
-<script>navigator.serviceWorker?.register('sw.js').catch(() => {}); // always the latest version (see sw.js)</script>
+
+  <script type="module">
+    // ── the opening: the Heart Lab's real heart, turning slowly and beating (a still picture if 3D isn't available) ──
+    const stage = document.getElementById('stage');
+    const still = document.getElementById('stage-fallback');
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    try {
+      const THREE = await import('three');
+      const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+      const { MeshoptDecoder } = await import('three/addons/libs/meshopt_decoder.module.js');
+      const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync('lessons/heart-lab/models/heart.glb');
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
+      scene.add(new THREE.HemisphereLight(0xfff4ec, 0x3a2a3a, 1.6));
+      const key = new THREE.DirectionalLight(0xffffff, 2.6);
+      key.position.set(2, 3, 4);
+      const rim = new THREE.DirectionalLight(0x9fb6ff, 2.2);
+      rim.position.set(-3, 1, -2);
+      scene.add(key, rim);
+      const COLORS = {
+        rightAtrium: 0x8c3038, leftAtrium: 0x8c3038, rightVentricle: 0x9c3434, leftVentricle: 0x9c3434, septum: 0x973032,
+        pulmonaryValve: 0xf0e2c8, tricuspid: 0xf0e2c8, mitral: 0xf0e2c8, aorta: 0xd9a291, pulmonaryArtery: 0xcf9c92,
+        venaCava: 0x6a4c8e, pulmonaryVeins: 0xa45064, coronaryArteries: 0xd0322c, cardiacVeins: 0x5c3c86, chordae: 0x9a3638,
+      };
+      const heart = gltf.scene;
+      heart.traverse((o) => {
+        if (!o.isMesh) return;
+        const name = o.name || o.parent?.name;
+        o.material = new THREE.MeshPhysicalMaterial({ color: COLORS[name] ?? 0x9c3434, roughness: 0.42, clearcoat: 0.55, clearcoatRoughness: 0.35, sheen: 0.4, sheenColor: 0xffb0a0 });
+      });
+      const pivot = new THREE.Group();
+      const box = new THREE.Box3().setFromObject(heart);
+      heart.position.sub(box.getCenter(new THREE.Vector3()));
+      pivot.add(heart);
+      scene.add(pivot);
+      const size = box.getSize(new THREE.Vector3()).length();
+      camera.position.set(0, size * 0.08, size * 1.75);
+      camera.lookAt(0, 0, 0);
+      stage.appendChild(renderer.domElement);
+      const resize = () => {
+        const r = stage.getBoundingClientRect();
+        renderer.setSize(r.width, r.height, false);
+        camera.aspect = r.width / r.height;
+        camera.updateProjectionMatrix();
+      };
+      resize();
+      addEventListener('resize', resize);
+      // follow the pointer a little
+      let tx = 0;
+      let ty = 0;
+      addEventListener('pointermove', (e) => {
+        tx = (e.clientX / innerWidth - 0.5) * 0.5;
+        ty = (e.clientY / innerHeight - 0.5) * 0.3;
+      });
+      let visible = true;
+      new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(stage);
+      const clock = new THREE.Clock();
+      let spin = 0.6;
+      let rx = 0;
+      let ry = 0;
+      renderer.setAnimationLoop(() => {
+        if (!visible || document.hidden) return;
+        const dt = Math.min(clock.getDelta(), 0.05);
+        const t = clock.elapsedTime;
+        if (!reduced) spin += dt * 0.25;
+        rx += (ty - rx) * 0.05;
+        ry += (tx - ry) * 0.05;
+        pivot.rotation.set(0.12 + rx, spin + ry, 0);
+        // lub-dub, about 70 beats a minute
+        const ph = (t % 0.86) / 0.86;
+        const beat = reduced ? 0 : Math.exp(-(((ph - 0.06) / 0.05) ** 2)) + 0.55 * Math.exp(-(((ph - 0.34) / 0.06) ** 2));
+        pivot.scale.setScalar(1 + 0.03 * beat);
+        renderer.render(scene, camera);
+      });
+      still.style.opacity = '0';
+      still.style.transition = 'opacity 0.6s';
+    } catch (e) {
+      console.warn('3D heart not shown:', e.message);
+    }
+  </script>
+  <script>navigator.serviceWorker?.register('sw.js').catch(() => {}); // always the latest version (see sw.js)</script>
 </body>
 </html>
