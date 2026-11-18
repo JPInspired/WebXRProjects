@@ -79,7 +79,7 @@ export class Bench {
     this.level = 'core';
 
     const top = benchTop(0.8, 0.36, { color: 0x2a3348 });
-    top.position.set(0, TOP - 0.007, 0.07);
+    top.position.set(0, TOP, 0.07);
     this.group.add(top);
 
     // beakers A–F, each with its letter, a selection ring and a white tile for used papers

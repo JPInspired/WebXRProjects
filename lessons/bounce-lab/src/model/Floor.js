@@ -240,7 +240,8 @@ export class Floor {
         this.membrane.position.y = s.depth;
         g.add(this.membrane);
       } else {
-        const mat = new THREE.Mesh(new THREE.BoxGeometry(MAT_W, s.depth, MAT_D), new THREE.MeshStandardMaterial({ color: tex[id] ? 0xffffff : s.color, map: tex[id] ?? null, roughness: 0.9 }));
+        // the texture doubles as a bump map, so concrete, carpet, grass and sand have a little relief
+        const mat = new THREE.Mesh(new THREE.BoxGeometry(MAT_W, s.depth, MAT_D), new THREE.MeshStandardMaterial({ color: tex[id] ? 0xffffff : s.color, map: tex[id] ?? null, bumpMap: tex[id] ?? null, bumpScale: id === 'wood' ? 0.3 : 1.5, roughness: id === 'wood' ? 0.55 : 0.95, envMapIntensity: 0.4 }));
         mat.position.y = s.depth / 2;
         g.add(mat);
       }

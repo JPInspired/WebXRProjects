@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 // Lab equipment shared by the chemistry lessons, built in code (nothing downloaded): glass beakers with a lip,
 // markings and a curved liquid surface, reagent bottles with labels, a lab bench top, a white spotting tile with
@@ -141,7 +142,8 @@ export function reagentBottle({ r = 0.017, h = 0.05, liquid = 0xe8f0f4, cap = 0x
 
 // ── benches and tiles ──────────────────────────────────
 
-/** A lab bench top (dark epoxy resin, with a fine speckle), w × d, top face at y = 0. */
+/** A lab bench top (dark epoxy resin, with a fine speckle), w × d. Returns a group whose top face is at its
+ * own y = 0, so placing the group at the bench height puts the surface exactly there. */
 export function benchTop(w, d, { color = 0x2a3140, thickness = 0.014 } = {}) {
   const map = once(`bench-${color}`, () => {
     const t = canvasTexture(256, 256, (g, W, H) => {
@@ -158,7 +160,9 @@ export function benchTop(w, d, { color = 0x2a3140, thickness = 0.014 } = {}) {
   });
   const top = new THREE.Mesh(new THREE.BoxGeometry(w, thickness, d), new THREE.MeshPhysicalMaterial({ color: 0xffffff, map, roughness: 0.45, clearcoat: 0.4, clearcoatRoughness: 0.4, envMapIntensity: 0.4 }));
   top.position.y = -thickness / 2;
-  return top;
+  const g = new THREE.Group();
+  g.add(top);
+  return g;
 }
 
 /** A white glazed tile, w × d (h thick), with a row of shallow wells (or none); top face at y = 0. */
@@ -190,6 +194,26 @@ export function spottingTile(w, d, wells = 3, { h = 0.006 } = {}) {
   }
   return g;
 }
+
+// ── bubbles ────────────────────────────────────────────
+
+/** A gas bubble seen from any side: a clear centre, a bright rim and a highlight (for Points materials). */
+export const bubbleTexture = () => once('bubble', () => canvasTexture(64, 64, (g, W) => {
+  g.clearRect(0, 0, W, W);
+  const r = g.createRadialGradient(W / 2, W / 2, W * 0.18, W / 2, W / 2, W * 0.46);
+  r.addColorStop(0, 'rgba(255,255,255,0.08)');
+  r.addColorStop(0.75, 'rgba(255,255,255,0.35)');
+  r.addColorStop(0.92, 'rgba(255,255,255,0.95)');
+  r.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = r;
+  g.beginPath();
+  g.arc(W / 2, W / 2, W * 0.47, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = 'rgba(255,255,255,0.95)'; // the highlight
+  g.beginPath();
+  g.ellipse(W * 0.38, W * 0.34, W * 0.08, W * 0.05, -0.6, 0, Math.PI * 2);
+  g.fill();
+}));
 
 // ── the Bunsen burner ──────────────────────────────────
 
@@ -242,4 +266,57 @@ export function bunsenBurner({ barrel = 0.12 } = {}) {
     },
   };
   return g;
+}
+
+// ── physics apparatus ──────────────────────────────────
+
+/** Cast-iron stand bases: heavy, dark, slightly glossy paint. */
+export const castIron = () => once('castIron', () => new THREE.MeshStandardMaterial({ color: 0x2b3040, metalness: 0.45, roughness: 0.45, envMapIntensity: 0.7 }));
+/** Polished steel (rods, clamps). */
+export const steel = () => once('steel', () => new THREE.MeshStandardMaterial({ color: 0xc8cdd5, metalness: 0.9, roughness: 0.22, envMapIntensity: 1 }));
+/** Brass (slotted masses, bobs). */
+export const brass = () => once('brass', () => new THREE.MeshStandardMaterial({ color: 0xc9a24a, metalness: 0.9, roughness: 0.28, envMapIntensity: 1 }));
+
+/** A retort-stand base (w × d), its top face at y = 0. */
+export function standBase(w, d) {
+  const g = new THREE.Group();
+  const slab = new THREE.Mesh(new RoundedBoxGeometry(w, 0.012, d, 2, 0.003), castIron());
+  slab.position.y = -0.006;
+  const lip = new THREE.Mesh(new THREE.BoxGeometry(w * 0.96, 0.002, d * 0.96), castIron());
+  lip.position.y = 0.0005;
+  g.add(slab, lip);
+  return g;
+}
+
+/** A boss head (the block that clamps an arm to a stand's rod), with its two thumbscrews. Centre at origin. */
+export function bossHead() {
+  const g = new THREE.Group();
+  const block = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.022, 0.022), castIron());
+  g.add(block);
+  for (const [x, z] of [[0, 0.015], [0.015, 0]]) {
+    const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.002, 0.002, 0.012, 10), steel());
+    const head = new THREE.Mesh(new THREE.CylinderGeometry(0.0055, 0.0055, 0.003, 16), steel());
+    if (z) { screw.rotation.x = Math.PI / 2; head.rotation.x = Math.PI / 2; }
+    else { screw.rotation.z = Math.PI / 2; head.rotation.z = Math.PI / 2; }
+    screw.position.set(x, 0, z);
+    head.position.set(x * 1.45, 0, z * 1.45);
+    g.add(screw, head);
+  }
+  g.traverse((m) => { if (m.isMesh) m.raycast = () => {}; });
+  return g;
+}
+
+/**
+ * A stack of brass slotted masses on a hanger (a single mesh, total height h, radius r), centred on its middle,
+ * like the cylinder it replaces: discs with grooves between them and the slot cut in one side.
+ */
+export function slottedMassGeometry(r, h, discs = 3) {
+  const pts = [[0, -h / 2]];
+  const step = h / discs;
+  for (let i = 0; i < discs; i++) {
+    const y0 = -h / 2 + i * step;
+    pts.push([r * 0.92, y0], [r, y0 + step * 0.08], [r, y0 + step * 0.9], [r * 0.9, y0 + step]);
+  }
+  pts.push([r * 0.12, h / 2], [r * 0.12, h / 2 + 0.012], [0, h / 2 + 0.012]); // the hanger's rod
+  return new THREE.LatheGeometry(pts.map(([x, y]) => new THREE.Vector2(x, y)), 32);
 }

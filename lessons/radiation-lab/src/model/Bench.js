@@ -1,6 +1,43 @@
 import * as THREE from 'three';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { SOURCES, LAB_IDS, HOME_IDS, ABSORBERS, BACKGROUND, D0, PA, HALF_LIFE } from '../data/radiation.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { benchTop, metalMaterial } from '../../../../shared/lab/kit.js';
+
+/** A small square picture drawn in code (warning signs, grilles), as a texture. */
+function drawn(size, draw) {
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  draw(c.getContext('2d'), size);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  return t;
+}
+
+/** The radiation warning sign: a black trefoil on yellow. */
+const trefoil = () => drawn(128, (g, S) => {
+  g.fillStyle = '#f2c230';
+  g.fillRect(0, 0, S, S);
+  g.fillStyle = '#15171c';
+  const c = S / 2;
+  for (let k = 0; k < 3; k++) {
+    const a = -Math.PI / 2 + (k * 2 * Math.PI) / 3;
+    g.beginPath();
+    g.moveTo(c, c);
+    g.arc(c, c, S * 0.4, a - Math.PI / 6, a + Math.PI / 6);
+    g.closePath();
+    g.fill();
+  }
+  g.fillStyle = '#f2c230';
+  g.beginPath();
+  g.arc(c, c, S * 0.12, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = '#15171c';
+  g.beginPath();
+  g.arc(c, c, S * 0.08, 0, Math.PI * 2);
+  g.fill();
+});
 
 // The lab bench: a lead box with the four sealed school sources, a tray of everyday things, a test stand
 // (source holder, absorber slot and the clip that holds the Geiger probe 3 cm away), a rack of absorbers,
@@ -133,17 +170,20 @@ export class Bench {
     this.group = new THREE.Group();
     app.lab.add(this.group);
 
-    const top = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.012, 0.38), mat(0x2a3348, { roughness: 0.7 }));
-    top.position.set(0, TOP - 0.006, 0.05);
-    const tray = new THREE.Mesh(new THREE.BoxGeometry(0.57, 0.006, 0.09), mat(0x3b4664));
+    const top = benchTop(0.9, 0.38, { color: 0x2a3348 });
+    top.position.set(0, TOP, 0.05);
+    const tray = new THREE.Mesh(new RoundedBoxGeometry(0.57, 0.006, 0.09, 2, 0.002), mat(0x3b4664));
     tray.position.set(-0.19, TOP + 0.003, TRAY_Z);
     this.group.add(top, tray);
 
     // the lead box (lid open)
-    const lead = mat(0x55595f, { roughness: 0.5, metalness: 0.3 });
-    const box = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.05, 0.1), lead);
+    const lead = metalMaterial('pb');
+    const box = new THREE.Mesh(new RoundedBoxGeometry(0.2, 0.05, 0.1, 3, 0.005), lead);
     box.position.set(BOX.x, TOP + 0.025, BOX.z);
-    const lid = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.012, 0.1), lead);
+    const warn = new THREE.Mesh(new THREE.PlaneGeometry(0.028, 0.028), new THREE.MeshStandardMaterial({ map: trefoil(), roughness: 0.6 }));
+    warn.position.set(BOX.x + 0.07, TOP + 0.025, BOX.z + 0.0505);
+    this.group.add(warn);
+    const lid = new THREE.Mesh(new RoundedBoxGeometry(0.2, 0.012, 0.1, 2, 0.004), lead);
     lid.position.set(BOX.x, TOP + 0.1, BOX.z - 0.055);
     lid.rotation.x = Math.PI / 2;
     const sign = makeLabel('☢ Lead box', { height: 0.018, size: 40, color: '#ffd166' });
@@ -171,7 +211,7 @@ export class Bench {
     });
 
     // the test stand: holder, absorber slot, probe clip
-    const stand = mat(0x3d4766);
+    const stand = mat(0x3d4766, { metalness: 0.5, roughness: 0.4 });
     const base = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.008, 0.06), stand);
     base.position.set(HOLDER.x + 0.04, TOP + 0.004, HOLDER.z);
     const post = new THREE.Mesh(new THREE.BoxGeometry(0.01, HOLDER.y - TOP - 0.01, 0.01), stand);
@@ -202,7 +242,7 @@ export class Bench {
     this.absorbers = {};
     for (const [id, x] of Object.entries(RACK)) {
       const a = ABSORBERS[id];
-      const m = new THREE.Mesh(new THREE.BoxGeometry(a.thick, 0.06, 0.06), mat(a.color, { metalness: id === 'paper' ? 0 : 0.5, roughness: id === 'paper' ? 0.9 : 0.35 }));
+      const m = new THREE.Mesh(new THREE.BoxGeometry(a.thick, 0.06, 0.06), id === 'al' ? metalMaterial('al') : id === 'lead' ? metalMaterial('pb') : mat(a.color, { roughness: 0.95 }));
       const home = new THREE.Vector3(x, TOP + 0.03, TRAY_Z);
       m.position.copy(home);
       m.userData = { handler: this, absorber: id, tapOnly: true };
@@ -240,7 +280,26 @@ export class Bench {
     this.group.add(this.held);
 
     // the Geiger counter and its probe
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.075, 0.09), mat(0xe8b830, { roughness: 0.5 }));
+    const body = new THREE.Mesh(new RoundedBoxGeometry(0.13, 0.075, 0.09, 4, 0.008), mat(0xe8b830, { roughness: 0.45 }));
+    const front = new THREE.Mesh(new RoundedBoxGeometry(0.118, 0.06, 0.004, 2, 0.002), mat(0x23262d, { roughness: 0.5 }));
+    front.position.set(COUNTER.x, TOP + 0.0375, COUNTER.z + 0.045);
+    front.raycast = () => {};
+    const knob = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.009, 0.008, 24).rotateX(Math.PI / 2), mat(0x15171c, { roughness: 0.4 }));
+    knob.position.set(COUNTER.x + 0.04, TOP + 0.022, COUNTER.z + 0.05);
+    knob.raycast = () => {};
+    const grille = new THREE.Mesh(new THREE.CircleGeometry(0.011, 24), new THREE.MeshStandardMaterial({ roughness: 0.6, map: drawn(64, (g, S) => {
+      g.fillStyle = '#2b2f38';
+      g.fillRect(0, 0, S, S);
+      g.fillStyle = '#0b0c0f';
+      for (let y = 6; y < S; y += 8) for (let x = 6; x < S; x += 8) { g.beginPath(); g.arc(x, y, 2.2, 0, Math.PI * 2); g.fill(); }
+    }) }));
+    grille.position.set(COUNTER.x - 0.04, TOP + 0.022, COUNTER.z + 0.0475);
+    grille.raycast = () => {};
+    const handle = new THREE.Mesh(new THREE.TorusGeometry(0.035, 0.005, 10, 24, Math.PI), mat(0x2b2f38, { roughness: 0.5 }));
+    // a carrying handle across the top, behind the screen
+    handle.position.set(COUNTER.x, TOP + 0.074, COUNTER.z - 0.03);
+    handle.raycast = () => {};
+    this.group.add(front, knob, grille, handle);
     body.position.set(COUNTER.x, TOP + 0.0375, COUNTER.z);
     body.userData = { handler: this, counter: true, tapOnly: true };
     this.counterBody = body;
@@ -254,14 +313,18 @@ export class Bench {
     this.group.add(body, screen, cTag);
 
     this.probe = new THREE.Group();
-    const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.11, 20).rotateZ(Math.PI / 2), mat(0x30343d, { roughness: 0.4 }));
+    const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.11, 24).rotateZ(Math.PI / 2), mat(0xc4c9d2, { metalness: 0.85, roughness: 0.3 }));
     tube.position.x = 0.055;
+    const endCap = new THREE.Mesh(new THREE.CylinderGeometry(0.0118, 0.0118, 0.03, 24).rotateZ(Math.PI / 2), mat(0x15171c, { roughness: 0.5 }));
+    endCap.position.x = 0.1;
+    this.probe.add(endCap);
+    endCap.userData = { handler: this, probe: true };
     const win = new THREE.Mesh(new THREE.CircleGeometry(0.009, 20).rotateY(-Math.PI / 2), mat(0x8c6b3a, { roughness: 0.3 }));
     win.position.x = -0.0005;
     const ring = new THREE.Mesh(new THREE.TorusGeometry(0.011, 0.0015, 8, 24).rotateY(Math.PI / 2), mat(0xe8b830));
     this.probe.add(tube, win, ring);
     for (const m of [tube, win, ring]) m.userData = { handler: this, probe: true };
-    this.probePicks = [tube, win, ring];
+    this.probePicks = [tube, win, ring, endCap];
     this.group.add(this.probe);
     this.inClip = true;
     this.probe.position.copy(WINDOW);

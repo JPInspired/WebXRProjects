@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { addContactShadows } from '../../../shared/util/contactShadows.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
 import { CARDS, SYSTEMS, QUIZ, ANSWERS } from './data/organs.js';
@@ -64,6 +65,7 @@ class App extends LessonApp {
     loadBody(new URL('../models/body.glb', import.meta.url).toString())
       .then((geos) => {
         this.body = new Body(this, geos);
+        addContactShadows(this, this.body.group, -0.3); // soft shadows under things on the bench (bench top at y = -0.3)
         this.body.setLevel(this.state.level);
         this.applyMode();
         this.refresh();

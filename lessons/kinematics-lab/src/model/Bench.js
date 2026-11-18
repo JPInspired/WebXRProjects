@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { benchTop } from '../../../../shared/lab/kit.js';
+import { benchTop, steel, brass, standBase, bossHead, slottedMassGeometry } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { G, DROP_OBJECTS, SPRINGS } from '../data/kinematics.js';
 
@@ -23,7 +23,7 @@ const RAMP_LEN = 0.7;
 
 const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.55, envMapIntensity: 0.6, ...o });
 const wood = mat(0xc89a66, { roughness: 0.75 });
-const metal = mat(0xb8bec8, { metalness: 0.75, roughness: 0.3 });
+const metal = steel();
 
 function rulerTexture(lengthM, every, big, unit) {
   const c = document.createElement('canvas');
@@ -59,7 +59,7 @@ function helix(len, color) {
     const a = t * turns * Math.PI * 2;
     pts.push(new THREE.Vector3(Math.cos(a) * 0.012, -t * len, Math.sin(a) * 0.012));
   }
-  return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), turns * 16, 0.0016, 6, false), mat(color, { metalness: 0.5, roughness: 0.3 }));
+  return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), turns * 16, 0.0016, 6, false), mat(color, { metalness: 0.85, roughness: 0.25, envMapIntensity: 1 })); // coloured spring steel (the colour tells the springs apart)
 }
 
 export class Bench {
@@ -119,18 +119,21 @@ export class Bench {
   buildPendulum() {
     const g = new THREE.Group();
     this.pendGroup = g;
-    const base = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.012, 0.1), mat(0x2b3040));
-    base.position.set(STAND.x - 0.12, TOP + 0.006, STAND.z);
+    const base = standBase(0.16, 0.1); // a cast-iron retort-stand base
+    base.position.set(STAND.x - 0.12, TOP, STAND.z);
     const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, PIVOT_Y - TOP + 0.02, 12), metal);
     rod.position.set(STAND.x - 0.16, (PIVOT_Y + TOP + 0.02) / 2, STAND.z);
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.01, 0.01), metal);
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.17, 12).rotateZ(Math.PI / 2), metal); // the clamp arm, held by a boss
     arm.position.set(STAND.x - 0.08, PIVOT_Y + 0.005, STAND.z);
+    const boss = bossHead();
+    boss.position.set(STAND.x - 0.16, PIVOT_Y + 0.005, STAND.z);
+    g.add(boss);
     // protractor behind the pivot
     const prot = new THREE.Mesh(new THREE.RingGeometry(0.06, 0.1, 48, 1, Math.PI * 1.17, Math.PI * 0.66), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
     prot.position.set(STAND.x, PIVOT_Y, STAND.z - 0.012);
     g.add(base, rod, arm, prot);
     this.string = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0xf2efe6 }));
-    this.bob = new THREE.Mesh(new THREE.SphereGeometry(0.02, 24, 16), mat(0xc0c6d0, { metalness: 0.8, roughness: 0.25 }));
+    this.bob = new THREE.Mesh(new THREE.SphereGeometry(0.02, 32, 20), brass()); // a brass pendulum bob
     this.bob.userData = { handler: this, bob: true };
     g.add(this.string, this.bob);
     this.group.add(g);
@@ -139,12 +142,15 @@ export class Bench {
   buildSpring() {
     const g = new THREE.Group();
     this.springGroup = g;
-    const base = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.012, 0.1), mat(0x2b3040));
-    base.position.set(STAND.x - 0.12, TOP + 0.006, STAND.z);
+    const base = standBase(0.16, 0.1); // a cast-iron retort-stand base
+    base.position.set(STAND.x - 0.12, TOP, STAND.z);
     const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, PIVOT_Y - TOP + 0.02, 12), metal);
     rod.position.set(STAND.x - 0.16, (PIVOT_Y + TOP + 0.02) / 2, STAND.z);
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.01, 0.01), metal);
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.17, 12).rotateZ(Math.PI / 2), metal); // the clamp arm, held by a boss
     arm.position.set(STAND.x - 0.08, PIVOT_Y + 0.005, STAND.z);
+    const boss = bossHead();
+    boss.position.set(STAND.x - 0.16, PIVOT_Y + 0.005, STAND.z);
+    g.add(boss);
     // the ruler (cm), zero at the bottom of the unstretched spring
     const rl = 0.6;
     const ruler = new THREE.Mesh(new THREE.BoxGeometry(0.025, rl, 0.004), new THREE.MeshStandardMaterial({ map: rulerTexture(0.6, 0.01, 10, 'cm'), roughness: 0.7 }));
@@ -153,7 +159,7 @@ export class Bench {
     this.springMesh = new THREE.Group();
     this.springMesh.position.set(STAND.x, PIVOT_Y, STAND.z);
     this.hanger = new THREE.Group();
-    this.springMass = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.03, 20), mat(0x9a7b3c, { metalness: 0.6, roughness: 0.35 }));
+    this.springMass = new THREE.Mesh(slottedMassGeometry(0.018, 0.03), brass());
     this.springMass.userData = { handler: this, mass: true };
     this.pointer = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.0015, 0.002), new THREE.MeshBasicMaterial({ color: 0xff3030 }));
     this.pointer.position.set(0.03, 0.015, 0);

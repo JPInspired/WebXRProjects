@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { benchTop } from '../../../../shared/lab/kit.js';
+import { benchTop, standBase, bossHead } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { BOBS, dragK } from '../data/pendulum.js';
 
@@ -198,14 +198,21 @@ export class Rig {
     this.group.add(this.benchGroup);
     const prot = new THREE.Mesh(new THREE.PlaneGeometry(PROT_R * 2.09, PROT_R * 1.14), new THREE.MeshStandardMaterial({ map: protractorTexture(), transparent: true, roughness: 0.8 }));
     prot.position.set(PIVOT.x, PIVOT.y - PROT_R * 0.51, PIVOT.z - 0.03);
-    const post = new THREE.Mesh(new THREE.BoxGeometry(0.03, PIVOT.y - TOP + 0.03, 0.03), mat(0x3a3f50));
+    // an anodised aluminium frame on cast-iron feet, the string held in a boss clamp
+    const frame = mat(0x3a3f50, { metalness: 0.65, roughness: 0.35, envMapIntensity: 0.9 });
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.03, PIVOT.y - TOP + 0.03, 0.03), frame);
     post.position.set(PIVOT.x - 0.4, (PIVOT.y + TOP + 0.03) / 2, PIVOT.z - 0.03);
     const post2 = post.clone();
     post2.position.x = PIVOT.x + 0.4;
-    const beam = new THREE.Mesh(new THREE.BoxGeometry(0.83, 0.03, 0.03), mat(0x3a3f50));
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(0.83, 0.03, 0.03), frame);
+    for (const fx of [-0.4, 0.4]) {
+      const foot = standBase(0.09, 0.12);
+      foot.position.set(PIVOT.x + fx, TOP, PIVOT.z - 0.03);
+      this.benchGroup.add(foot);
+    }
     beam.position.set(PIVOT.x, PIVOT.y + 0.03, PIVOT.z - 0.03);
-    const clamp = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.02, 0.05), mat(0x2b2f3a));
-    clamp.position.set(PIVOT.x, PIVOT.y + 0.01, PIVOT.z - 0.01);
+    const clamp = bossHead();
+    clamp.position.set(PIVOT.x, PIVOT.y + 0.012, PIVOT.z - 0.012);
     this.benchGroup.add(prot, post, post2, beam, clamp);
     this.string = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0x222222 }));
     this.benchGroup.add(this.string);

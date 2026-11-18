@@ -3,7 +3,7 @@ import { makeLabel } from '../../../../shared/ui/labels.js';
 import { METALS } from '../data/lithium.js';
 import { pop, fizz, bang } from './sounds.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { benchTop, bunsenBurner, metalMaterial, glassMaterial, liquidMaterial } from '../../../../shared/lab/kit.js';
+import { benchTop, bunsenBurner, metalMaterial, glassMaterial, liquidMaterial, bubbleTexture } from '../../../../shared/lab/kit.js';
 
 // The bench, as in the original lesson: five metal cubes (lithium, and four mystery metals B–E), a Bunsen
 // burner, and a tank of water — plus a safety screen that slides across in front of the tank.
@@ -81,7 +81,7 @@ export class Bench {
     const glass = new THREE.Mesh(new RoundedBoxGeometry(TANK_W, TANK_H, TANK_D, 3, 0.006), glassMaterial());
     glass.position.set(TANK.x, TOP + TANK_H / 2, TANK.z);
     glass.renderOrder = 3;
-    this.water = new THREE.Mesh(new RoundedBoxGeometry(TANK_W - 0.006, WATER_Y - TOP, TANK_D - 0.006, 2, 0.004), liquidMaterial(0x8fc8f0, 0.38));
+    this.water = new THREE.Mesh(new RoundedBoxGeometry(TANK_W - 0.006, WATER_Y - TOP, TANK_D - 0.006, 2, 0.004), liquidMaterial(0x5aa8e6, 0.26)); // a big body of water: kept clear
     this.water.position.set(TANK.x, (WATER_Y + TOP) / 2, TANK.z);
     const wTag = makeLabel('Water', { height: 0.012, size: 36 });
     wTag.position.set(TANK.x, TOP + TANK_H + 0.025, TANK.z - TANK_D / 2);
@@ -112,7 +112,7 @@ export class Bench {
     // effects: bubbles, a hydrogen flame on the water, an explosion flash
     const n = 260;
     this.fx = { pos: new Float32Array(n * 3), vel: new Float32Array(n * 3), life: new Float32Array(n), n, acc: 0 };
-    this.particles = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(this.fx.pos, 3)), new THREE.PointsMaterial({ color: 0xffffff, size: 0.004, transparent: true, opacity: 0.9, depthWrite: false }));
+    this.particles = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(this.fx.pos, 3)), new THREE.PointsMaterial({ color: 0xffffff, size: 0.0065, map: bubbleTexture(), transparent: true, opacity: 0.95, depthWrite: false }));
     this.particles.frustumCulled = false;
     this.group.add(this.particles);
     this.h2Flame = new THREE.Mesh(new THREE.ConeGeometry(0.01, 0.035, 12, 1, true), new THREE.MeshBasicMaterial({ color: 0xffb343, transparent: true, opacity: 0.8, depthWrite: false }));

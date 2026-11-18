@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { benchTop, glassMaterial, liquidMaterial } from '../../../../shared/lab/kit.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { benchTop, glassMaterial, liquidMaterial, bubbleTexture, metalMaterial } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { V_MAX, CYL, RUN, MARKS, rateConstant } from '../data/enzymes.js';
 
@@ -109,9 +110,9 @@ export class Bench {
     this.halves = [];
 
     // hot plate
-    const plate = new THREE.Mesh(new THREE.BoxGeometry(0.15, PLATE_H, 0.15), mat(0x2f6bd8));
+    const plate = new THREE.Mesh(new RoundedBoxGeometry(0.15, PLATE_H, 0.15, 3, 0.006), mat(0x2f6bd8, { roughness: 0.45 })); // enamelled case
     plate.position.set(PLATE.x, TOP + PLATE_H / 2, PLATE.z);
-    const pad = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.004, 0.13), mat(0xb9bec8, { metalness: 0.6, roughness: 0.3 }));
+    const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.062, 0.004, 48), metalMaterial('al')); // the round heating plate
     pad.position.set(PLATE.x, TOP + PLATE_H + 0.002, PLATE.z);
     this.group.add(plate, pad);
     this.display = panelTexture(256, 96);
@@ -188,7 +189,7 @@ export class Bench {
     const n = 220;
     this.bub = { pos: new Float32Array(n * 3), life: new Float32Array(n), kind: new Uint8Array(n), n, acc: 0, acc2: 0 };
     const geo = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(this.bub.pos, 3));
-    this.bubbles = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.0035, transparent: true, opacity: 0.85, depthWrite: false }));
+    this.bubbles = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.0055, map: bubbleTexture(), transparent: true, opacity: 0.95, depthWrite: false }));
     this.bubbles.frustumCulled = false;
     this.group.add(this.bubbles);
 

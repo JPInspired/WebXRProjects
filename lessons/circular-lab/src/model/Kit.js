@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { benchTop } from '../../../../shared/lab/kit.js';
+import { benchTop, steel, brass, castIron, glassMaterial, standBase, bossHead, slottedMassGeometry } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { G, BALLS, idealRps } from '../data/circular.js';
 import { fx } from './sounds.js';
@@ -37,7 +37,7 @@ const RACK = new THREE.Vector3(-0.34, TOP, 0.17);
 const WATCH = new THREE.Vector3(0.24, TOP, 0.14);
 
 const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.55, envMapIntensity: 0.6, ...o });
-const metal = mat(0xb8bec8, { metalness: 0.75, roughness: 0.3 });
+const metal = steel();
 const ballRadius = (g) => 0.017 * Math.cbrt(g / 50);
 
 function canvasTex(w, h) {
@@ -51,7 +51,13 @@ function canvasTex(w, h) {
 
 function makeBall(g) {
   const grp = new THREE.Group();
-  const s = new THREE.Mesh(new THREE.SphereGeometry(ballRadius(g), 24, 16), mat(0x34373f, { roughness: 0.35, metalness: 0.3 }));
+  // a rubber bung (as in the school experiment), its size set by its mass; the string runs through its middle
+  const r = ballRadius(g);
+  const s = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.82, r, r * 1.5, 28), mat(0x6b2f28, { roughness: 0.85 }));
+  const hole = new THREE.Mesh(new THREE.CircleGeometry(r * 0.16, 16).rotateX(-Math.PI / 2), mat(0x1a0d0b));
+  hole.position.y = r * 0.751;
+  hole.raycast = () => {};
+  s.add(hole);
   grp.add(s);
   const tag = makeLabel(`${g} g`, { height: 0.014, size: 40, color: '#ff9a3c', bg: 'rgba(20,20,26,0.82)' });
   tag.position.y = ballRadius(g) + 0.016;
@@ -101,19 +107,21 @@ export class Kit {
     const top = benchTop(0.92, 0.6); // a dark lab bench (shared lab kit)
     top.position.set(0, TOP, -0.06);
     this.group.add(top);
-    const base = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.012, 0.11), mat(0x2b3040));
-    base.position.set(AXIS.x - 0.1, TOP + 0.006, AXIS.z - 0.02);
+    const base = standBase(0.16, 0.11); // a cast-iron retort-stand base
+    base.position.set(AXIS.x - 0.1, TOP, AXIS.z - 0.02);
     const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, TUBE_TOP_Y - TOP - 0.04, 12), metal);
     rod.position.set(AXIS.x - 0.1, (TUBE_TOP_Y + TOP - 0.04) / 2, AXIS.z - 0.02);
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.012, 0.012), metal);
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.1, 12).rotateZ(Math.PI / 2), metal);
     arm.position.set(AXIS.x - 0.05, TUBE_TOP_Y - TUBE_LEN * 0.6, AXIS.z - 0.01);
-    this.group.add(base, rod, arm);
+    const boss = bossHead();
+    boss.position.set(AXIS.x - 0.1, TUBE_TOP_Y - TUBE_LEN * 0.6, AXIS.z - 0.02);
+    this.group.add(base, rod, arm, boss);
 
     // ── the tube (held or in the stand), with its status light ──
     this.tube = new THREE.Group();
-    const tubeMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, TUBE_LEN, 16, 1, true), mat(0xdfe6f0, { roughness: 0.2, metalness: 0.1, side: THREE.DoubleSide }));
+    const tubeMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, TUBE_LEN, 20, 1, true), glassMaterial());
     tubeMesh.position.y = -TUBE_LEN / 2;
-    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.07, 16), mat(0x3a64c8));
+    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.07, 24), mat(0x3a64c8, { roughness: 0.85 })); // a rubber grip
     grip.position.y = -TUBE_LEN * 0.55;
     this.light = new THREE.Mesh(new THREE.TorusGeometry(0.013, 0.004, 8, 24).rotateX(Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x5b9bff }));
     this.light.position.y = -0.008;
@@ -140,7 +148,7 @@ export class Kit {
     this.gateGroup = new THREE.Group();
     const post = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, TUBE_TOP_Y + 0.1 - TOP, 10), mat(0x30343e));
     post.position.set(0.025, (TUBE_TOP_Y + 0.1 + TOP) / 2, 0);
-    const foot = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.02, 0.05), mat(0x30343e));
+    const foot = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.02, 0.05), castIron());
     foot.position.set(0.012, TOP + 0.01, 0);
     const head = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.02, 0.025), mat(0x30343e));
     head.position.set(0.012, TUBE_TOP_Y + 0.1, 0);
@@ -245,7 +253,7 @@ export class Kit {
     this.hanger.add(hook);
     const n = Math.round(this.M / 50);
     for (let i = 0; i < n; i++) {
-      const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.0065, 20), mat(0x9a7b3c, { metalness: 0.6, roughness: 0.35 }));
+      const disc = new THREE.Mesh(slottedMassGeometry(0.02, 0.0065, 1), brass());
       disc.position.y = -0.033 - i * 0.0072;
       this.hanger.add(disc);
     }

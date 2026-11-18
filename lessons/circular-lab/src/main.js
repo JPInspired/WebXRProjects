@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { addContactShadows } from '../../../shared/util/contactShadows.js';
 import { studioReflections } from '../../../shared/util/reflections.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
@@ -53,6 +54,8 @@ class App extends LessonApp {
     this.panels = [this.controlPanel, this.infoPanel, this.explainPanel];
 
     this.kit = new Kit(this);
+
+    addContactShadows(this, this.kit.group, -0.3); // soft shadows under things on the bench (bench top at y = -0.3)
     this.plenary = new Plenary(this);
     this.board = new Board();
     this.boardStage = new THREE.Group();

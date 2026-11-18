@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { benchTop, glassMaterial, liquidMaterial } from '../../../../shared/lab/kit.js';
+import { benchTop, glassMaterial, liquidMaterial, bubbleTexture, metalMaterial } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { FACTORS, V_MAX, RUN, volumeAt } from '../data/kinetics.js';
 
@@ -78,7 +78,7 @@ export class Bench {
     // bubbles
     const n = 300;
     this.fx = { pos: new Float32Array(n * 3), life: new Float32Array(n), stop: new Float32Array(n), n };
-    this.bubbles = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(this.fx.pos, 3)), new THREE.PointsMaterial({ color: 0xffffff, size: 0.003, transparent: true, opacity: 0.9, depthWrite: false }));
+    this.bubbles = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(this.fx.pos, 3)), new THREE.PointsMaterial({ color: 0xffffff, size: 0.005, map: bubbleTexture(), transparent: true, opacity: 0.95, depthWrite: false }));
     this.bubbles.frustumCulled = false;
     this.group.add(this.bubbles);
     this.targetsList = [];
@@ -141,7 +141,7 @@ export class Bench {
   addSolid(kind, opt, home) {
     let mesh;
     if (kind === 'mg') {
-      mesh = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.0012, 0.05), mat(0xc4c8cf, { metalness: 0.7, roughness: 0.3 }));
+      mesh = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.0004, 0.05), metalMaterial('mg')); // a strip of magnesium ribbon
       mesh.position.copy(home).add(new THREE.Vector3(0, 0.0006, 0));
     } else if (opt === 'lump') {
       mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.011, 0), mat(0xf1efe8, { roughness: 0.9 }));
