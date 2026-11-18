@@ -12,7 +12,8 @@
 Changes made for this project (`tools/organs-model/`): the bones of the skeletal system (without ligaments and
 membranes) and 17 organs were converted to metres, simplified and compressed for Meta Quest; the parts of each
 organ were combined (for example the lobes of each lung, the three parts of the small intestine); the great
-vessels were trimmed a few centimetres from the heart; the top of the skull was cut off as a separate skull cap.
+vessels were trimmed a few centimetres from the heart; the top of the skull was cut off as a separate skull cap; soft shadows in the folds (ambient occlusion) were
+baked in per vertex.
 As the licence requires (share-alike), `body.glb` is shared under the same CC BY-SA 2.1 Japan licence. This
 applies only to that file, not to the rest of the project.
 

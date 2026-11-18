@@ -13,10 +13,12 @@ lessons don't use it.
      pancreas, spleen, gallbladder, oesophagus, trachea, diaphragm, and the heart wall and great vessels).
    About 170 MB in all.
 2. `npm install`, then `node build.mjs <that folder> ../../lessons/organs-lab/models/body.glb`
+3. `node shade.mjs ../../lessons/organs-lab/models/body.glb`: adds the soft shadows in the folds (ambient
+   occlusion, a number per vertex called `_AO`) that the lesson uses for depth. Takes a few seconds.
 
 What it does: converts millimetres to metres in body coordinates (x = the body's left, y = up from the soles of
 the feet, z = forward), so every organ keeps its real place; removes scan specks; trims the great vessels a few
 centimetres from the heart; cuts the top off the skull with a clean horizontal cut (the skull cap); simplifies for
-Meta Quest (about 145,000 triangles in all) and compresses the result (meshopt), about 970 KB.
+Meta Quest (about 145,000 triangles in all) and compresses the result (meshopt). With the fold shadows from `shade.mjs`, about 1.1 MB.
 
 Licence of the data: CC BY-SA 2.1 Japan (see `lessons/organs-lab/CREDITS.md`).

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { ORGANS, CARDS, SYSTEMS, organsFor, cardsFor } from '../data/organs.js';
+import { tissueMaterial, kindOf } from './tissue.js';
 
 // Each student's own life-size skeleton, standing on the floor beside their desk, and the organs on the desk
 // (shown at 60% size so they fit; they grow to life size when picked up). Put each organ in its place:
@@ -37,7 +38,7 @@ function setOpacity(mat, o) {
   mat.opacity = o;
 }
 
-const boneMat = () => new THREE.MeshStandardMaterial({ color: 0xe8dcc0, roughness: 0.72, metalness: 0 });
+const boneMat = (geo) => tissueMaterial(0xe8dcc0, 'bone', !!geo.getAttribute('_ao'));
 
 /** Load the GLB: { id → geometry in body coordinates }. */
 export async function loadBody(url) {
@@ -60,6 +61,8 @@ export async function loadBody(url) {
       for (let i = 0; i < a.count; i++) arr.set([a.getX(i), a.getY(i), a.getZ(i)], i * 3);
       g.setAttribute(name, new THREE.BufferAttribute(arr, 3));
     }
+    const ao = src.getAttribute('_ao'); // soft shadows in the folds, 0–1 (see tools/organs-model/shade.mjs)
+    if (ao) g.setAttribute('_ao', new THREE.BufferAttribute(Float32Array.from({ length: ao.count }, (_, i) => ao.getX(i)), 1));
     g.setIndex(src.index);
     g.applyMatrix4(o.matrixWorld);
     if (!g.getAttribute('normal')) g.computeVertexNormals();
@@ -143,8 +146,8 @@ export class Body {
     this.skel.position.copy(SKEL);
     this.skel.rotation.y = SKEL_YAW;
     this.group.add(this.skel);
-    this.boneMat = boneMat();
-    this.ribMat = boneMat();
+    this.boneMat = boneMat(geos.bones);
+    this.ribMat = boneMat(geos.ribcage);
     this.bones = new THREE.Mesh(geos.bones, this.boneMat);
     this.ribcage = new THREE.Mesh(geos.ribcage, this.ribMat);
     this.skel.add(this.bones, this.ribcage);
@@ -167,7 +170,7 @@ export class Body {
       geo.translate(-home.x, -home.y, -home.z);
       geo.computeBoundingBox();
       const size = geo.boundingBox.getSize(new THREE.Vector3());
-      const mat = new THREE.MeshStandardMaterial({ color: o.color, roughness: 0.55, metalness: 0, transparent: false });
+      const mat = tissueMaterial(o.color, kindOf(o.id), !!geo.getAttribute('_ao'));
       const mesh = new THREE.Mesh(geo, mat);
       const group = new THREE.Group();
       group.add(mesh);
