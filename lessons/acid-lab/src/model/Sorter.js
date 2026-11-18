@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { reagentBottle } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { sound } from '../../../../shared/util/sound.js';
 import { SUBSTANCES, SORT_SET, UI_CHART, css, describePH } from '../data/acid.js';
@@ -73,23 +74,19 @@ export class Sorter {
     ids.forEach((id, i) => {
       const s = SUBSTANCES[id];
       const g = new THREE.Group();
-      const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.044, 18), new THREE.MeshStandardMaterial({ color: s.color, roughness: 0.25, transparent: true, opacity: 0.92 }));
-      glass.position.y = 0.022;
-      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.012, 0.014, 14), glass.material);
-      neck.position.y = 0.051;
-      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.0095, 0.0095, 0.008, 14), new THREE.MeshStandardMaterial({ color: 0x2b3560, roughness: 0.5 }));
-      cap.position.y = 0.062;
+      // a glass bottle with the substance inside (its real colour), a screw cap and a paper label
+      const bottle = reagentBottle({ r: 0.017, h: 0.058, liquid: s.color, label: s.short ?? s.name });
       const tag = makeLabel(s.short ?? s.name, { height: 0.0135, size: 40 });
       tag.position.y = -0.012;
       tag.material.depthTest = false;
       tag.renderOrder = 6;
-      g.add(glass, neck, cap, tag);
+      g.add(bottle, tag);
       const row = i < 6 ? 0 : 1;
       const col = i % 6;
       const home = new THREE.Vector3((col - 2.5) * 0.125, TOP + 0.014, 0.09 + row * 0.11);
       g.position.copy(home);
       const item = { id, group: g, home, done: false, tag };
-      for (const m of [glass, neck, cap]) m.userData = { handler: this, item };
+      bottle.traverse((m) => { if (m.isMesh) m.userData = { handler: this, item }; });
       this.group.add(g);
       this.items.push(item);
     });

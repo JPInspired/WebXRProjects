@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { sound } from '../../../../shared/util/sound.js';
 import { LETTERS, PAPERS, paperColor } from '../data/acid.js';
+import { makeBeaker, benchTop, spottingTile } from '../../../../shared/lab/kit.js';
 
 // The lab bench: six beakers of unknown solutions (A–F), a white tile in front of each for used test papers,
 // three paper dispensers (red litmus, blue litmus, universal indicator), a digital pH meter, a beaker of
@@ -17,25 +18,43 @@ const ROW_Z = -0.02;
 const TOOLS_Z = 0.19;
 const SLOT_X = { red: -0.03, blue: 0, ui: 0.03 };
 
-const glassMat = new THREE.MeshStandardMaterial({ color: 0xd4ecff, transparent: true, opacity: 0.28, roughness: 0.1, metalness: 0, side: THREE.DoubleSide, depthWrite: false });
+/** The side of a stack of paper strips. */
+const edgeMats = new Map();
+function paperEdges(color) {
+  if (!edgeMats.has(color)) {
+    const c = document.createElement('canvas');
+    c.width = 64;
+    c.height = 64;
+    const g = c.getContext('2d');
+    g.fillStyle = `#${new THREE.Color(color).getHexString()}`;
+    g.fillRect(0, 0, 64, 64);
+    g.fillStyle = 'rgba(0,0,0,0.12)';
+    for (let y = 0; y < 64; y += 4) g.fillRect(0, y, 64, 1);
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    edgeMats.set(color, new THREE.MeshStandardMaterial({ map: t, roughness: 0.9 }));
+  }
+  return edgeMats.get(color);
+}
 
-function makeBeaker(r, h, color, fill = 0.62) {
-  const g = new THREE.Group();
-  const liquid = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.93, r * 0.9, h * fill, 28),
-    new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.82, roughness: 0.15 }));
-  liquid.position.y = (h * fill) / 2 + 0.002;
-  const glass = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.96, h, 28, 1, true), glassMat);
-  glass.position.y = h / 2;
-  glass.renderOrder = 2;
-  const base = new THREE.Mesh(new THREE.CircleGeometry(r * 0.96, 28), glassMat);
-  base.rotation.x = -Math.PI / 2;
-  base.position.y = 0.001;
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(r, 0.0012, 6, 32), new THREE.MeshStandardMaterial({ color: 0xeaf6ff, roughness: 0.2 }));
-  rim.rotation.x = Math.PI / 2;
-  rim.position.y = h;
-  g.add(liquid, glass, base, rim);
-  g.userData = { glass, liquid, r, liquidTop: h * fill };
-  return g;
+/** The top of a booklet: the paper colour, with a white band printed with its name. */
+function bookletTop(type) {
+  const c = document.createElement('canvas');
+  c.width = 256;
+  c.height = 184;
+  const g = c.getContext('2d');
+  g.fillStyle = `#${new THREE.Color(PAPERS[type].dry).getHexString()}`;
+  g.fillRect(0, 0, 256, 184);
+  g.fillStyle = '#f6f3ea';
+  g.fillRect(0, 62, 256, 60);
+  g.fillStyle = '#1d2236';
+  g.font = '700 34px sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText({ red: 'RED LITMUS', blue: 'BLUE LITMUS', ui: 'pH 1–14' }[type], 128, 93);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return new THREE.MeshStandardMaterial({ map: t, roughness: 0.85 });
 }
 
 function makeStrip(type) {
@@ -59,8 +78,8 @@ export class Bench {
     this.mode = 'paper';
     this.level = 'core';
 
-    const top = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.012, 0.36), new THREE.MeshStandardMaterial({ color: 0x2a3348, roughness: 0.7 }));
-    top.position.set(0, TOP - 0.006, 0.07);
+    const top = benchTop(0.8, 0.36, { color: 0x2a3348 });
+    top.position.set(0, TOP - 0.007, 0.07);
     this.group.add(top);
 
     // beakers A–F, each with its letter, a selection ring and a white tile for used papers
@@ -79,8 +98,8 @@ export class Bench {
       ring.position.y = 0.003;
       ring.visible = false;
       g.add(ring);
-      const tile = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.003, 0.07), new THREE.MeshStandardMaterial({ color: 0xf4f6f8, roughness: 0.5 }));
-      tile.position.set(x, TOP + 0.0015, ROW_Z + 0.085);
+      const tile = spottingTile(0.1, 0.07, 0, { h: 0.0016 }); // a white glazed tile for the used papers
+      tile.position.set(x, TOP + 0.0028, ROW_Z + 0.085);
       this.kit.add(g, tile);
       const b = { id: letter, letter, group: g, ring, x, z: ROW_Z, ph: 7, strips: {} };
       Object.assign(g.userData.glass.userData, { handler: this, beaker: b, tapOnly: true });
@@ -92,8 +111,9 @@ export class Bench {
     this.kit.add(this.papers);
     this.dispensers = [];
     [['red', -0.32], ['blue', -0.22], ['ui', -0.12]].forEach(([type, x]) => {
-      const box = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.022, 0.05), new THREE.MeshStandardMaterial({ color: PAPERS[type].dry, roughness: 0.8 }));
-      box.position.set(x, TOP + 0.011, TOOLS_Z);
+      // a booklet of test strips: the strips' edges, and a printed cover band
+      const box = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.012, 0.05), [paperEdges(PAPERS[type].dry), paperEdges(PAPERS[type].dry), bookletTop(type), paperEdges(PAPERS[type].dry), paperEdges(PAPERS[type].dry), paperEdges(PAPERS[type].dry)]);
+      box.position.set(x, TOP + 0.006, TOOLS_Z);
       box.userData = { handler: this, paper: type };
       const tag = makeLabel({ red: 'Red litmus', blue: 'Blue litmus', ui: 'Indicator' }[type], { height: 0.015, size: 40 });
       tag.position.set(x, TOP + 0.046, TOOLS_Z);
