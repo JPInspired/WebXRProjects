@@ -61,6 +61,8 @@ export async function loadHeartModel(base) {
       for (let i = 0; i < a.count; i++) arr.set([a.getX(i), a.getY(i), a.getZ(i)], i * 3);
       g.setAttribute(name, new THREE.BufferAttribute(arr, 3));
     }
+    const fat = src.getAttribute('_fat'); // epicardial fat, 0–1 (see tools/heart-model/tidy.mjs)
+    if (fat) g.setAttribute('_fat', new THREE.BufferAttribute(Float32Array.from({ length: fat.count }, (_, i) => fat.getX(i)), 1));
     g.setIndex(src.index);
     g.applyMatrix4(o.matrixWorld);
     if (!g.getAttribute('normal')) g.computeVertexNormals();
@@ -134,13 +136,17 @@ export class RealHeart {
 
   mat(id) {
     if (this.mats.has(id)) return this.mats.get(id);
-    const m = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, metalness: 0, side: THREE.DoubleSide });
+    // physical: a clear coat over the tissue gives the wet, glossy look of a real heart
+    const m = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.5, metalness: 0, side: THREE.DoubleSide });
     m.userData.inner = { value: new THREE.Color(0x5e1520) };
+    m.userData.fat = { value: 0 }; // epicardial fat (realistic look; only parts whose model has it)
+    m.userData.hasFat = false;
     m.userData.fibre = { value: 0 }; // muscle fibres (realistic look, heart muscle only)
     m.userData.valve = null; // { ring, axis, open, R, kind }
     const self = this;
     m.onBeforeCompile = (sh) => {
-      Object.assign(sh.uniforms, self.U, { uInner: m.userData.inner, uFibre: m.userData.fibre });
+      Object.assign(sh.uniforms, self.U, { uInner: m.userData.inner, uFibre: m.userData.fibre, uFat: m.userData.fat });
+      const fat = m.userData.hasFat;
       const v = m.userData.valve;
       if (v) Object.assign(sh.uniforms, { uRing: { value: v.ring }, uAxis: { value: v.axis }, uOpen: v.open, uR: { value: v.R } });
       sh.vertexShader = sh.vertexShader
@@ -148,7 +154,8 @@ export class RealHeart {
           uniform vec3 uBase, uRL, uMid, uRAc, uLAc, uRVc, uLVc;
           uniform float uAtr, uVen, uWeak;
           ${v ? 'uniform vec3 uRing, uAxis; uniform float uOpen, uR;' : ''}
-          varying vec3 vObj;`)
+          ${fat ? 'attribute float _fat;' : ''}
+          varying vec3 vObj; varying float vFat;`)
         .replace('#include <begin_vertex>', `#include <begin_vertex>
           vec3 p = transformed;
           ${v && v.kind === 'av' ? `
@@ -181,11 +188,13 @@ export class RealHeart {
             p += (cV - p) * wV * fV * uVen * 0.09 * (1.0 - uWeak * side * 0.6);
           }
           vObj = p;
+          vFat = ${fat ? '_fat' : '0.0'};
           transformed = p;`);
       sh.fragmentShader = sh.fragmentShader
         .replace('#include <common>', `#include <common>
-          uniform vec3 uInner; uniform float uIsch, uFibre; uniform vec3 uLad[6];
-          varying vec3 vObj;`)
+          uniform vec3 uInner; uniform float uIsch, uFibre, uFat; uniform vec3 uLad[6];
+          varying vec3 vObj; varying float vFat;
+          float fatMix = 0.0;`)
         .replace('#include <map_fragment>', `#include <map_fragment>
           if (!gl_FrontFacing) diffuseColor.rgb = uInner; // inside the muscle, where it is cut
           if (uFibre > 0.0) { // fine muscle fibres and mottling (no texture needed)
@@ -193,13 +202,22 @@ export class RealHeart {
             float mot = sin(vObj.x * 9.0 + 1.3) * sin(vObj.y * 7.0 + 0.7) * sin(vObj.z * 8.0 + 2.1);
             diffuseColor.rgb *= 1.0 + uFibre * (0.07 * fib + 0.1 * mot);
           }
+          if (uFat > 0.0 && gl_FrontFacing) { // epicardial fat along the grooves: pale yellow, in soft lumps
+            float lump = sin(vObj.x * 47.0 + sin(vObj.z * 31.0) * 2.0) * sin(vObj.y * 43.0 + sin(vObj.x * 27.0) * 2.0) * sin(vObj.z * 39.0 + 1.7);
+            float edge = sin(vObj.x * 13.0 + 0.4) * sin(vObj.y * 11.0 + 2.0) * sin(vObj.z * 12.0 + 1.1);
+            fatMix = smoothstep(0.12, 0.7, vFat + 0.06 * lump + 0.08 * edge) * 0.85 * uFat;
+            vec3 fatCol = vec3(0.78, 0.6, 0.28) * (0.95 + 0.08 * lump);
+            diffuseColor.rgb = mix(diffuseColor.rgb, fatCol, fatMix);
+          }
           if (uIsch > 0.0) {
             float d = 10.0;
             for (int i = 0; i < 6; i++) d = min(d, distance(vObj, uLad[i]));
             diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.2, 0.13, 0.22), (1.0 - smoothstep(0.07, 0.18, d)) * uIsch * 0.9);
-          }`);
+          }`)
+        .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+          roughnessFactor = mix(roughnessFactor, 0.32, fatMix);`);
     };
-    m.customProgramCacheKey = () => `realheart-${m.userData.valve?.kind ?? 'none'}`;
+    m.customProgramCacheKey = () => `realheart-${m.userData.valve?.kind ?? 'none'}-${m.userData.hasFat ? 'fat' : ''}`;
     this.mats.set(id, m);
     if (!NO_CLIP.has(id)) this.clipMats.push(m);
     return m;
@@ -231,6 +249,7 @@ export class RealHeart {
         this.valves[id] = { open: 0, uniform: m.userData.valve.open, def: { kind: 'sl' } };
       }
       if (g.getAttribute('color')) m.vertexColors = true;
+      if (g.getAttribute('_fat')) m.userData.hasFat = true;
       this.add(id, new THREE.Mesh(g, m));
     }
 
@@ -340,7 +359,10 @@ export class RealHeart {
       const key = VALVES.includes(id) ? 'valve' : NODES.includes(id) ? 'conduction' : id;
       const c = look[key] ?? 0xffffff;
       m.color.set(c);
-      m.roughness = view === 'real' ? (key === 'valve' ? 0.4 : 0.48) : 0.62;
+      m.roughness = view === 'real' ? (key === 'valve' ? 0.4 : 0.5) : 0.62;
+      m.clearcoat = view === 'real' ? 0.65 : 0.1; // the wet sheen
+      m.clearcoatRoughness = 0.28;
+      m.userData.fat.value = view === 'real' ? 1 : 0;
       // where the muscle is cut: a darker shade of the part
       m.userData.inner.value.set(view === 'real' ? 0x6e1e26 : new THREE.Color(c).multiplyScalar(0.55));
       m.userData.fibre.value = view === 'real' && ['rightAtrium', 'leftAtrium', 'rightVentricle', 'leftVentricle', 'septum', 'chordae'].includes(id) ? 1 : 0;

@@ -19,7 +19,8 @@ trims the vessels a few centimetres from the heart (measured along each vessel),
 for Meta Quest (about 140,000 triangles in all), splits the heart wall into right/left atrium, right/left ventricle
 and septum (`split.mjs`: the coronary grooves, the valve rings and the cavity each inner surface faces), measures
 the landmarks (`finalize.mjs`), closes the vessels' cut ends (`cap.mjs`: each ragged end is re-cut straight, never
-within 3 cm of a valve, and closed with the cut wall around a dark opening, as vertex colours), and compresses the
-result (meshopt).
+within 3 cm of a valve, and closed with the cut wall around a dark opening, as vertex colours), removes vessel pieces
+left floating and marks the epicardial fat (`tidy.mjs`: mostly in the grooves where chambers meet, a little along
+the coronary vessels, stored as the vertex value `_FAT`), and compresses the result (meshopt).
 
 Licence of the data: CC BY-SA 2.1 Japan (see `lessons/heart-lab/CREDITS.md`).

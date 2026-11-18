@@ -1,7 +1,8 @@
 // BodyParts3D heart parts (STL, mm) → one GLB for the Heart Lab, in the lesson's heart coordinates:
 // x = the patient's left (your right, looking at them), y = up, z = forward (out of the chest), 1 unit = 10 cm.
 // Trims vessels a short way outside the heart, drops scan specks, simplifies for Quest, splits the heart wall
-// into the chambers and septum, closes the vessels' cut ends (cap.mjs), and stores each part as a named node.
+// into the chambers and septum, closes the vessels' cut ends (cap.mjs), drops floating vessel pieces and marks where the epicardial fat lies
+// (tidy.mjs), and stores each part as a named node.
 // usage: node build.mjs <stlDir> ../../lessons/heart-lab/models/heart.glb   (see README.md)
 import path from 'node:path';
 import fs from 'node:fs';
@@ -11,6 +12,7 @@ import { meshopt, weld, prune } from '@gltf-transform/functions';
 import { MeshoptSimplifier, MeshoptEncoder } from 'meshoptimizer';
 import { readSTL, components } from './stl.mjs';
 import { capOpenEnds, recutEnds } from './cap.mjs';
+import { dropFloating, fatAmount, pointGrid } from './tidy.mjs';
 
 const [, , dir, out, preview] = process.argv;
 await MeshoptSimplifier.ready;
@@ -190,6 +192,15 @@ for (const id of ['aorta', 'pulmonaryArtery', 'pulmonaryVeins', 'venaCava', 'cor
   if (process.env.DEBUG_ENDS) console.log(capped.ends.map((e) => `n${e.n} r${e.r.toFixed(3)} at ${e.c.map((x) => x.toFixed(2))} (root ${Math.min(...[L.aorticRoot, L.pv, L.svc[1], L.ivc[1]].map((q) => Math.hypot(q[0] - e.c[0], q[1] - e.c[1], q[2] - e.c[2]))).toFixed(2)})`).join('  '));
   parts[id] = capped;
 }
+// no vessel pieces left floating in the air, and the epicardial fat along the coronary grooves (tidy.mjs)
+for (const line of dropFloating(parts, ['aorta', 'pulmonaryArtery', 'pulmonaryVeins', 'venaCava', 'coronaryArteries', 'cardiacVeins'])) console.log('  ' + line);
+const coronaryGrid = pointGrid([parts.coronaryArteries.pos, parts.cardiacVeins.pos]);
+for (const id of Object.keys(groups)) {
+  // the grooves: where this chamber meets another one (the septum is inside, so it doesn't count)
+  const others = Object.keys(groups).filter((k) => k !== id && k !== 'septum').map((k) => parts[k].pos);
+  parts[id].fat = id === 'septum' ? fatAmount(parts[id], normals(parts[id]), coronaryGrid, null) : fatAmount(parts[id], normals(parts[id]), coronaryGrid, pointGrid(others));
+  console.log('  fat →', id.padEnd(15), (parts[id].fat.reduce((a, b) => a + b, 0) / parts[id].fat.length * 100).toFixed(1) + '% cover');
+}
 
 const doc = new Document();
 const buffer = doc.createBuffer();
@@ -201,6 +212,7 @@ for (const [id, m] of Object.entries(parts)) {
     .setAttribute('NORMAL', doc.createAccessor().setType('VEC3').setArray(normals(m)).setBuffer(buffer))
     .setIndices(doc.createAccessor().setType('SCALAR').setArray(m.idx).setBuffer(buffer));
   if (m.col) prim.setAttribute('COLOR_0', doc.createAccessor().setType('VEC3').setArray(m.col).setBuffer(buffer));
+  if (m.fat) prim.setAttribute('_FAT', doc.createAccessor().setType('SCALAR').setArray(m.fat).setBuffer(buffer));
   const mesh = doc.createMesh(id).addPrimitive(prim);
   scene.addChild(doc.createNode(id).setMesh(mesh));
 }
