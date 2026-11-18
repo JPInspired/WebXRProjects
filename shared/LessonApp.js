@@ -8,6 +8,8 @@ import { RoomScan, solveRoom, fingerprint } from './net/RoomAlign.js';
 import { newSessionCode } from './net/code.js';
 import { initStartScreen } from './ui/StartScreen.js';
 import { PerfGuard } from './util/PerfGuard.js';
+import { sound } from './util/sound.js';
+import { Sparks } from './fx/Sparks.js';
 
 // Everything every WebXR lesson needs, so each lesson only adds its own content:
 //  • three.js scene, desktop camera + orbit controls, lights, floor grid
@@ -75,6 +77,7 @@ export class LessonApp {
     this.initSessionUI(session);
     this.initXRButtons();
     this.refresh();
+    this.sparks = new Sparks(this.scene); // the finished-task sparks (celebrate)
     this.perf = new PerfGuard(this); // frames-per-second counter (teacher, or ?fps) and the headset safety net
     this.clock = new THREE.Clock();
     this.renderer.setAnimationLoop((t, frame) => this.frame(frame));
@@ -183,12 +186,27 @@ export class LessonApp {
     Object.assign(this.state, patch);
   }
 
-  /** Show an explanation on the floating card (and read it out if voice is on). */
+  /**
+   * Show an explanation on the floating card (and read it out if voice is on).
+   * done: true marks the end of a task (every part labelled, every organ placed…): see celebrate().
+   */
   explain(e) {
     if (!e) return;
     this.state.explain = e;
     this.say(`${e.title}. ${e.text}`);
     this.refresh();
+    if (e.done) this.celebrate();
+  }
+
+  /**
+   * A task is finished: the same moment in every lesson. A chime, a buzz in both controllers, the card's edge
+   * glows green and a few sparks rise from it.
+   */
+  celebrate() {
+    sound.done();
+    this.interaction?.pulseAll(0.6, 120);
+    this.explainPanel?.flashDone();
+    if (this.explainPanel) this.sparks.burst(this.explainPanel.mesh);
   }
 
   say(text) {
@@ -987,6 +1005,7 @@ export class LessonApp {
     }
     this.perf.update();
     this.interaction.update();
+    this.sparks.update(dt);
     this.update(dt, frame);
     if (this.presence) {
       this.presence.update(dt);

@@ -125,6 +125,7 @@
     .testing .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; padding-top: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
     .testing p { margin: 0; color: var(--ink-2); max-width: 46em; }
     .testing b { color: var(--ink); }
+    .testing .pair { display: flex; flex-wrap: wrap; gap: 10px; }
 
     /* ── lessons ── */
     .lessons { padding: 70px 0 30px; }
@@ -177,6 +178,11 @@
     .tag.subject { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); background: color-mix(in srgb, var(--accent) 9%, transparent); }
     .card h4 { font: 500 25px/1.15 var(--serif); letter-spacing: -0.01em; margin: 12px 0 6px; }
     .card p { margin: 0; color: var(--ink-2); font-size: 15px; }
+    .do { display: block; margin-top: 12px; font-size: 14px; color: var(--ink-2); }
+    .do b { color: var(--ink); font-weight: 600; }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--ink-3); }
+    .meta span { display: inline-flex; align-items: center; gap: 5px; }
+    .meta svg { width: 15px; height: 15px; flex: none; }
     .open { margin-top: auto; padding-top: 16px; font-size: 14px; font-weight: 600; color: var(--accent); }
     .open::after { content: " →"; transition: margin 0.2s; }
     .card:hover .open::after { margin-left: 4px; }
@@ -208,6 +214,8 @@
     .same { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; padding: 6px 2px; font-weight: 600; }
     .same input { width: 18px; height: 18px; margin: 0; }
     .same small { grid-column: 2; font-weight: 400; color: var(--ink-3); font-size: 13px; }
+    .guide-link { display: inline-block; margin-top: 8px; font-size: 14px; font-weight: 600; color: var(--accent); text-decoration: none; }
+    .guide-link::after { content: " →"; }
     .close { margin-top: 16px; background: none; border: 0; color: var(--ink-3); cursor: pointer; font: inherit; text-decoration: underline; padding: 0; }
     .error { color: #d23f3f; min-height: 1.2em; margin: 6px 0 0; font-size: 14px; }
 
@@ -244,7 +252,7 @@
         <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="10" width="28" height="15" rx="6" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="10.5" cy="17.5" r="3.2" fill="currentColor"/><circle cx="21.5" cy="17.5" r="3.2" fill="currentColor"/><path d="M13.5 25c1-2.3 4-2.3 5 0" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16 2 28 6.5 16 11 4 6.5z" fill="var(--brand)"/></svg>
         WebXR Library
       </a>
-      <nav aria-label="Page"><a href="#how">How it works</a><a href="#lessons">Lessons</a><a href="checklist/">Testing checklist</a></nav>
+      <nav aria-label="Page"><a href="#how">How It Works</a><a href="#lessons">Lessons</a><a href="guide/">Teacher Guides</a><a href="checklist/">Testing Checklist</a></nav>
       <button class="theme" id="theme" type="button" aria-label="Switch between light and dark">
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
         <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
@@ -256,17 +264,17 @@
     <section class="hero">
       <div class="wrap">
         <div>
-          <span class="eyebrow">Mixed reality lessons for the classroom</span>
-          <h1>Lessons you can <em>step into</em>.</h1>
-          <p class="lede">Hold a beating heart, build a PC part by part, swirl a ball above your head and time it, or walk through the great hall of the Natural History Museum. 20 hands-on lessons in science, computing and museum visits, straight in the headset’s browser, for one student or a whole class at once.</p>
+          <span class="eyebrow">Immersive Learning for the Modern Classroom</span>
+          <h1>Lessons You Can <em>Step Into</em></h1>
+          <p class="lede">Twenty hands-on lessons in science, computing and museum visits, designed to bring difficult ideas within reach. Students hold a beating heart, assemble a computer and stand beneath a blue whale, directly in the headset’s browser, whether learning independently or as a whole class.</p>
           <div class="cta">
-            <a class="btn primary" href="#lessons">Browse the lessons</a>
-            <a class="btn" href="#how">How it works</a>
+            <a class="btn primary" href="#lessons">Explore the Lessons</a>
+            <a class="btn" href="#how">How It Works</a>
           </div>
           <div class="facts">
             <div><b>20</b>lessons</div>
             <div><b>5</b>subjects</div>
-            <div><b>0</b>installs: open a link</div>
+            <div><b>0</b>installations: open a link</div>
           </div>
         </div>
         <figure class="stage" id="stage">
@@ -278,22 +286,25 @@
 
     <section class="how" id="how" aria-label="How it works">
       <div class="wrap">
-        <div class="step"><span class="n">1</span><h3>Open it on a headset</h3><p>Visit this page in the Meta Quest browser (or any WebXR headset). No app store, no installs. It works on any computer screen too.</p></div>
-        <div class="step"><span class="n">2</span><h3>Start a class session</h3><p>Pick a lesson and start a shared session. Students join with a four-letter code; in the same room, everyone’s lab lines up with the real classroom.</p></div>
-        <div class="step"><span class="n">3</span><h3>Teach from your own menu</h3><p>Choose the activity and level for everyone, put predictions on the class board and reveal the answers, while each student works on their own bench.</p></div>
+        <div class="step"><span class="n">1</span><h3>Open on Any Headset</h3><p>Visit this page in the Meta Quest browser or on any WebXR headset. There is nothing to install, and every lesson also works on a computer screen.</p></div>
+        <div class="step"><span class="n">2</span><h3>Bring the Class Together</h3><p>Choose a lesson and start a shared session. Students join with a four-letter code and, in the same room, every lab aligns with the real classroom.</p></div>
+        <div class="step"><span class="n">3</span><h3>Lead From the Teacher Menu</h3><p>Set the activity and level for everyone, gather predictions on the class board and reveal the answers, while each student works at their own bench.</p></div>
       </div>
     </section>
 
     <section class="testing" aria-label="Testing the lessons">
       <div class="wrap">
-        <p><b>Trying the lessons before a class?</b> The testing checklist walks you through each one on a headset, with its frame rate, and gives you a report to send back.</p>
-        <a class="btn" href="checklist/">Open the testing checklist</a>
+        <p><b>Preparing for a Lesson</b> Each teacher guide sets out a lesson’s aims, activities and teaching tips, and the testing checklist guides you through each lesson on a headset before class.</p>
+        <div class="pair">
+          <a class="btn" href="guide/">Read the Teacher Guides</a>
+          <a class="btn" href="checklist/">Open the Testing Checklist</a>
+        </div>
       </div>
     </section>
 
     <section class="lessons" id="lessons" aria-label="Lessons">
       <div class="wrap">
-        <div class="head"><h2>The lessons</h2>
+        <div class="head"><h2>Explore the Lessons</h2>
           <label class="search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
             <input type="search" id="search" placeholder="Search lessons" autocomplete="off" spellcheck="false" aria-label="Search lessons"><kbd title="Press / to search">/</kbd>
@@ -305,15 +316,17 @@
         </div>
         <p class="no-match" id="no-match" hidden></p>
         <section class="subject" data-subject="chemistry" id="chemistry">
-          <header><h3>Chemistry</h3><p>Atoms, molecules, reactions and measuring in the lab.</p></header>
+          <header><h3>Chemistry</h3><p>Atoms, reactions and careful measurement at the lab bench.</p></header>
           <div class="grid">
             <button class="card" data-lesson="atomic-models" data-keywords="atoms atom electrons protons neutrons nucleus periodic table elements molecules scale bohr">
               <span class="media"><img src="assets/lessons/atomic-models.webp" data-loop="assets/lessons/atomic-models-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
               <span class="body">
                 <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span></span>
                 <h4>Atom Scale Lab</h4>
-                <p>Build and explore atomic models, compare the sizes of atoms and molecules, perform reactions by hand and discover the real scale of an atom — all you need to do is look out of the window.</p>
-                <span class="open">Open lesson</span>
+                <p>An immersive introduction to the structure and scale of matter. Students assemble atoms and molecules by hand, carry out reactions on the bench and discover the true size of an atom by looking out across the world beyond the classroom window.</p>
+                <span class="do"><b>Students</b> build atoms, compare sizes and react molecules</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>30 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 11–16 · KS3–KS4</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="acid-lab" data-keywords="acids alkalis bases ph indicator neutralisation neutralization litmus salts" data-same-room="1">
@@ -321,8 +334,10 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Acid Lab</h4>
-                <p>A lab bench for every student: sort everyday substances on the pH scale, test mystery solutions with litmus, universal indicator paper and a digital pH meter, record the results and compare how accurate each method is.</p>
-                <span class="open">Open lesson</span>
+                <p>A personal lab bench for every student, designed around careful measurement. Everyday substances are sorted on the pH scale, mystery solutions are tested three ways and the accuracy of each method is compared across the class.</p>
+                <span class="do"><b>Students</b> sort, test with indicators and compare methods</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>40 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 11–14 · KS3</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="lithium-lab" data-keywords="lithium alkali metals group 1 reactivity water sodium potassium battery" data-same-room="1">
@@ -330,8 +345,10 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Lithium Reactions</h4>
-                <p>Drop lithium and four mystery alkali metals into water and hold them in a Bunsen flame: float or sink, fizz or explode, flame colour. Identify each metal from a reference chart, and keep the safety screen across.</p>
-                <span class="open">Open lesson</span>
+                <p>A safe way to explore one of the most dramatic reactions in chemistry. Students observe lithium and four unknown alkali metals in water and in a Bunsen flame, then use their observations and a reference chart to identify each metal.</p>
+                <span class="do"><b>Students</b> observe, record and identify the metals</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>30 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 11–16 · KS3–KS4</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="kinetics-lab" data-keywords="rates of reaction rate temperature concentration surface area catalyst collision theory" data-same-room="1">
@@ -339,8 +356,10 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Kinetics Lab</h4>
-                <p>What makes a reaction go faster? Time magnesium and marble disappearing in acid, read a gas syringe, and compare the effects of temperature, surface area, concentration and catalysts.</p>
-                <span class="open">Open lesson</span>
+                <p>A focused investigation into what makes a reaction faster. Students time magnesium and marble in acid, read a gas syringe and draw conclusions about temperature, surface area, concentration and catalysts.</p>
+                <span class="do"><b>Students</b> time reactions, read a gas syringe and conclude</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>45 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 14–16 · KS4</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="voltaic-lab" data-keywords="battery batteries cells electricity voltage electrochemistry electrochemical metals electrolyte current" data-same-room="1">
@@ -348,22 +367,26 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Chemistry</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Voltaic Lab</h4>
-                <p>Make electricity from chemistry: put metal strips in electrolytes (or build two-beaker cells with a salt bridge), measure the voltage, link cells in series, zoom in to see the electrons flow, and open up real batteries.</p>
-                <span class="open">Open lesson</span>
+                <p>Electricity made from chemistry, from the first metal strip to a real battery. Students build simple and two-beaker cells, measure their voltage, connect them in series and follow the electrons as they flow.</p>
+                <span class="do"><b>Students</b> build cells, measure voltage and open batteries</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>40 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 14–16 · KS4</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
           </div>
         </section>
         <section class="subject" data-subject="physics" id="physics">
-          <header><h3>Physics</h3><p>Forces, energy and waves.</p></header>
+          <header><h3>Physics</h3><p>Forces, energy, motion and waves.</p></header>
           <div class="grid">
             <button class="card" data-lesson="waves-lab" data-keywords="waves sound light frequency wavelength amplitude transverse longitudinal" data-same-room="1">
               <span class="media"><img src="assets/lessons/waves-lab.webp" data-loop="assets/lessons/waves-lab-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
               <span class="body">
                 <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Waves Lab</h4>
-                <p>A rope and a ripple tank for every student: change the frequency, amplitude and speed of a wave, freeze it and measure it, hear it as sound, see it as light and the sea, and work out which variable was changed.</p>
-                <span class="open">Open lesson</span>
+                <p>A rope and a ripple tank for every student, with every variable in their hands. Waves are frozen, measured, heard as sound and seen as light, before students work out which variable has been changed.</p>
+                <span class="do"><b>Students</b> change, freeze and measure waves</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>30 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 11–16 · KS3–KS4</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="bounce-lab" data-keywords="bounce energy forces gravity drop elastic potential kinetic efficiency" data-same-room="1">
@@ -371,8 +394,10 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Bounce Lab</h4>
-                <p>Surface mats on the real classroom floor and six real-size balls: drop them by hand onto concrete, grass, sand, a trampoline or the Moon, read the rebound from a slow-motion replay, and compare the whole class’s results.</p>
-                <span class="open">Open lesson</span>
+                <p>A practical investigation set out on the real classroom floor. Students drop six life-size balls onto different surfaces, read each rebound from a slow-motion replay and compare their findings with the whole class.</p>
+                <span class="do"><b>Students</b> drop, measure the rebound and compare</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>30 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 11–14 · KS3</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="radiation-lab" data-keywords="radiation radioactivity radioactive alpha beta gamma geiger nuclear half-life" data-same-room="1">
@@ -380,8 +405,10 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Radiation Lab</h4>
-                <p>A Geiger counter, sealed school sources and everyday things that are slightly radioactive: use paper, aluminium and lead to find out which give off alpha, beta and gamma, handle them safely with tongs, and watch your own dose.</p>
-                <span class="open">Open lesson</span>
+                <p>A safe introduction to radioactivity and how it is measured. With a Geiger counter, sealed sources and everyday materials, students identify alpha, beta and gamma radiation and learn to handle sources responsibly.</p>
+                <span class="do"><b>Students</b> count, shield and identify the radiation</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>45 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 14–16 · KS4</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="circular-lab" data-keywords="circular motion centripetal force forces orbit satellite" data-same-room="1">
@@ -389,8 +416,10 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Circular Motion</h4>
-                <p>Swirl a ball on a string above your head, pulled by a hanging weight, and time its turns with a stopwatch and a light gate. How do mass and string length change the speed? Then cut the string and see which way it flies.</p>
-                <span class="open">Open lesson</span>
+                <p>A classic practical brought to life above every student’s head. Students swing a ball on a string, time its turns with a stopwatch and a light gate, and test how mass and length affect the motion.</p>
+                <span class="do"><b>Students</b> swing, time and compare masses and lengths</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>40 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 16–18 · KS5</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="kinematics-lab" data-keywords="kinematics motion speed velocity acceleration forces graphs free fall gravity" data-same-room="1">
@@ -398,8 +427,10 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Physics</span><span class="tag">Maths</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Kinematics Lab</h4>
-                <p>Drop things from a tower (and watch it life-size through the ceiling), swing a pendulum, bounce a spring and roll a ball down a ramp. Chart displacement, velocity and acceleration, and work out g, periods and spring constants.</p>
-                <span class="open">Open lesson</span>
+                <p>Four experiments in one laboratory, from a tower drop seen at full height to a ball on a ramp. Students chart displacement, velocity and acceleration, and calculate g, periods and spring constants from their own data.</p>
+                <span class="do"><b>Students</b> measure, chart and calculate motion</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>45 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 14–18 · KS4–KS5</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="pendulum-lab" data-keywords="pendulum oscillation time period energy forces gravity clock" data-same-room="1">
@@ -407,22 +438,26 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Physics</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Pendulum Lab</h4>
-                <p>How does length change a pendulum's swing? Time swings with a stopwatch and a light gate, try a giant pendulum from the ceiling, watch its energy drain away, then regulate a grandfather clock and push a swing.</p>
-                <span class="open">Open lesson</span>
+                <p>A clear route into oscillation, from a simple pendulum to a grandfather clock. Students time swings by hand and with a light gate, see how energy is lost and use what they learn to regulate a clock.</p>
+                <span class="do"><b>Students</b> time swings, test length and regulate a clock</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>30 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 11–16 · KS3–KS4</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
           </div>
         </section>
         <section class="subject" data-subject="biology" id="biology">
-          <header><h3>Biology</h3><p>Cells, the human body and ecosystems.</p></header>
+          <header><h3>Biology</h3><p>Cells, the human body and living ecosystems.</p></header>
           <div class="grid">
             <button class="card" data-lesson="cell-explorer" data-keywords="cells cell organelles nucleus mitochondria membrane plant animal">
               <span class="media"><img src="assets/lessons/cell-explorer.webp" data-loop="assets/lessons/cell-explorer-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
               <span class="body">
                 <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span></span>
                 <h4>Cell Explorer</h4>
-                <p>Investigate animal, plant and bacterial cells thousands of times bigger than life — name every part, pull organelles out to examine them, and see what happens to the cell when one goes missing.</p>
-                <span class="open">Open lesson</span>
+                <p>Animal, plant and bacterial cells enlarged thousands of times. Students name every structure, remove organelles to examine them closely and discover what happens to the cell when one is missing.</p>
+                <span class="do"><b>Students</b> name, examine and compare cells</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>30 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 11–14 · KS3</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="heart-lab" data-keywords="heart circulation blood anatomy organs cardiovascular" data-same-room="1">
@@ -430,8 +465,10 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class heart</span></span>
                 <h4>Heart Lab</h4>
-                <p>A beating human heart on every desk and a big one for the whole class: name every part, follow the blood through the chambers and valves, step through the cardiac cycle with a live ECG, and see what exercise and heart disease do.</p>
-                <span class="open">Open lesson</span>
+                <p>A beating human heart on every desk, with a larger one for the whole class. Students name each part, follow the blood through the chambers and valves, and connect the cardiac cycle to a live ECG.</p>
+                <span class="do"><b>Students</b> label, follow the blood and read the ECG</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>30 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 11–16 · KS3–KS4</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="enzyme-lab" data-keywords="enzymes digestion catalase amylase temperature ph proteins" data-same-room="1">
@@ -439,8 +476,10 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Enzyme Lab</h4>
-                <p>Cut the liver, drop it into hydrogen peroxide and put the stopper on: the oxygen made by the enzyme catalase pushes the water down a measuring cylinder. Read the volume every 30 seconds and build a class graph of how temperature changes it.</p>
-                <span class="open">Open lesson</span>
+                <p>A complete enzyme practical, from preparation to class results. Students measure the oxygen produced by catalase at different temperatures and build a shared graph that reveals the pattern.</p>
+                <span class="do"><b>Students</b> prepare, measure and graph the results</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>45 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 14–16 · KS4</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="microscope-lab" data-keywords="microscope cells magnification slides" data-same-room="1">
@@ -448,8 +487,10 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Microscope Lab</h4>
-                <p>Learn the parts of a light microscope, prepare slides of onion, cheek cells, pondweed, blood, pond water and gut tissue, focus at ×40, ×100 and ×400, and label the cells you see.</p>
-                <span class="open">Open lesson</span>
+                <p>A thorough grounding in light microscopy. Students learn each part of the microscope, prepare six slides, focus at three magnifications and label the cells they observe.</p>
+                <span class="do"><b>Students</b> prepare slides, focus and label the cells</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>35 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 11–16 · KS3–KS4</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="osmosis-lab" data-keywords="osmosis diffusion water potato cells membrane concentration" data-same-room="1">
@@ -457,8 +498,10 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Osmosis Lab</h4>
-                <p>Cut equal pieces from a potato with a digital scalpel, dry and weigh them, then soak them in five strengths of salt solution. Watch a simulated 24-hour time-lapse, weigh them again, and plot the class's mass change against concentration.</p>
-                <span class="open">Open lesson</span>
+                <p>The osmosis practical, carried out with precision. Students cut, dry and weigh potato samples, soak them in five salt solutions, observe a 24-hour time-lapse and plot the class’s results.</p>
+                <span class="do"><b>Students</b> cut, weigh, soak and plot</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>45 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 14–16 · KS4</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="organs-lab" data-keywords="organs body anatomy human body systems skeleton heart lungs" data-same-room="1">
@@ -466,8 +509,10 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Biology</span><span class="tag">Mixed reality</span><span class="tag">Class board</span></span>
                 <h4>Identifying Organs</h4>
-                <p>Every student gets their own life-size skeleton with its organs missing. Put the brain, heart, lungs and the rest in their places, match each organ to its job, then see how the body systems depend on each other.</p>
-                <span class="open">Open lesson</span>
+                <p>A life-size skeleton for every student, waiting for its organs. Students place each organ in position, match it to its function and see how the body’s systems depend on one another.</p>
+                <span class="do"><b>Students</b> place, match and connect the organs</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>30 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 9–14 · KS2–KS3</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
             <button class="card" data-lesson="reef-dive" data-keywords="ocean sea marine coral reef ecology ecosystems animals fish climate" data-same-room="1">
@@ -475,36 +520,42 @@
               <span class="body">
                 <span class="tags"><span class="tag subject">Biology</span><span class="tag">IB</span><span class="tag">Mixed reality</span><span class="tag">Whole room</span></span>
                 <h4>Reef Dive</h4>
-                <p>The classroom becomes the sea floor: identify marine life swimming around the room at real size, and test how temperature, pH, nutrients and light change the reef.</p>
-                <span class="open">Open lesson</span>
+                <p>The classroom becomes the sea floor. Students identify marine life swimming around them at real size and investigate how temperature, pH, nutrients and light shape the health of a reef.</p>
+                <span class="do"><b>Students</b> identify species and test the conditions</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>25 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 9–14 · KS2–KS3</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
           </div>
         </section>
         <section class="subject" data-subject="computing" id="computing">
-          <header><h3>Computer Science</h3><p>Hardware and how computers work.</p></header>
+          <header><h3>Computer Science</h3><p>The hardware inside a computer and how it works together.</p></header>
           <div class="grid">
             <button class="card" data-lesson="pc-builder" data-keywords="computer pc hardware cpu gpu motherboard ram components computing build">
               <span class="media"><img src="assets/lessons/pc-builder.webp" data-loop="assets/lessons/pc-builder-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
               <span class="body">
                 <span class="tags"><span class="tag subject">Computer Science</span><span class="tag">Mixed reality</span></span>
                 <h4>PC Builder Lab</h4>
-                <p>Build your own computer from real, life-size parts like Lego — check that everything is compatible, power it on, and follow the power and data to see how the components work together.</p>
-                <span class="open">Open lesson</span>
+                <p>A computer built from real, life-size components. Students check that every part is compatible, power the machine on and follow the power and data to understand how the components work together.</p>
+                <span class="do"><b>Students</b> assemble, check and power on</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>30 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Ages 11–16 · KS3–KS4</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
           </div>
         </section>
         <section class="subject" data-subject="museum" id="museum">
-          <header><h3>Museum visits</h3><p>Walk through real places in virtual reality.</p></header>
+          <header><h3>Museum Visits</h3><p>Real places, explored in virtual reality.</p></header>
           <div class="grid">
             <button class="card" data-lesson="hintze-hall" data-keywords="natural history museum london whale dinosaurs fossils evolution darwin" data-solo="1">
               <span class="media"><img src="assets/lessons/hintze-hall.webp" data-loop="assets/lessons/hintze-hall-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
               <span class="body">
                 <span class="tags"><span class="tag subject">Museum visit</span><span class="tag">VR</span><span class="tag">Solo</span></span>
                 <h4>Hintze Hall</h4>
-                <p>Step inside the Natural History Museum in London: climb the stairs to Charles Darwin, walk both balconies, stand beneath Hope the blue whale and discover the story behind every exhibit.</p>
-                <span class="open">Open lesson</span>
+                <p>A visit to the Natural History Museum in London without leaving the classroom. Students climb the stairs to Charles Darwin, walk both balconies and stand beneath Hope the blue whale, discovering the story behind each exhibit.</p>
+                <span class="do"><b>Students</b> explore the hall and its exhibits</span>
+                <span class="meta"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>25 min</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c.8-3.8 3.6-5.6 7-5.6s6.2 1.8 7 5.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>All ages</span></span>
+                <span class="open">Open Lesson</span>
               </span>
             </button>
           </div>
@@ -515,27 +566,28 @@
 
   <footer>
     <div class="wrap">
-      <div><b>WebXR Library</b><br>Mixed reality lessons that run in the browser.</div>
-      <div><a href="checklist/">Testing checklist</a></div>
+      <div><b>WebXR Library</b><br>Immersive lessons that run in the browser.</div>
+      <div><a href="guide/">Teacher Guides</a><br><a href="checklist/">Testing Checklist</a></div>
       <div>Heart model: BodyParts3D, © The Database Center for Life Science, CC BY-SA 2.1 Japan.<br>Other third-party models and scans are credited in each lesson’s CREDITS.md.</div>
     </div>
   </footer>
 
   <dialog id="start">
     <h2 id="lesson-title">Lesson</h2>
-    <p>How do you want to open it?</p>
+    <p>How would you like to open it?</p>
+    <a class="guide-link" id="guide-link" href="guide/">Read the Teacher Guide</a>
     <label class="field">Your name (shown to others in shared sessions)<input id="name" maxlength="24" placeholder="e.g. Alex" autocomplete="nickname"></label>
     <div class="choices">
-      <button class="big primary" id="solo">Open on my own<small>Just you</small></button>
-      <button class="big" id="create">Start a shared session<small>Get a code a colleague or class can join. Everyone builds their own and sees each other.</small></button>
-      <label class="same"><input type="checkbox" id="same-room"> We’re in the same room<small>Everyone sees the same things in the same places in the room. Each headset lines itself up from its scan of the room (Space Setup), with nothing to press.</small></label>
+      <button class="big primary" id="solo">Open Independently<small>Just you</small></button>
+      <button class="big" id="create">Start a Shared Session<small>Receive a code that a colleague or class can join. Everyone works on their own model and sees each other.</small></button>
+      <label class="same"><input type="checkbox" id="same-room"> We are in the same room<small>Everyone sees the same things in the same places in the room. Each headset lines itself up from its scan of the room (Space Setup), with nothing to press.</small></label>
       <form class="join" id="join">
         <input id="code" maxlength="8" placeholder="CODE" autocomplete="off" aria-label="Session code">
-        <button class="big">Join with code</button>
+        <button class="big">Join With Code</button>
       </form>
       <p class="error" id="error"></p>
     </div>
-    <button class="close" id="cancel">Back to lessons</button>
+    <button class="close" id="cancel">Back to the Lessons</button>
   </dialog>
 
   <script type="module">
@@ -657,6 +709,7 @@
         lesson = card.dataset.lesson;
         if (card.dataset.solo) return go(null); // a solo visit: straight in
         document.getElementById('lesson-title').textContent = card.querySelector('h4').textContent;
+        document.getElementById('guide-link').href = `guide/${lesson}/`;
         document.getElementById('error').textContent = '';
         document.getElementById('same-room').checked = card.dataset.sameRoom === '1';
         dialog.showModal();

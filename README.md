@@ -39,6 +39,22 @@ A **search box** under “The lessons” (press **/** to jump to it) filters the
 
 **Lesson start screens** share the same look (`shared/ui/start.css` and `shared/ui/StartScreen.js`; each lesson’s `style.css` just imports the shared one): the lesson’s picture and hover loop from `assets/lessons/`, its subject, a light/dark switch (the same choice as the lessons page), and **Explore on screen**, which folds the box away (the – / + button brings it back). Where the device has no headset, Explore on screen becomes the main button. A new lesson needs its picture in `assets/lessons/` and, in its `index.html`, the `<figure class="shot">` and `<span class="eyebrow">` lines copied from any other lesson.
 
+**Lesson cards** each show a short overview, what students do, how long the lesson takes and the ages it suits (with the UK key stage). Edit them in `index.html`.
+
+**Teacher guides:** `guide/` has a page for every lesson (aims, how the lesson runs step by step, teaching tips, its picture, and links to open it or test it), plus a list of all of them. They are linked from the top of the lessons page, its footer, and from each lesson's "How would you like to open it?" box. The pages are made from one file: edit `tools/guides/lessons.mjs`, then run `node tools/guides/build.mjs` (no installs needed). Add a lesson there when you add one to the site.
+
+**Writing style** for the site (pages, cards, guides): British spelling; headings in Title Case with no full stop; calm, confident sentences that speak about "students" and "the class"; lists of three joined with "and"; no contractions, exclamation marks or emoji; short button labels such as *Open Lesson* or *Read the Guide*.
+
+## The same feel in every lesson
+
+Shared code gives every lesson the same hands-on feel, so a new lesson gets it for free:
+
+- **Glow:** whatever a hand, ray or mouse is on softly glows (`shared/ui/HoverGlow.js`), and what you are holding glows a little. In a headset the controller gives a tiny tick when it reaches something new.
+- **Easing into place:** when you let go and the lesson moves the object (snapping into its spot, or back to the desk), it eases there over a fraction of a second instead of jumping (`Interaction.settle`).
+- **Menu buttons** look raised, show as pressed in for a moment when used, and tap.
+- **Sounds** (`shared/util/sound.js`): one soft, warm family for every lesson: tap (buttons), pick and put (hands: played automatically unless the lesson makes its own sound), correct, wrong, done, and lab sounds. `sound.loop('bubbles' | 'fizz' | 'hum')` gives sounds that last, used for the Enzyme Lab's bubbling, the Kinetics Lab's fizzing and the PC Builder's fans. No audio files.
+- **A finished task:** pass `done: true` with an explanation (`this.explain({ title, text, done: true })`), or call `this.celebrate()`: a chime, a buzz in both controllers, a green glow round the card and a few sparks. Used when every part is labelled or placed, a quiz is finished, or a computer starts.
+
 ## Shared sessions (work alongside colleagues)
 
 Every lesson can be opened **solo** or in a **shared session**:
@@ -581,8 +597,12 @@ shared/                            used by every lesson
                                    RoomAlign (each headset finds the shared room frame from its room scan), config
   vendor/                          Trystero (MIT) bundled as one file
   ui/                              canvas panels, labels, mouse/touch/controller/hand input, and the lesson start screen (start.css, StartScreen.js)
-  util/sound.js                    synthesised sound effects
+  util/sound.js                    synthesised sound effects (one family for every lesson, plus lasting loops)
   fx/Flows.js                      animated flows between points (used for processes)
+  fx/Sparks.js                     the sparks when a task is finished
+  ui/HoverGlow.js                  the glow on whatever you are about to grab
+guide/                             a teacher guide for every lesson (made by tools/guides/build.mjs from tools/guides/lessons.mjs)
+checklist/                         the testing checklist
 lessons/acid-lab/
   src/data/acid.js                 substances and pH values, paper colours, the unknown sets, method comparison, answers
   src/model/                       Bench (beakers, papers, pH meter), Sorter (pH scale), Board (class board)

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { benchTop, glassMaterial, liquidMaterial, bubbleTexture, metalMaterial } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
+import { sound } from '../../../../shared/util/sound.js';
 import { FACTORS, V_MAX, RUN, volumeAt } from '../data/kinetics.js';
 
 // The bench changes with the factor being investigated.
@@ -383,6 +384,7 @@ export class Bench {
   // ───────────── every frame ─────────────
 
   bubble(p, top, rate, dt) {
+    this.fizzLevel = Math.max(this.fizzLevel ?? 0, rate / 40); // how loud the fizzing is (set each frame)
     this.acc = (this.acc ?? 0) + rate * dt;
     const f = this.fx;
     while (this.acc >= 1) {
@@ -441,6 +443,9 @@ export class Bench {
       if (f.pos[i * 3 + 1] > f.stop[i]) f.life[i] = 0;
     }
     this.bubbles.geometry.attributes.position.needsUpdate = true;
+    // the fizzing you hear follows the bubbles you see
+    if (this.fizzLevel > 0 || this.fizz) (this.fizz ??= sound.loop('fizz')).set(Math.min(1, this.fizzLevel ?? 0));
+    this.fizzLevel = 0;
   }
 
   /** Without the mouse (buttons and tests). */

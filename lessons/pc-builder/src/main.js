@@ -235,6 +235,8 @@ class App extends LessonApp {
     this.state.power = 'booting';
     this.state.screen = { lines: [], note: null, desktop: false };
     sound.power();
+    // the fans spin up as soon as there is power (even if it then fails to start)
+    (this.fans ??= sound.loop('hum')).set(0.7);
     let i = 0;
     const next = () => {
       if (this.state.power !== 'booting') return;
@@ -254,6 +256,7 @@ class App extends LessonApp {
       } else if (step.done) {
         this.state.power = 'on';
         this.state.booted = true;
+        this.celebrate();
         if (!this.state.screen.note) this.state.screen.note = { title: 'It works!', text: 'Every part is doing its job. Press “How it works” to watch power, data and heat flow between them.' };
       } else {
         this.bootTimer = setTimeout(next, step.wait * 1000);
@@ -268,6 +271,7 @@ class App extends LessonApp {
     clearTimeout(this.bootTimer);
     const wasOn = this.state.power !== 'off';
     this.state.power = 'off';
+    this.fans?.set(0);
     this.state.screen = { lines: [], note: null, desktop: false };
     this.endTour();
     if (safety && wasOn) this.state.explain = T.SAFETY;

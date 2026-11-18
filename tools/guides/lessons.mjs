@@ -1,0 +1,150 @@
+// The teacher guide for every lesson: aims, how the lesson runs, and tips. `node tools/guides/build.mjs` turns
+// this into one page per lesson (guide/<lesson>/index.html) and the list of guides (guide/index.html).
+// Writing style: British spelling, Title Case headings, calm and confident, no contractions or exclamation marks.
+
+export const SUBJECTS = {
+  chemistry: 'Chemistry', physics: 'Physics', biology: 'Biology', computing: 'Computer Science', museum: 'Museum Visits',
+};
+
+export const GUIDES = [
+  {
+    id: 'atomic-models', title: 'Atom Scale Lab', subject: 'chemistry', mins: 30, ages: 'Ages 11–16 · KS3–KS4', mode: 'Mixed reality · on your own',
+    intro: 'An immersive introduction to the structure and scale of matter, in which students build atoms and molecules by hand and come to understand just how small an atom really is.',
+    aims: ['Describe the structure of an atom in terms of protons, neutrons and electrons', 'Relate the position of an element in the periodic table to its atomic structure', 'Represent simple molecules and explain how atoms bond to form them', 'Appreciate the true scale of an atom and its nucleus'],
+    steps: [['Atom', 'Students add protons, neutrons and electrons and watch the element, its charge and its mass change as they build.'], ['Molecules', 'Atoms are joined into familiar molecules, with each bond formed by hand.'], ['Reactions', 'Reactant molecules are pulled apart and rebuilt into products, showing that atoms are rearranged rather than created or destroyed.'], ['Scale', 'The nucleus is placed in the room and the edge of the atom is found far beyond the classroom window.']],
+    tips: ['Begin with hydrogen and carbon before allowing free exploration of the periodic table.', 'The Scale activity is most powerful in mixed reality, where the real window is visible.', 'Ask students to predict how far away the edge of the atom will be before revealing it.'],
+  },
+  {
+    id: 'acid-lab', title: 'Acid Lab', subject: 'chemistry', mins: 40, ages: 'Ages 11–14 · KS3', mode: 'Mixed reality · class board',
+    intro: 'A personal lab bench for every student, built around careful testing and honest comparison of methods.',
+    aims: ['Place everyday substances on the pH scale as acids, alkalis or neutral', 'Use litmus, universal indicator and a pH meter to test unknown solutions', 'Compare the precision of different testing methods', 'Follow safe laboratory practice, including eye protection and rinsing equipment'],
+    steps: [['pH Scale', 'Students sort everyday substances onto the pH scale and check their answers.'], ['Test Papers', 'Six unknown solutions are tested with litmus and universal indicator paper, and the results are recorded.'], ['pH Meter', 'The same solutions are measured with a digital meter, rinsing the probe between samples.'], ['Compare', 'Students compare the three methods and discuss which is most accurate and why.']],
+    tips: ['Goggles must be put on before any solution can be handled, which offers a natural moment to discuss safety.', 'An unrinsed probe gives a misleading reading by design: use it to discuss contamination.', 'In a shared session, choose the set of solutions for the whole class from the Teacher Menu.'],
+  },
+  {
+    id: 'lithium-lab', title: 'Lithium Reactions', subject: 'chemistry', mins: 30, ages: 'Ages 11–16 · KS3–KS4', mode: 'Mixed reality · class board',
+    intro: 'A safe way to explore the reactivity of the alkali metals, from a gentle fizz to a violent explosion, and to identify unknown metals from evidence.',
+    aims: ['Describe the reactions of the alkali metals with water', 'Use flame colours to help identify a metal', 'Explain the trend in reactivity down Group 1', 'Recognise why some reactions are demonstrated only behind a safety screen'],
+    steps: [['Predict', 'Students predict how each metal will behave and share their predictions on the class board.'], ['Experiment', 'Lithium and four unknown metals are placed in water and held in a Bunsen flame, and every observation is recorded.'], ['Class Results', 'Each metal is identified using a reference chart, and the class compares its identifications and the trend down the group.']],
+    tips: ['The unknown metals are shuffled for each student, so results cannot simply be copied.', 'Leave the safety screen open once, deliberately, to show why it matters.', 'Ask students to justify each identification with at least two observations.'],
+  },
+  {
+    id: 'kinetics-lab', title: 'Kinetics Lab', subject: 'chemistry', mins: 45, ages: 'Ages 14–16 · KS4', mode: 'Mixed reality · class board',
+    intro: 'A focused investigation into rates of reaction, covering each of the four factors students are expected to know.',
+    aims: ['Explain how temperature, surface area, concentration and catalysts affect the rate of a reaction', 'Measure rate by timing a reaction and by collecting gas', 'Use collision theory to explain experimental results', 'Identify the variables in a fair test'],
+    steps: [['Predict', 'Students predict the effect of each factor before any measurement is taken.'], ['Experiment', 'Magnesium and marble react with acid: temperature and surface area are timed, while concentration and catalysts are measured with a gas syringe.'], ['Summary', 'The class chart and summary table bring each factor together with its explanation.']],
+    tips: ['Assign different factors to different groups and use the summary to share findings.', 'Ask students to name the independent, dependent and control variables for each run.', 'The fizzing sound follows the rate of reaction: ask students what they notice.'],
+  },
+  {
+    id: 'voltaic-lab', title: 'Voltaic Lab', subject: 'chemistry', mins: 40, ages: 'Ages 14–16 · KS4', mode: 'Mixed reality · class board',
+    intro: 'Electricity made from chemistry, from a pair of metal strips to the batteries found in everyday devices.',
+    aims: ['Build a simple cell and measure its voltage', 'Relate the voltage of a cell to the reactivity of its metals', 'Explain how cells connected in series combine', 'Describe oxidation and reduction in terms of electron transfer'],
+    steps: [['Predict', 'Students predict which pairs of metals will give the greatest voltage.'], ['Experiment', 'Cells are built, measured and connected in series, with a zoomed-in view of the particles and electrons. Advanced students build two-beaker cells with a salt bridge.'], ['Real Batteries', 'Real batteries are opened and compared with the cells built in the lesson.']],
+    tips: ['Use the Advanced level for students ready for standard electrode potentials.', 'The particle view is an excellent prompt for explaining oxidation and reduction aloud.', 'Ask students to rank metal pairs before revealing the class results.'],
+  },
+  {
+    id: 'waves-lab', title: 'Waves Lab', subject: 'physics', mins: 30, ages: 'Ages 11–16 · KS3–KS4', mode: 'Mixed reality · class board',
+    intro: 'A rope and a ripple tank for every student, with every property of a wave under their control.',
+    aims: ['Describe waves in terms of frequency, amplitude, wavelength and speed', 'Measure the wavelength and amplitude of a frozen wave', 'Distinguish between transverse and longitudinal waves', 'Apply the wave equation'],
+    steps: [['Predict', 'A wave is frozen, students predict what happens next and the teacher reveals the answer.'], ['Rope Wave', 'Students change the frequency, amplitude and tension of a rope wave, freeze it and measure it.'], ['Ripple Tank', 'Waves are explored in two dimensions, alongside sound, light and the sea.'], ['Mystery Wave', 'Students work out which variable has been changed in each mystery wave.']],
+    tips: ['Keep snapshots so students can compare settings side by side.', 'Ask students to calculate wave speed from their own measurements.', 'The Mystery Wave activity works well as a short, low-stakes assessment.'],
+  },
+  {
+    id: 'bounce-lab', title: 'Bounce Lab', subject: 'physics', mins: 30, ages: 'Ages 11–14 · KS3', mode: 'Mixed reality · class board',
+    intro: 'A practical investigation into energy transfer, set out on the real classroom floor.',
+    aims: ['Measure rebound height accurately', 'Describe the energy transfers as a ball falls and bounces', 'Compare how different surfaces affect a bounce', 'Identify anomalous results and suggest their causes'],
+    steps: [['Predict', 'Students answer prediction questions on their own panel before any ball is dropped.'], ['Drop and Measure', 'Six life-size balls are dropped onto different surfaces and the rebound is read from a slow-motion replay.'], ['Compare', 'Mean results are shared on the class chart, where results that do not fit can be discussed.']],
+    tips: ['Insist on reading the ruler from the bottom of the ball, as the lesson prompts.', 'The surface of the Moon is a useful extension for discussing gravity.', 'Ask each group to explain one anomalous result on the class chart.'],
+  },
+  {
+    id: 'radiation-lab', title: 'Radiation Lab', subject: 'physics', mins: 45, ages: 'Ages 14–16 · KS4', mode: 'Mixed reality · class board',
+    intro: 'A safe introduction to radioactivity, with real procedures for measuring and handling sources.',
+    aims: ['Measure and account for background radiation', 'Identify alpha, beta and gamma radiation using absorbers', 'Handle radioactive sources safely', 'Interpret a half-life graph'],
+    steps: [['The Counter', 'Students measure background radiation with three ten-second counts.'], ['Test Sources', 'Sealed sources and everyday materials are tested with paper, aluminium and lead to decide what each gives off.'], ['Half-Life', 'Advanced students follow the decay of a source over time.'], ['Class Results', 'The class compares its verdicts for every source.']],
+    tips: ['Tongs, distance and the lead box are part of the task: praise careful handling.', 'The dose badge is a useful talking point about risk and exposure.', 'Discuss why counts vary even when nothing changes.'],
+  },
+  {
+    id: 'circular-lab', title: 'Circular Motion', subject: 'physics', mins: 40, ages: 'Ages 16–18 · KS5', mode: 'Mixed reality · class board',
+    intro: 'A classic practical on centripetal force, carried out above every student’s head with standard school equipment.',
+    aims: ['Investigate how mass and radius affect circular motion', 'Measure rotation rate with a stopwatch and a light gate', 'Explain the role of centripetal force', 'Apply the ideas to satellites and vehicles'],
+    steps: [['Predict', 'Students predict how changing mass and string length will affect the speed.'], ['Experiment', 'The ball is swung above the head, turns are counted against a stopwatch and checked with a light gate.'], ['Real World', 'The string is cut to show the direction of motion, and the ideas are applied to a satellite and a car.']],
+    tips: ['Compare stopwatch and light-gate readings to discuss reaction time and uncertainty.', 'Ask students to predict the path of the ball before the string is cut.', 'Use the Advanced level to compare results with theory.'],
+  },
+  {
+    id: 'kinematics-lab', title: 'Kinematics Lab', subject: 'physics', mins: 45, ages: 'Ages 14–18 · KS4–KS5', mode: 'Mixed reality · class board',
+    intro: 'Four experiments in one laboratory, each producing real data for students to chart and analyse.',
+    aims: ['Interpret displacement, velocity and acceleration against time', 'Determine the acceleration due to gravity', 'Investigate the period of a pendulum and a spring', 'Draw conclusions from a datasheet'],
+    steps: [['Predict', 'Students predict the outcome of each experiment.'], ['Experiment', 'A tower drop, pendulum, spring and ramp each produce a chart and a row in the datasheet, with the workings available on request.'], ['Share Findings', 'Groups share their key insights on the class board.']],
+    tips: ['Choose one station for the whole class to make the class datasheet easier to discuss.', 'The life-size tower view is a memorable way to show how far an object falls each second.', 'Ask students to calculate first and reveal the workings afterwards.'],
+  },
+  {
+    id: 'pendulum-lab', title: 'Pendulum Lab', subject: 'physics', mins: 30, ages: 'Ages 11–16 · KS3–KS4', mode: 'Mixed reality · class board',
+    intro: 'A clear route into oscillation, from a simple pendulum to a grandfather clock.',
+    aims: ['Measure the period of a pendulum accurately', 'Investigate how length affects the period', 'Describe how energy is transferred and lost as a pendulum swings', 'Apply the ideas to clocks, swings and other planets'],
+    steps: [['Predict', 'Students predict how length and mass affect the swing.'], ['Measure', 'Ten swings are timed by hand and with a light gate, and the length is changed between runs.'], ['Energy', 'Students observe how quickly the swing dies away with different bobs and air resistance.'], ['Real World', 'A clock is regulated, a swing is pushed and pendulums are tried on other planets.']],
+    tips: ['Timing ten swings and dividing by ten is a useful lesson in reducing uncertainty.', 'The giant pendulum hangs behind the bench: encourage students to turn around.', 'The clock challenge works well as a closing task for pairs.'],
+  },
+  {
+    id: 'cell-explorer', title: 'Cell Explorer', subject: 'biology', mins: 30, ages: 'Ages 11–14 · KS3', mode: 'Mixed reality · on your own',
+    intro: 'Animal, plant and bacterial cells enlarged thousands of times, ready to be examined part by part.',
+    aims: ['Identify the main structures in animal, plant and bacterial cells', 'Describe the function of each structure', 'Compare the three types of cell', 'Appreciate the relative sizes of cells and their parts'],
+    steps: [['Explore', 'Students turn the cell, remove organelles and read about each one.'], ['Label It', 'Every structure is labelled by placing a tag on its spot.'], ['Follow a Process', 'Students follow processes such as making a protein through the cell.'], ['Compare Sizes', 'Cells and their parts are compared at scale.']],
+    tips: ['Start with the animal cell, then ask what the plant cell has in addition.', 'Ask what would happen to the cell if a particular organelle were missing.', 'Use the Label It activity as a short check of understanding.'],
+  },
+  {
+    id: 'heart-lab', title: 'Heart Lab', subject: 'biology', mins: 30, ages: 'Ages 11–16 · KS3–KS4', mode: 'Mixed reality · class heart',
+    intro: 'A beating human heart on every desk, with a larger one for the whole class that the teacher controls.',
+    aims: ['Name the chambers, valves and blood vessels of the heart', 'Describe the path of blood through the heart', 'Relate the cardiac cycle to an ECG', 'Explain how exercise and disease affect the heart'],
+    steps: [['Explore', 'Students turn and open their own heart and read about each part.'], ['Blood Flow', 'Blood is followed through the chambers and valves.'], ['Cardiac Cycle', 'Each stage of a heartbeat is shown alongside a live ECG.'], ['Exercise and Conditions', 'Students see how exercise and heart disease change the heart’s work.'], ['Label It', 'Every part is labelled as a closing check.']],
+    tips: ['Use the class heart to demonstrate before students explore their own.', 'Freeze the cardiac cycle at each stage and ask which valves are open.', 'In a same-room session, place the class heart in the middle of the room.'],
+  },
+  {
+    id: 'enzyme-lab', title: 'Enzyme Lab', subject: 'biology', mins: 45, ages: 'Ages 14–16 · KS4', mode: 'Mixed reality · class board',
+    intro: 'A complete enzyme practical, from preparing the liver to building a class graph of the results.',
+    aims: ['Describe how enzymes speed up reactions', 'Investigate the effect of temperature on enzyme activity', 'Collect gas by displacement and read volumes accurately', 'Explain the results in terms of the active site and denaturing'],
+    steps: [['Starter Quiz', 'A short quiz checks what students already know about enzymes.'], ['Experiment', 'Liver is cut and placed in hydrogen peroxide, and the oxygen produced is measured every 30 seconds at a chosen temperature.'], ['Class Graph', 'Each student’s result is added to a class graph of volume against temperature.']],
+    tips: ['Assign a different temperature to each student so the class graph fills quickly.', 'Ask students to explain the shape of the graph above the optimum temperature.', 'The bubbling sound follows the rate of reaction.'],
+  },
+  {
+    id: 'microscope-lab', title: 'Microscope Lab', subject: 'biology', mins: 35, ages: 'Ages 11–16 · KS3–KS4', mode: 'Mixed reality · class board',
+    intro: 'A thorough grounding in light microscopy, from naming each part to labelling real cells.',
+    aims: ['Name the parts of a light microscope and their functions', 'Prepare a wet-mount slide', 'Focus correctly at low, medium and high power', 'Identify and label cells and their structures'],
+    steps: [['Microscope Parts', 'Students learn each part of the microscope before using it.'], ['Prepare and View', 'Six samples are prepared, placed on the stage, focused at three magnifications and labelled.'], ['Quiz', 'A closing quiz reviews preparation, focusing and identification.']],
+    tips: ['Emphasise using only the fine focus at high power: the lesson explains why.', 'The teacher’s view appears on the class board, which is useful for modelling technique.', 'Ask students to calculate the total magnification for each lens.'],
+  },
+  {
+    id: 'osmosis-lab', title: 'Osmosis Lab', subject: 'biology', mins: 45, ages: 'Ages 14–16 · KS4', mode: 'Mixed reality · class board',
+    intro: 'The osmosis practical carried out with precision, from cutting the potato to plotting the class results.',
+    aims: ['Define osmosis in terms of water movement across a membrane', 'Measure percentage change in mass accurately', 'Plot and interpret a graph of mass change against concentration', 'Estimate the concentration of the potato cells'],
+    steps: [['Predict', 'Students predict how each salt solution will affect the potato.'], ['Experiment', 'Equal pieces are cut, dried and weighed, soaked in five solutions during a 24-hour time-lapse and weighed again.'], ['Class Graph', 'Every student’s percentage change is plotted against concentration.']],
+    tips: ['Use the point where the line crosses zero to discuss the concentration inside the cells.', 'Ask why the pieces are dried before each weighing.', 'Repeat with a new potato to discuss repeatability.'],
+  },
+  {
+    id: 'organs-lab', title: 'Identifying Organs', subject: 'biology', mins: 30, ages: 'Ages 9–14 · KS2–KS3', mode: 'Mixed reality · class board',
+    intro: 'A life-size skeleton for every student, waiting for its organs to be put back in place.',
+    aims: ['Locate the major organs of the human body', 'Describe the function of each organ', 'Explain how the body systems depend on one another'],
+    steps: [['Sticky Notes', 'Students share an organ and its job on the class board.'], ['Build the Body', 'Each organ is placed in its correct position in the skeleton.'], ['Functions', 'Function cards are matched to the organs.'], ['Body Systems', 'The class explores one system at a time and how they work together.'], ['Quiz', 'A ten-question quiz reviews the lesson.']],
+    tips: ['Use the hint on each organ’s name for students who need support.', 'Ask pairs to explain one connection between two body systems.', 'The teacher can show the answers on the class board at the end.'],
+  },
+  {
+    id: 'reef-dive', title: 'Reef Dive', subject: 'biology', mins: 25, ages: 'Ages 9–14 · KS2–KS3', mode: 'Mixed reality · whole room',
+    intro: 'The classroom becomes the sea floor, with marine life swimming around the class at real size.',
+    aims: ['Identify common reef species', 'Describe how conditions such as temperature and pH affect a reef', 'Explain why coral reefs are vulnerable to environmental change'],
+    steps: [['Explore', 'Students identify the animals swimming around the room.'], ['Change the Conditions', 'Temperature, pH, nutrients and light are changed to observe the effect on the reef.']],
+    tips: ['Clear a space in the room before starting, as the reef fills the whole classroom.', 'Ask students to predict the effect of warmer water before changing it.', 'This lesson is one of the most demanding on a headset: test it first with the checklist.'],
+  },
+  {
+    id: 'pc-builder', title: 'PC Builder Lab', subject: 'computing', mins: 30, ages: 'Ages 11–16 · KS3–KS4', mode: 'Mixed reality · on your own',
+    intro: 'A computer built from real, life-size components, then powered on to see how they work together.',
+    aims: ['Identify the main components of a computer and their roles', 'Check that components are compatible', 'Describe how power and data move between components'],
+    steps: [['Case', 'Students choose a case to build in.'], ['Parts', 'Components are installed one at a time, and incompatible parts are refused with an explanation.'], ['Test', 'The computer is powered on, and a guided tour follows the power, data and heat.']],
+    tips: ['Encourage students to read the explanation whenever a part is refused.', 'Ask what would happen if a single component were removed.', 'The laptop case is a useful comparison once a desktop has been built.'],
+  },
+  {
+    id: 'hintze-hall', title: 'Hintze Hall', subject: 'museum', mins: 25, ages: 'All ages', mode: 'Virtual reality · on your own',
+    intro: 'A visit to the great hall of the Natural History Museum in London, without leaving the classroom.',
+    aims: ['Explore the exhibits of a world-famous museum', 'Learn the stories behind key specimens', 'Connect museum exhibits to ideas in science and history'],
+    steps: [['Explore', 'Students walk all three floors, teleporting wherever they point.'], ['Discover', 'Pointing at an exhibit or its marker reveals its story.']],
+    tips: ['Set students a short list of exhibits to find and report back on.', 'Seated use is comfortable: teleporting avoids the need to walk around the room.', 'This lesson is one of the most demanding on a headset: test it first with the checklist.'],
+  },
+];

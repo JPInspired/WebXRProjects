@@ -149,7 +149,7 @@ class App extends LessonApp {
       sound.bond();
       const b = this.body;
       const left = b.active.length - b.placed;
-      this.explain({ kicker: 'IN PLACE', title: p.o.name, text: left ? `${p.o.where} ${left} to go.` : 'Every organ is in its place. Well done! Next: what does each one do?' });
+      this.explain({ done: !left, kicker: 'IN PLACE', title: p.o.name, text: left ? `${p.o.where} ${left} to go.` : 'Every organ is in its place. Well done! Next: what does each one do?' });
     } else sound.click();
   }
 
@@ -220,7 +220,7 @@ class App extends LessonApp {
   onCardMatched(k) {
     sound.bond();
     const b = this.body;
-    this.explain({ kicker: 'MATCHED', title: k.c.name, text: `${k.c.text}. ${b.matched === b.activeCards.length ? 'All the cards are matched: your skeleton is a labelled diagram!' : `${b.activeCards.length - b.matched} cards to go.`}` });
+    this.explain({ done: b.matched === b.activeCards.length, kicker: 'MATCHED', title: k.c.name, text: `${k.c.text}. ${b.matched === b.activeCards.length ? 'All the cards are matched: your skeleton is a labelled diagram!' : `${b.activeCards.length - b.matched} cards to go.`}` });
   }
 
   onCardWrong(k, p) {

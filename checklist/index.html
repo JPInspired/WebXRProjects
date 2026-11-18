@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Testing the lessons · WebXR Library</title>
+  <title>Testing the Lessons · WebXR Library</title>
   <meta name="description" content="A checklist for trying every WebXR Library lesson on a headset before using it in class, and reporting anything that needs fixing.">
   <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="../assets/icon-180.png">
@@ -106,7 +106,7 @@
         <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="10" width="28" height="15" rx="6" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="10.5" cy="17.5" r="3.2" fill="currentColor"/><circle cx="21.5" cy="17.5" r="3.2" fill="currentColor"/><path d="M13.5 25c1-2.3 4-2.3 5 0" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16 2 28 6.5 16 11 4 6.5z" fill="var(--brand)"/></svg>
         WebXR Library
       </a>
-      <nav aria-label="Site"><a href="../#lessons">Lessons</a><a href="./" aria-current="page">Testing checklist</a></nav>
+      <nav aria-label="Site"><a href="../#lessons">Lessons</a><a href="../guide/">Teacher Guides</a><a href="./" aria-current="page">Testing Checklist</a></nav>
       <button class="theme" id="theme" type="button" aria-label="Switch between light and dark">
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
         <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
@@ -117,33 +117,33 @@
   <main class="wrap">
     <div class="intro">
       <span class="eyebrow">For teachers and testers</span>
-      <h1>Testing the <em>lessons</em>.</h1>
+      <h1>Testing the <em>Lessons</em></h1>
       <p class="lede">Before using a lesson with a class, try it once on a headset. This page walks you through it: what to check, how to read the frame rate, and how to send back anything that needs fixing. Your ticks and notes are kept on this device, so you can stop and come back.</p>
     </div>
 
     <section class="part" aria-labelledby="before">
-      <h2 id="before">1. Before you start</h2>
+      <h2 id="before">1. Before You Start</h2>
       <ol>
         <li><b>Charge the headset</b> and update it if it asks.</li>
         <li><b>Do Space Setup</b> (Quest settings → Physical space → Space setup) in the room you will teach in: shared sessions in the same room line up from it.</li>
         <li><b>Use the school Wi-Fi</b> that the class will use, so you test what the students will get.</li>
-        <li>Open this page in the headset’s browser (or open the lessons page and choose <b>Testing checklist</b>).</li>
+        <li>Open this page in the headset’s browser (or open the lessons page and choose <b>Testing Checklist</b>).</li>
       </ol>
     </section>
 
     <section class="part" aria-labelledby="fps">
-      <h2 id="fps">2. Checking the frame rate</h2>
+      <h2 id="fps">2. Checking the Frame Rate</h2>
       <p class="lede" style="font-size:16px">Every <b>Open</b> link below adds <code>?fps</code> to the lesson’s address: a small counter appears in the bottom-left of your view. Look around the whole lesson for about 10 seconds.</p>
       <div class="key">
         <div class="g"><b>Green number</b>The headset is keeping up: the lesson will feel smooth.</div>
-        <div class="o"><b>Orange number</b>It isn’t keeping up. Note the number in the lesson’s notes.</div>
+        <div class="o"><b>Orange number</b>It is not keeping up. Note the number in the lesson’s notes.</div>
         <div><b>“lighter effects 1” or “2”</b>The lesson switched off some of its effects by itself to stay smooth. Note it: it will still work.</div>
         <div><b>For a whole class</b>In a shared session, the teacher can choose <b>Teacher menu → Students → Effects → Light</b> to give every headset the lighter look from the start.</div>
       </div>
     </section>
 
     <section class="part" aria-labelledby="each">
-      <h2 id="each">3. Each lesson</h2>
+      <h2 id="each">3. Each Lesson</h2>
       <p class="note" style="margin:0 0 12px">Start with the ones marked <b>check first</b>: they have the most detail. For each lesson, tick what works and write anything odd in its notes.</p>
       <div class="bar">
         <button class="btn primary" id="copy" type="button">Copy results</button>
@@ -155,17 +155,17 @@
     </section>
 
     <section class="part" aria-labelledby="class">
-      <h2 id="class">4. A class session (two headsets)</h2>
+      <h2 id="class">4. A Class Session (Two Headsets)</h2>
       <ol>
-        <li>On one headset, open a lesson and choose <b>Start a shared session</b>, ticking <b>We’re in the same room</b>. Note the four-letter code.</li>
-        <li>On the second headset, open the same lesson and <b>Join with code</b>.</li>
+        <li>On one headset, open a lesson and choose <b>Start a Shared Session</b>, ticking <b>We are in the same room</b>. Note the four-letter code.</li>
+        <li>On the second headset, open the same lesson and <b>Join With Code</b>.</li>
         <li>Check that both see each other in the list, that the second headset’s lab lines up with the room, and that the teacher’s choice of activity reaches the student.</li>
         <li>Try <b>Teacher menu → Students → Effects → Light</b> and back to <b>Full</b>: the student’s look should change within a few seconds.</li>
       </ol>
     </section>
 
     <section class="part" aria-labelledby="report">
-      <h2 id="report">5. Sending your results</h2>
+      <h2 id="report">5. Sending Your Results</h2>
       <ol>
         <li>Press <b>Copy results</b> above: it copies every lesson’s ticks and notes as plain text.</li>
         <li>Paste it into an email or a chat message to whoever looks after the WebXR Library.</li>

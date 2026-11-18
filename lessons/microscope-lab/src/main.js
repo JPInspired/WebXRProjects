@@ -121,7 +121,7 @@ class App extends LessonApp {
     if (!s.seen.includes(id)) s.seen.push(id);
     sound.click();
     const all = s.seen.length === PART_IDS.length;
-    this.explain({ title: PARTS[id].name, text: `${PARTS[id].job}${all ? ' That’s every part! Next: prepare a slide.' : ''}` });
+    this.explain({ done: all, title: PARTS[id].name, text: `${PARTS[id].job}${all ? ' That’s every part! Next: prepare a slide.' : ''}` });
   }
 
   // ───────────── slides ─────────────
@@ -246,7 +246,7 @@ class App extends LessonApp {
     s.lastLabel = s.pick;
     s.pick = null;
     const left = labelsFor(id, s.level).filter((l) => !list.some((f) => f.label === l));
-    this.explain({ title: `✓ ${list[list.length - 1].label}`, text: `${ABOUT_LABEL[s.lastLabel]}${left.length ? '' : ' Every part labelled: try another slide.'}` });
+    this.explain({ done: !left.length, title: `✓ ${list[list.length - 1].label}`, text: `${ABOUT_LABEL[s.lastLabel]}${left.length ? '' : ' Every part labelled: try another slide.'}` });
     this.view.redraw();
   }
 
@@ -285,7 +285,7 @@ class App extends LessonApp {
     const q = this.state.quiz;
     q.i++;
     q.picked = null;
-    if (q.i >= this.quiz().length) this.explain({ title: `Quiz done: ${q.score} / ${this.quiz().length}`, text: 'What was hardest about preparing and focusing the slides? How could these skills be used in real research?' });
+    if (q.i >= this.quiz().length) this.explain({ done: true, title: `Quiz done: ${q.score} / ${this.quiz().length}`, text: 'What was hardest about preparing and focusing the slides? How could these skills be used in real research?' });
   }
 
   restartQuiz() {

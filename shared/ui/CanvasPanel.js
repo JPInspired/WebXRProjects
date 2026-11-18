@@ -15,7 +15,10 @@ export const THEME = {
   btnActive: '#5b6cff',
   btnDisabled: '#1a2038',
   box: 'rgba(91, 108, 255, 0.14)',
+  good: '#7ee2a8',
 };
+
+const PRESS_MS = 170; // how long a pressed button shows as pressed
 
 const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 export const font = (size, weight = 400) => `${weight} ${size}px ${FONT}`;
@@ -62,6 +65,8 @@ export class CanvasPanel {
     this.fit = fit ? Math.round(fit * pxPerMeter) : 0;
     this.shownPx = this.canvas.height; // how much of the canvas is showing (all of it unless it fits)
     this.onResize = null;
+    this.pressed = null; // { id, t }: the button just pressed (drawn pressed in for a moment)
+    this.doneAt = 0; // when a task finished: the panel's border glows green for a few seconds
   }
 
   /** The panel's height in metres as it is showing now. */
@@ -111,6 +116,18 @@ export class CanvasPanel {
     ctx.lineWidth = 4;
     ctx.strokeStyle = THEME.border;
     ctx.stroke();
+    const done = this.doneGlow;
+    if (done > 0) {
+      ctx.save();
+      ctx.globalAlpha = done;
+      ctx.lineWidth = 7;
+      ctx.strokeStyle = THEME.good;
+      ctx.shadowColor = THEME.good;
+      ctx.shadowBlur = 18;
+      roundRect(ctx, 6, 6, W - 12, H - 12, 34);
+      ctx.stroke();
+      ctx.restore();
+    }
     this.buttons = [];
     if (!this.builder) {
       this.texture.needsUpdate = true;
@@ -204,8 +221,28 @@ export class CanvasPanel {
   click(uv) {
     const b = this.buttonAt(uv);
     if (!b || b.disabled) return false;
+    this.pressed = { id: b.id, t: performance.now() };
     b.onClick?.();
+    this.redraw();
+    clearTimeout(this.pressTimer);
+    this.pressTimer = setTimeout(() => { this.pressed = null; this.redraw(); }, PRESS_MS);
     return true;
+  }
+
+  /** 0..1: how strongly the "task finished" border glows now (fades over 3 s). */
+  get doneGlow() {
+    const t = (performance.now() - this.doneAt) / 3000;
+    return this.doneAt && t < 1 ? (1 - t) ** 1.5 : 0;
+  }
+
+  /** A task finished: glow green around the edge for a few seconds. */
+  flashDone() {
+    this.doneAt = performance.now();
+    clearInterval(this.doneTimer);
+    this.doneTimer = setInterval(() => {
+      this.redraw();
+      if (!this.doneGlow) clearInterval(this.doneTimer);
+    }, 80);
   }
 }
 
@@ -317,14 +354,42 @@ class PanelDrawer {
     const { ctx } = this;
     id = id ?? `auto-${this.auto++}`;
     const hover = this.panel.hoverId === id && !disabled;
+    const pressed = this.panel.pressed?.id === id && !disabled;
+    // pressed: pushed in a little (2 px lower, a touch smaller and darker)
+    const inset = pressed ? 3 : 0;
+    x += inset; y += inset + 1; w -= inset * 2; h -= inset * 2;
+    if (!disabled && !pressed) {
+      // a soft shadow under the button, so it looks pressable
+      roundRect(ctx, x, y + 3, w, h, 16);
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';
+      ctx.fill();
+    }
     roundRect(ctx, x, y, w, h, 16);
     ctx.fillStyle = disabled ? THEME.btnDisabled : active ? THEME.btnActive : hover ? THEME.btnHover : (color || THEME.btn);
     ctx.fill();
+    if (!disabled) {
+      // light from above: brighter at the top edge
+      const g = ctx.createLinearGradient(0, y, 0, y + h);
+      g.addColorStop(0, pressed ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.12)');
+      g.addColorStop(0.5, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g;
+      ctx.fill();
+    }
+    if (active && !disabled) {
+      ctx.save();
+      ctx.shadowColor = THEME.btnActive;
+      ctx.shadowBlur = 14;
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+      ctx.stroke();
+      ctx.restore();
+    }
     if (hover) {
       ctx.lineWidth = 3;
       ctx.strokeStyle = '#ffffff';
       ctx.stroke();
     }
+    x -= inset; y -= inset + 1; w += inset * 2; h += inset * 2;
     let s = size;
     ctx.font = font(s, 600);
     while (s > 16 && ctx.measureText(label).width > w - 20) {

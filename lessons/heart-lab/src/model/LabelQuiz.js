@@ -146,7 +146,7 @@ export class LabelQuiz {
       this.app.interaction.pulse(0.5, 40);
       if (this.right === this.total) {
         sound.release(300);
-        this.app.explain({ title: `All ${this.total} labelled!`, text: `You named every part of the heart${this.wrong ? ` (with ${this.wrong} wrong tr${this.wrong === 1 ? 'y' : 'ies'} on the way)` : ' without a single mistake'}. Now explain to a partner what each part does.` });
+        this.app.explain({ done: true, title: `All ${this.total} labelled!`, text: `You named every part of the heart${this.wrong ? ` (with ${this.wrong} wrong tr${this.wrong === 1 ? 'y' : 'ies'} on the way)` : ' without a single mistake'}. Now explain to a partner what each part does.` });
       } else {
         this.app.explain({ title: `Yes: ${PARTS[id].name}`, text: `${PARTS[id].text} (${this.right} of ${this.total} labelled)` });
       }

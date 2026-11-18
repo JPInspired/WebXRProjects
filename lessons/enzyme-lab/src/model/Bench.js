@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { benchTop, glassMaterial, liquidMaterial, bubbleTexture, metalMaterial } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
+import { sound } from '../../../../shared/util/sound.js';
 import { V_MAX, CYL, RUN, MARKS, rateConstant } from '../data/enzymes.js';
 
 // The bench, set up as in the original lesson: a piece of liver and a scalpel on a white tile, a conical
@@ -458,6 +459,9 @@ export class Bench {
         return;
       }
     };
+    // the bubbling you hear follows the bubbles you see
+    const loud = this.inFlask ? Math.min(1, Math.min(60, cm3PerS * 40) / 30) : 0;
+    if (loud > 0 || this.bubbling) (this.bubbling ??= sound.loop('bubbles')).set(loud);
     while (b.acc >= 1) { b.acc--; spawn(0); }
     while (b.acc2 >= 1) { b.acc2--; spawn(1); }
     for (let i = 0; i < b.n; i++) {

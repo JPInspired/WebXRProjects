@@ -165,7 +165,7 @@ export class LabelQuiz {
       this.app.interaction.pulse(0.5, 40);
       if (this.right === this.total) {
         sound.release(300);
-        this.app.explain({ title: `All ${this.total} labelled!`, text: `You named every part of the ${this.cell.def.name.toLowerCase()}${this.wrong ? ` (with ${this.wrong} wrong tr${this.wrong === 1 ? 'y' : 'ies'} on the way)` : ' without a single mistake'}. Try another cell, or switch to Explore to find out what each part does.` });
+        this.app.explain({ done: true, title: `All ${this.total} labelled!`, text: `You named every part of the ${this.cell.def.name.toLowerCase()}${this.wrong ? ` (with ${this.wrong} wrong tr${this.wrong === 1 ? 'y' : 'ies'} on the way)` : ' without a single mistake'}. Try another cell, or switch to Explore to find out what each part does.` });
       } else {
         this.app.explain({ title: `Yes — ${ORGANELLES[id].name}`, text: `${ORGANELLES[id].purpose} (${this.right} of ${this.total} labelled)` });
       }

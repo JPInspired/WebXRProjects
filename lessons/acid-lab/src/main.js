@@ -170,7 +170,7 @@ class App extends LessonApp {
     this.state.substance = { id, known: true };
     if (q.placed.length === q.total) {
       sound.release(300);
-      this.explain({ title: 'Every one placed!', text: `You sorted all ${q.total} substances${q.wrong ? ` (with ${q.wrong} wrong tr${q.wrong === 1 ? 'y' : 'ies'})` : ' without a mistake'}. Notice how many everyday things are acids or alkalis. Next: test some mystery solutions.` });
+      this.explain({ done: true, title: 'Every one placed!', text: `You sorted all ${q.total} substances${q.wrong ? ` (with ${q.wrong} wrong tr${q.wrong === 1 ? 'y' : 'ies'})` : ' without a mistake'}. Notice how many everyday things are acids or alkalis. Next: test some mystery solutions.` });
     } else {
       const adv = this.state.level === 'advanced' ? ` Hydrogen ions: ${hydrogen(sub.ph)}.` : '';
       this.explain({ title: `${sub.name}: pH ${sub.ph}`, text: `${describePH(sub.ph)[0].toUpperCase()}${describePH(sub.ph).slice(1)}. ${sub.fact}${adv}` });

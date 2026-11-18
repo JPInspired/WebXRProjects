@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { makeLabel } from './labels.js';
+import { sound } from '../util/sound.js';
+import { HoverGlow } from './HoverGlow.js';
 
 // One input layer for everything:
 //  • mouse / touch on a normal screen (with OrbitControls)
@@ -10,6 +12,10 @@ import { makeLabel } from './labels.js';
 //   grab(object, mode, worldPos) → { move(worldPos), release(worldPos) } | null   (mode: 'single' | 'group')
 //   tap(object)?            — quick press without dragging
 //   describe(object)?       — short hover text
+//
+// The feel is the same in every lesson: whatever you are about to grab glows softly (and the controller gives a
+// tiny tick when you reach it), picking up and putting down make a soft sound (unless the lesson makes its own),
+// menu buttons tap, and things that are put somewhere ease into place instead of jumping there.
 
 const NEAR = 0.035; // reach distance (m) for grabbing directly with a hand or controller
 const TAP_MS = 350;
@@ -30,6 +36,9 @@ export class Interaction {
     this.plane = new THREE.Plane();
     this.hoverLabel = null;
     this.hoverText = '';
+    this.glow = new HoverGlow(app.scene);
+    this.settling = []; // things easing into the place they were put
+    this.reach = new Map(); // controller → what it was last reaching for (for the haptic tick)
 
     const dom = app.renderer.domElement;
     // Capture phase so OrbitControls doesn't rotate the view when something is pressed.
@@ -140,8 +149,9 @@ export class Interaction {
     if (!session) return false;
     this.app.scene.add(handle);
     if (source !== 'mouse') source.attach(handle);
-    this.active.set(source, { session, handle });
+    this.active.set(source, { session, handle, object, from: world.clone() });
     this.pulse(0.3, 20, source);
+    sound.pick();
     this.app.refresh();
     return true;
   }
@@ -153,12 +163,50 @@ export class Interaction {
     const p = new THREE.Vector3();
     g.handle.getWorldPosition(p);
     g.handle.removeFromParent();
+    const before = sound.stamp;
+    const held = g.object.getWorldPosition(new THREE.Vector3());
     g.session.release(p);
+    if (sound.stamp === before) sound.put(); // the lesson didn't make a sound of its own
+    this.settle(g.object, held);
     this.app.refresh();
+  }
+
+  /**
+   * Something was let go and the lesson moved it (snapped into its place, or back to the desk): ease it there
+   * from where the hand left it, instead of jumping. Any lesson that moves it again takes over at once.
+   */
+  settle(object, fromWorld) {
+    if (!object.parent) return;
+    object.updateWorldMatrix(true, false);
+    const to = object.position.clone();
+    const from = object.parent.worldToLocal(fromWorld.clone());
+    const d = from.distanceTo(to);
+    const scale = object.parent.getWorldScale(new THREE.Vector3()).x || 1;
+    if (d * scale < 0.004 || d * scale > 0.8) return; // didn't move, or went somewhere far (a reset)
+    this.settling = this.settling.filter((s) => s.object !== object);
+    object.position.copy(from);
+    this.settling.push({ object, from, to, t: 0, dur: 0.12 + Math.min(0.2, d * scale * 0.4), last: from.clone() });
+  }
+
+  updateSettling(dt) {
+    this.settling = this.settling.filter((s) => {
+      if (!s.object.position.equals(s.last) || this.isHeld(s.object)) return false; // moved by the lesson / grabbed
+      s.t = Math.min(1, s.t + dt / s.dur);
+      const k = 1 - (1 - s.t) ** 3; // ease out
+      s.object.position.lerpVectors(s.from, s.to, k);
+      s.last.copy(s.object.position);
+      return s.t < 1;
+    });
+  }
+
+  isHeld(object) {
+    for (const g of this.active.values()) if (g.object === object) return true;
+    return false;
   }
 
   press(hit, controller = null) {
     if (hit.panel.click(hit.uv)) {
+      sound.tap();
       this.app.refresh();
       this.pulse(0.4, 25, controller);
     }
@@ -236,7 +284,9 @@ export class Interaction {
       const hit = this.castFromScreen();
       if (hit?.panel) this.press(hit);
     } else if (down.hit.object?.userData.handler.tap) {
+      const before = sound.stamp;
       down.hit.object.userData.handler.tap(down.hit.object);
+      if (sound.stamp === before) sound.tap();
       app.refresh();
     }
   }
@@ -320,7 +370,9 @@ export class Interaction {
       if (this.active.has(c)) {
         this.endGrab(c);
       } else if (pending?.object?.userData.handler.tap && performance.now() - pending.t < TAP_MS * 3) {
+        const before = sound.stamp;
         pending.object.userData.handler.tap(pending.object);
+        if (sound.stamp === before) sound.tap();
         this.pulse(0.4, 25, c);
         this.app.refresh();
       }
@@ -376,8 +428,10 @@ export class Interaction {
     const now = performance.now();
     const dt = Math.min(0.1, (now - this.lastUpdate) / 1000);
     this.lastUpdate = now;
+    this.updateSettling(dt);
     const hovers = new Map();
     let hoverObject = null;
+    const reaching = new Set(); // what hands / rays are on now (all of them glow)
     if (this.app.renderer.xr.isPresenting) {
       for (const c of this.controllers) {
         const { line, dot, mode } = c.userData;
@@ -405,17 +459,33 @@ export class Interaction {
           if (hit.panel.scrollable && Math.abs(stick) > 0.2) hit.panel.scrollBy(stick * dt * 1400);
           const b = hit.panel.buttonAt(hit.uv);
           if (b) hovers.set(hit.panel, b.id);
-        } else if (hit?.object) hoverObject = hit.object;
+        } else if (hit?.object) {
+          hoverObject = hit.object;
+          reaching.add(hit.object);
+        }
+        // a tiny tick in the controller when it reaches something new to grab
+        const was = this.reach.get(c) ?? null;
+        const now = hit?.object ?? null;
+        if (now !== was) {
+          this.reach.set(c, now);
+          if (now) this.pulse(hit.direct ? 0.25 : 0.12, 12, c);
+        }
       }
     } else if (this.mouseInside && !this.active.has('mouse')) {
       const hit = this.castFromScreen();
       const b = hit?.panel && hit.panel.buttonAt(hit.uv);
       if (b) hovers.set(hit.panel, b.id);
-      if (hit?.object) hoverObject = hit.object;
+      if (hit?.object) {
+        hoverObject = hit.object;
+        reaching.add(hit.object);
+      }
       this.app.renderer.domElement.style.cursor = b ? 'pointer' : hit?.object ? 'grab' : '';
     }
     for (const p of this.app.panels) p.setHover(hovers.get(p) ?? null);
     this.showHover(hoverObject);
+    // what's held glows a little too, so it's clear what you've got
+    for (const g of this.active.values()) if (g.object.visible) reaching.add(g.object);
+    this.glow.update(reaching, dt, this.active);
   }
 
   /** Small floating label saying what you're pointing at. */
