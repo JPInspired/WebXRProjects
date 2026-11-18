@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { benchTop, glassMaterial, liquidMaterial } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { FACTORS, V_MAX, RUN, volumeAt } from '../data/kinetics.js';
 
@@ -20,8 +21,8 @@ const SYRINGE = new THREE.Vector3(0.1, TOP + 0.12, -0.05);
 const SYR_LEN = 0.2; // 0 → 100 cm³
 const SYR_MAX = 100;
 
-const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.5, ...o });
-const glass = new THREE.MeshStandardMaterial({ color: 0xd8eeff, transparent: true, opacity: 0.25, roughness: 0.05, side: THREE.DoubleSide, depthWrite: false });
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.5, envMapIntensity: 0.6, ...o });
+const glass = glassMaterial(); // clear lab glass (shared lab kit)
 
 function flaskMesh(liquid = 0xbfe6ff) {
   const pts = [[0, 0], [0.038, 0], [0.04, 0.006], [0.037, 0.018], [0.013, 0.08], [0.011, 0.088], [0.011, FLASK_H]].map(([r, y]) => new THREE.Vector2(r, y));
@@ -29,7 +30,7 @@ function flaskMesh(liquid = 0xbfe6ff) {
   const f = new THREE.Mesh(new THREE.LatheGeometry(pts, 28), glass);
   f.renderOrder = 3;
   const lp = [[0, 0.002], [0.036, 0.002], [0.037, 0.006], [0.034, 0.02], [0.022, 0.05], [0, 0.05]].map(([r, y]) => new THREE.Vector2(r, y));
-  const l = new THREE.Mesh(new THREE.LatheGeometry(lp, 28), new THREE.MeshStandardMaterial({ color: liquid, transparent: true, opacity: 0.55, roughness: 0.1 }));
+  const l = new THREE.Mesh(new THREE.LatheGeometry(lp, 28), liquidMaterial(liquid, 0.55));
   g.add(l, f);
   g.userData.liquid = l;
   return g;
@@ -68,8 +69,8 @@ export class Bench {
     this.app = app;
     this.group = new THREE.Group();
     app.lab.add(this.group);
-    const top = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.012, 0.4), mat(0xe9ecf2, { roughness: 0.4 }));
-    top.position.set(0, TOP - 0.006, 0.06);
+    const top = benchTop(0.92, 0.4); // a dark lab bench (shared lab kit)
+    top.position.set(0, TOP, 0.06);
     this.group.add(top);
     this.rig = new THREE.Group();
     this.group.add(this.rig);

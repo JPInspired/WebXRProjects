@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { studioReflections } from '../../../shared/util/reflections.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
 import { PREDICTIONS, ANSWERS, LENGTHS, BOBS, AIR, PLANETS, periodSmall } from './data/pendulum.js';
@@ -48,6 +49,7 @@ class App extends LessonApp {
   }
 
   initLesson() {
+    studioReflections(this); // metal, glass and glossy surfaces
     this.lab.remove(this.explainPanel.mesh);
     this.explainPanel = new CanvasPanel({ width: 0.5, height: 0.22, name: 'card' });
     this.explainPanel.mesh.position.set(-0.55, 0.64, -0.25);

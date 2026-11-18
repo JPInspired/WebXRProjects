@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { benchTop } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { BOBS, dragK } from '../data/pendulum.js';
 
@@ -17,7 +18,7 @@ const WATCH = new THREE.Vector3(0.27, TOP, 0.14);
 const GIANT_AT = new THREE.Vector3(0, 0, -1.15); // x, z; the pivot is 2.75 m above the floor
 const GIANT_PIVOT_H = 2.75;
 
-const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.55, ...o });
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.55, envMapIntensity: 0.6, ...o });
 const metal = mat(0xb8bec8, { metalness: 0.75, roughness: 0.3 });
 
 export class Pend {
@@ -188,8 +189,8 @@ export class Rig {
     this.watch = { running: false, t0: 0, t: 0, n: 0 };
     this.tmp = new THREE.Vector3();
 
-    const top = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.012, 0.5), mat(0xe9ecf2, { roughness: 0.4 }));
-    top.position.set(0, TOP - 0.006, 0.02);
+    const top = benchTop(0.92, 0.5); // a dark lab bench (shared lab kit)
+    top.position.set(0, TOP, 0.02);
     this.group.add(top);
 
     // ── the protractor board and the gallows ──

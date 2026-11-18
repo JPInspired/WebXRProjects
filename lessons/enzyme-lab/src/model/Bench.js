@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { benchTop, glassMaterial, liquidMaterial } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { V_MAX, CYL, RUN, MARKS, rateConstant } from '../data/enzymes.js';
 
@@ -26,8 +27,8 @@ const CYL_LEN = 0.16;
 const SCALE_TOP = CYL_BOTTOM + CYL_LEN - 0.012; // 0 cm³ (the closed end is at the top)
 const SCALE_LEN = 0.12; // 0 → 50 cm³
 
-const glass = new THREE.MeshStandardMaterial({ color: 0xd8eeff, transparent: true, opacity: 0.25, roughness: 0.05, side: THREE.DoubleSide, depthWrite: false });
-const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.5, ...o });
+const glass = glassMaterial(); // clear lab glass (shared lab kit)
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.5, envMapIntensity: 0.6, ...o });
 
 function flaskProfile(scale = 1) {
   const pts = [[0, 0], [0.045, 0], [0.047, 0.006], [0.044, 0.02], [0.016, 0.095], [0.013, 0.105], [0.013, 0.13]];
@@ -79,8 +80,8 @@ export class Bench {
     this.group = new THREE.Group();
     app.lab.add(this.group);
 
-    const top = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.012, 0.38), mat(0xe9ecf2, { roughness: 0.4 }));
-    top.position.set(0, TOP - 0.006, 0.05);
+    const top = benchTop(0.9, 0.38); // a dark lab bench (shared lab kit)
+    top.position.set(0, TOP, 0.05);
     const tile = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.004, 0.12), mat(0xffffff, { roughness: 0.3 }));
     tile.position.set(TILE.x, TOP + 0.002, TILE.z);
     this.group.add(top, tile);
@@ -135,7 +136,7 @@ export class Bench {
     const fill = 0.045;
     const lp = flaskProfile(0.94).filter((p) => p.y < fill);
     lp.push(new THREE.Vector2(flaskR(fill) * 0.94, fill), new THREE.Vector2(0, fill));
-    this.liquid = new THREE.Mesh(new THREE.LatheGeometry(lp, 32), new THREE.MeshStandardMaterial({ color: 0xbfe6ff, transparent: true, opacity: 0.55, roughness: 0.1 }));
+    this.liquid = new THREE.Mesh(new THREE.LatheGeometry(lp, 32), liquidMaterial(0xbfe6ff, 0.55));
     this.liquid.position.copy(flask.position);
     this.liquidTop = this.flaskBase + fill;
     const fTag = makeLabel('Hydrogen peroxide', { height: 0.012, size: 36 });
@@ -153,7 +154,7 @@ export class Bench {
     this.tubeKey = '';
 
     // trough and upside-down measuring cylinder
-    const water = mat(0x6fb8ff, { transparent: true, opacity: 0.35, depthWrite: false });
+    const water = liquidMaterial(0x6fb8ff, 0.35);
     const troughWater = new THREE.Mesh(new THREE.BoxGeometry(0.15, TROUGH_H - 0.01, 0.13), water);
     troughWater.position.set(TROUGH.x, TOP + (TROUGH_H - 0.01) / 2, TROUGH.z);
     const troughGlass = new THREE.Mesh(new THREE.BoxGeometry(0.16, TROUGH_H, 0.14), glass);

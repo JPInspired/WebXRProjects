@@ -10,7 +10,7 @@ import { SECONDS_L } from '../data/pendulum.js';
 //    higher; at the wrong moment, a push slows it down.
 //  - a metronome: slide the weight up the arm and the beat slows (it ticks at each end of its swing).
 
-const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.55, ...o });
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.55, envMapIntensity: 0.6, ...o });
 
 function canvasTex(w, h) {
   const c = document.createElement('canvas');

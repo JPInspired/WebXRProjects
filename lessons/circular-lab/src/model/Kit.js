@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { benchTop } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { G, BALLS, idealRps } from '../data/circular.js';
 import { fx } from './sounds.js';
@@ -35,7 +36,7 @@ const GATE_ANGLE = Math.PI / 6; // where round the circle the light gate stands 
 const RACK = new THREE.Vector3(-0.34, TOP, 0.17);
 const WATCH = new THREE.Vector3(0.24, TOP, 0.14);
 
-const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.55, ...o });
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.55, envMapIntensity: 0.6, ...o });
 const metal = mat(0xb8bec8, { metalness: 0.75, roughness: 0.3 });
 const ballRadius = (g) => 0.017 * Math.cbrt(g / 50);
 
@@ -97,8 +98,8 @@ export class Kit {
     this.gate = { on: true, last: null, rps: null, flash: 0 };
 
     // ── bench and stand ──
-    const top = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.012, 0.6), mat(0xe9ecf2, { roughness: 0.4 }));
-    top.position.set(0, TOP - 0.006, -0.06);
+    const top = benchTop(0.92, 0.6); // a dark lab bench (shared lab kit)
+    top.position.set(0, TOP, -0.06);
     this.group.add(top);
     const base = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.012, 0.11), mat(0x2b3040));
     base.position.set(AXIS.x - 0.1, TOP + 0.006, AXIS.z - 0.02);

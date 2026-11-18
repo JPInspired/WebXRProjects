@@ -90,8 +90,9 @@ export class Rope {
     // beads: watch one and see that it only goes up and down
     this.beads = [];
     const beadGeo = new THREE.SphereGeometry(radius * 1.9, 14, 10);
-    const white = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
-    const red = new THREE.MeshStandardMaterial({ color: 0xff5566, roughness: 0.4, emissive: 0x661118 });
+    // glossy beads, like painted wooden ones
+    const white = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.35, clearcoat: 0.8, clearcoatRoughness: 0.15 });
+    const red = new THREE.MeshPhysicalMaterial({ color: 0xff5566, roughness: 0.35, emissive: 0x661118, clearcoat: 0.8, clearcoatRoughness: 0.15 });
     const every = Math.round(points / 12);
     for (let i = every; i < points - 4; i += every) {
       const special = this.beads.length === 5;

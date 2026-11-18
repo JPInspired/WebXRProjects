@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { benchTop } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { G, DROP_OBJECTS, SPRINGS } from '../data/kinematics.js';
 
@@ -20,7 +21,7 @@ const PIVOT_Y = 0.42; // pendulum pivot and spring hook (lab y)
 const SPRING_L0 = 0.12; // the spring's own length (m)
 const RAMP_LEN = 0.7;
 
-const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.55, ...o });
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.55, envMapIntensity: 0.6, ...o });
 const wood = mat(0xc89a66, { roughness: 0.75 });
 const metal = mat(0xb8bec8, { metalness: 0.75, roughness: 0.3 });
 
@@ -76,8 +77,8 @@ export class Bench {
     this.trace = [];
     this.tmp = new THREE.Vector3();
 
-    const top = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.012, 0.5), mat(0xe9ecf2, { roughness: 0.4 }));
-    top.position.set(0, TOP - 0.006, 0.02);
+    const top = benchTop(0.92, 0.5); // a dark lab bench (shared lab kit)
+    top.position.set(0, TOP, 0.02);
     this.group.add(top);
     this.buildDrop();
     this.buildPendulum();

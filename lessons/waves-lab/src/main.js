@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { studioReflections } from '../../../shared/util/reflections.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
 import { ROPE, TANK, MAX, GAPS, CHANGES, PREDICTIONS, TASKS, ANSWERS, SETUPS, quizFor, ropeParams, ropeLambda, pitch } from './data/waves.js';
@@ -51,6 +52,7 @@ class App extends LessonApp {
   }
 
   initLesson() {
+    studioReflections(this); // metal, glass and glossy surfaces
     this.lab.remove(this.explainPanel.mesh);
     this.explainPanel = new CanvasPanel({ width: 0.68, height: 0.25, name: 'card' });
     this.explainPanel.mesh.position.set(0, 0.47, -0.06);

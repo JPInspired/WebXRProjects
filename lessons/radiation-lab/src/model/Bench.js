@@ -21,7 +21,7 @@ const COUNTER = new THREE.Vector3(0.29, TOP, -0.07);
 const TONGS = new THREE.Vector3(0.38, TOP + 0.006, 0.16);
 const RACK = { paper: 0.13, al: 0.2, lead: 0.27 };
 
-const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, ...o });
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, envMapIntensity: 0.6, ...o });
 
 function poisson(l) {
   if (l <= 0) return 0;

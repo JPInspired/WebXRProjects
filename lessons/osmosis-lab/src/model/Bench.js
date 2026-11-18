@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { benchTop, makeBeaker as kitBeaker } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { CONCENTRATIONS, BASE_MASS, SOAK_HOURS, pctAt } from '../data/osmosis.js';
 
@@ -21,7 +22,7 @@ const TIMER = new THREE.Vector3(0.08, TOP + 0.16, -0.17);
 const TRAY_Z = 0.22;
 const POTATO_LEN = 0.11;
 
-const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, ...o });
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, envMapIntensity: 0.6, ...o });
 const skin = mat(0xc49a5a, { roughness: 0.75 });
 const flesh = mat(0xf2e6c2, { roughness: 0.55 });
 
@@ -29,13 +30,10 @@ function beakerX(i) {
   return BEAKER_X0 + i * BEAKER_GAP;
 }
 
+/** An empty glass beaker from the shared lab kit (this lesson adds its own solution). */
 function makeBeaker(r, h) {
-  const g = new THREE.Group();
-  const glass = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.94, h, 24, 1, true), new THREE.MeshStandardMaterial({ color: 0xd8eeff, transparent: true, opacity: 0.28, roughness: 0.08, side: THREE.DoubleSide, depthWrite: false }));
-  glass.position.y = h / 2;
-  const base = new THREE.Mesh(new THREE.CircleGeometry(r * 0.94, 24).rotateX(-Math.PI / 2), glass.material);
-  base.position.y = 0.001;
-  g.add(glass, base);
+  const g = kitBeaker(r, h, 0xffffff, 0.1);
+  g.userData.liquid.visible = false;
   return g;
 }
 
@@ -74,8 +72,8 @@ export class Bench {
     this.group = new THREE.Group();
     app.lab.add(this.group);
 
-    const top = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.012, 0.42), mat(0xe9ecf2, { roughness: 0.4 }));
-    top.position.set(0, TOP - 0.006, 0.07);
+    const top = benchTop(0.92, 0.42); // a dark lab bench (shared lab kit)
+    top.position.set(0, TOP, 0.07);
     this.group.add(top);
 
     // cutting board
