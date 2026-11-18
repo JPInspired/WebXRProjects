@@ -1,7 +1,7 @@
 // BodyParts3D heart parts (STL, mm) → one GLB for the Heart Lab, in the lesson's heart coordinates:
 // x = the patient's left (your right, looking at them), y = up, z = forward (out of the chest), 1 unit = 10 cm.
 // Trims vessels a short way outside the heart, drops scan specks, simplifies for Quest, splits the heart wall
-// into the chambers and septum, and stores each part as a named node.
+// into the chambers and septum, closes the vessels' cut ends (cap.mjs), and stores each part as a named node.
 // usage: node build.mjs <stlDir> ../../lessons/heart-lab/models/heart.glb   (see README.md)
 import path from 'node:path';
 import fs from 'node:fs';
@@ -10,6 +10,7 @@ import { EXTMeshoptCompression, KHRMeshQuantization } from '@gltf-transform/exte
 import { meshopt, weld, prune } from '@gltf-transform/functions';
 import { MeshoptSimplifier, MeshoptEncoder } from 'meshoptimizer';
 import { readSTL, components } from './stl.mjs';
+import { capOpenEnds, recutEnds } from './cap.mjs';
 
 const [, , dir, out, preview] = process.argv;
 await MeshoptSimplifier.ready;
@@ -180,6 +181,15 @@ fs.writeFileSync(out.replace(/.glb$/, '.json'), JSON.stringify(L));
 console.log('landmarks:', Object.keys(L).join(' '));
 const parts = { ...groups };
 for (const id of Object.keys(PARTS)) if (id !== 'wall') parts[id] = meshes[id];
+// the vessels' cut ends: a clean cut with the wall and the opening (after measuring, so the landmarks don't change)
+for (const id of ['aorta', 'pulmonaryArtery', 'pulmonaryVeins', 'venaCava', 'coronaryArteries', 'cardiacVeins']) {
+  const capped = capOpenEnds(recutEnds(parts[id], { keep: [L.pv, L.aorticRoot] }));
+  const big = capped.ends.filter((e) => e.r >= 0.006);
+  console.log('  cut ends →', id.padEnd(17), capped.ends.length, 'closed,', big.length, 'with an opening, largest r', Math.max(0, ...capped.ends.map((e) => e.r)).toFixed(3));
+  if (process.env.DEBUG_ENDS) { const { boundaryLoops: bl } = await import('./cap.mjs'); const left = bl(capped); const cnt = new Map(); const k = (a, b) => (a < b ? a + '_' + b : b + '_' + a); for (let t = 0; t < capped.idx.length; t += 3) for (let e = 0; e < 3; e++) { const key = k(capped.idx[t + e], capped.idx[t + (e + 1) % 3]); cnt.set(key, (cnt.get(key) ?? 0) + 1); } console.log('    still open:', [...cnt.values()].filter((x) => x === 1).length, 'edges,', left.length, 'loops; non-manifold edges', [...cnt.values()].filter((x) => x > 2).length); }
+  if (process.env.DEBUG_ENDS) console.log(capped.ends.map((e) => `n${e.n} r${e.r.toFixed(3)} at ${e.c.map((x) => x.toFixed(2))} (root ${Math.min(...[L.aorticRoot, L.pv, L.svc[1], L.ivc[1]].map((q) => Math.hypot(q[0] - e.c[0], q[1] - e.c[1], q[2] - e.c[2]))).toFixed(2)})`).join('  '));
+  parts[id] = capped;
+}
 
 const doc = new Document();
 const buffer = doc.createBuffer();
@@ -190,6 +200,7 @@ for (const [id, m] of Object.entries(parts)) {
     .setAttribute('POSITION', doc.createAccessor().setType('VEC3').setArray(m.pos).setBuffer(buffer))
     .setAttribute('NORMAL', doc.createAccessor().setType('VEC3').setArray(normals(m)).setBuffer(buffer))
     .setIndices(doc.createAccessor().setType('SCALAR').setArray(m.idx).setBuffer(buffer));
+  if (m.col) prim.setAttribute('COLOR_0', doc.createAccessor().setType('VEC3').setArray(m.col).setBuffer(buffer));
   const mesh = doc.createMesh(id).addPrimitive(prim);
   scene.addChild(doc.createNode(id).setMesh(mesh));
 }

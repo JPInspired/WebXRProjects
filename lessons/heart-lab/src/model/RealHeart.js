@@ -54,7 +54,7 @@ export async function loadHeartModel(base) {
     if (!o.isMesh) return;
     const src = o.geometry;
     const g = new THREE.BufferGeometry();
-    for (const name of ['position', 'normal']) {
+    for (const name of ['position', 'normal', 'color']) { // color: the vessels' cut ends (the wall and the opening)
       const a = src.getAttribute(name);
       if (!a) continue;
       const arr = new Float32Array(a.count * 3);
@@ -165,7 +165,7 @@ export class RealHeart {
             vec3 d = p - uRing; float ax = dot(d, uAxis); vec3 rad = d - uAxis * ax;
             float r = length(rad);
             if (r > 1e-4) rad *= 1.0 + uOpen * 0.85 * max(0.0, uR - r) / r;
-            ax += uOpen * 0.03;
+            ax += uOpen * 0.03 * (1.0 - smoothstep(uR * 0.5, uR, r)); // the free edges move downstream; the base stays put
             p = uRing + uAxis * ax + rad;
           }` : ''}
           { // the beat: atria then ventricles squeeze towards their middles
@@ -227,9 +227,10 @@ export class RealHeart {
         this.valves[id] = { open: 1, uniform: m.userData.valve.open, def: { kind: 'av' } };
       } else if (id === 'pulmonaryValve') {
         const axis = V(L.paTrunk[1] ?? L.paTrunk[0]).sub(V(L.pv)).normalize();
-        m.userData.valve = { ring: V(L.pv), axis, open: { value: 0 }, R: 0.12, kind: 'sl' };
+        m.userData.valve = { ring: V(L.pv), axis, open: { value: 0 }, R: 0.08, kind: 'sl' }; // R: how far the cusps open (kept inside the artery wall)
         this.valves[id] = { open: 0, uniform: m.userData.valve.open, def: { kind: 'sl' } };
       }
+      if (g.getAttribute('color')) m.vertexColors = true;
       this.add(id, new THREE.Mesh(g, m));
     }
 

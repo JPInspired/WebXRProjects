@@ -18,6 +18,8 @@ What it does: converts millimetres to the lesson's units (1 = 10 cm; x = the pat
 trims the vessels a few centimetres from the heart (measured along each vessel), removes scan specks, simplifies
 for Meta Quest (about 140,000 triangles in all), splits the heart wall into right/left atrium, right/left ventricle
 and septum (`split.mjs`: the coronary grooves, the valve rings and the cavity each inner surface faces), measures
-the landmarks (`finalize.mjs`), and compresses the result (meshopt).
+the landmarks (`finalize.mjs`), closes the vessels' cut ends (`cap.mjs`: each ragged end is re-cut straight, never
+within 3 cm of a valve, and closed with the cut wall around a dark opening, as vertex colours), and compresses the
+result (meshopt).
 
 Licence of the data: CC BY-SA 2.1 Japan (see `lessons/heart-lab/CREDITS.md`).

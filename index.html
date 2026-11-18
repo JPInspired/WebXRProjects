@@ -21,7 +21,6 @@
   <meta property="og:image:alt" content="WebXR Library: lessons you can step into, with the Heart Lab’s anatomical heart">
   <meta name="twitter:card" content="summary_large_image">
   <!-- /link preview -->
-  <!-- /link preview -->
   <script>
     // the chosen theme, before anything is drawn (no flash)
     try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
@@ -728,7 +727,7 @@
       heart.traverse((o) => {
         if (!o.isMesh) return;
         const name = o.name || o.parent?.name;
-        o.material = new THREE.MeshPhysicalMaterial({ color: COLORS[name] ?? 0x9c3434, roughness: 0.42, clearcoat: 0.55, clearcoatRoughness: 0.35, sheen: 0.4, sheenColor: 0xffb0a0 });
+        o.material = new THREE.MeshPhysicalMaterial({ color: COLORS[name] ?? 0x9c3434, vertexColors: !!o.geometry.getAttribute('color'), roughness: 0.42, clearcoat: 0.55, clearcoatRoughness: 0.35, sheen: 0.4, sheenColor: 0xffb0a0 });
       });
       const pivot = new THREE.Group();
       const box = new THREE.Box3().setFromObject(heart);

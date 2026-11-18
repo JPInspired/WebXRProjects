@@ -112,9 +112,11 @@ const tags = ({ url, image, title, description, alt }, nl) => [
 const write = (rel, info, after) => {
   let h = fs.readFileSync(file(rel), 'utf8');
   const nl = h.includes('\r\n') ? '\r\n' : '\n';
-  const block = /  <!-- (link preview|the preview shown when the link is shared)[\s\S]*?(<!-- \/link preview -->|<meta name="twitter:card" content="summary_large_image">)\r?\n/;
-  // the older hand-written block on the lessons page also had its own og: lines: drop them all first
-  h = h.replace(block, '').replace(/  <meta (property="og:[^"]+"|name="twitter:card") content="[^"]*">\r?\n/g, '');
+  // drop the previous preview tags: the "link preview" comments (and an older two-line note) and every og:/twitter: line
+  h = h
+    .replace(/  <!-- the preview shown when the link is shared[^\n]*\n[^\n]*-->\r?\n/g, '')
+    .replace(/  <!-- \/?link preview[^\n]*-->\r?\n/g, '')
+    .replace(/  <meta (property="og:[^"]+"|name="twitter:card") content="[^"]*">\r?\n/g, '');
   const anchor = h.match(after);
   if (!anchor) throw new Error(`${rel}: nowhere to put the preview tags`);
   h = h.replace(anchor[0], anchor[0] + tags(info, nl));

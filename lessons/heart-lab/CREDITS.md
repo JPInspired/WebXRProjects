@@ -11,7 +11,8 @@
 
 Changes made for this project (`tools/heart-model/`): the parts of the heart were combined, trimmed a few
 centimetres from the heart, simplified and compressed for Meta Quest; the heart wall was divided into the four
-chambers and the septum; landmarks were measured for the animations. As the licence requires (share-alike),
+chambers and the septum; landmarks were measured for the animations; the vessels' cut ends were trimmed to clean
+cuts and closed, showing the vessel wall and its opening. As the licence requires (share-alike),
 `heart.glb` and `heart.json` are shared under the same CC BY-SA 2.1 Japan licence. This applies only to those two
 files, not to the rest of the project.
 
