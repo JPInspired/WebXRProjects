@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Testing the lessons · WebXR Library</title>
+  <meta name="description" content="A checklist for trying every WebXR Library lesson on a headset before using it in class, and reporting anything that needs fixing.">
+  <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/icon-180.png">
+  <meta name="theme-color" content="#f6f5f1">
+  <script>
+    // the chosen theme (shared with the lessons page), before anything is drawn
+    try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f5f1; --bg-2: #ecebe5; --surface: #ffffff;
+      --ink: #15171c; --ink-2: #4a4f5c; --ink-3: #7a8090;
+      --line: rgba(21, 23, 28, 0.1); --line-2: rgba(21, 23, 28, 0.18);
+      --brand: #2f4bd8; --good: #047857; --warn: #b45309;
+      --shadow: 0 1px 2px rgba(20, 24, 40, 0.05), 0 8px 24px rgba(20, 24, 40, 0.06);
+      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Noto Serif", Georgia, serif;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0e1015; --bg-2: #151821; --surface: #171a23;
+      --ink: #eef0f5; --ink-2: #b7bdcc; --ink-3: #8a91a3;
+      --line: rgba(255, 255, 255, 0.08); --line-2: rgba(255, 255, 255, 0.16);
+      --brand: #8ea2ff; --good: #34d399; --warn: #f5a524;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+    code { font: 600 0.92em ui-monospace, Menlo, Consolas, monospace; background: var(--bg-2); padding: 1px 6px; border-radius: 6px; }
+
+    .top { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--line); }
+    .top .wrap { display: flex; align-items: center; gap: 18px; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 600 21px/1 var(--serif); letter-spacing: -0.01em; }
+    .brand svg { width: 30px; height: 30px; }
+    .top nav { display: flex; gap: 22px; margin-left: auto; }
+    .top nav a { text-decoration: none; color: var(--ink-2); font-size: 15px; }
+    .top nav a:hover, .top nav a[aria-current] { color: var(--ink); }
+    .theme { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+    .theme svg { width: 18px; height: 18px; }
+    .theme .moon { display: none; }
+    :root[data-theme="dark"] .theme .sun { display: none; }
+    :root[data-theme="dark"] .theme .moon { display: block; }
+
+    .intro { padding: 56px 0 26px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+    .eyebrow::before { content: ""; width: 22px; height: 1px; background: currentColor; }
+    h1 { font: 500 clamp(38px, 5.4vw, 64px)/1.02 var(--serif); letter-spacing: -0.025em; margin: 16px 0 18px; }
+    h1 em { font-style: italic; color: var(--brand); }
+    .lede { font-size: 18px; color: var(--ink-2); max-width: 40em; margin: 0; }
+    h2 { font: 500 30px/1.1 var(--serif); letter-spacing: -0.015em; margin: 0 0 14px; }
+    section.part { padding: 34px 0; border-top: 1px solid var(--line); }
+    ol, ul { padding-left: 1.25em; margin: 0; }
+    li { margin: 6px 0; color: var(--ink-2); }
+    li b { color: var(--ink); }
+    .note { color: var(--ink-3); font-size: 14px; margin-top: 12px; }
+    .key { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+    .key div { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; font-size: 14px; color: var(--ink-2); }
+    .key b { display: block; font: 600 16px var(--sans); margin-bottom: 2px; }
+    .key .g b { color: var(--good); }
+    .key .o b { color: var(--warn); }
+
+    .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 6px 0 18px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; font: 600 14px var(--sans); text-decoration: none; border: 1px solid var(--line-2); color: var(--ink); background: var(--surface); cursor: pointer; }
+    .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .btn.armed { background: #b42318; color: #fff; border-color: #b42318; }
+    .status { font-size: 14px; color: var(--good); font-weight: 600; min-height: 1.2em; }
+    .progress { margin-left: auto; font-size: 14px; color: var(--ink-3); }
+
+    .lesson { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 18px 20px; margin-bottom: 14px; }
+    .lesson.done { border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+    .lesson header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; }
+    .lesson h3 { font: 500 23px/1.15 var(--serif); margin: 0; }
+    .badge { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--ink-3); }
+    .badge.heavy { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+    .lesson header a { margin-left: auto; font-size: 14px; font-weight: 600; color: var(--brand); text-decoration: none; }
+    .lesson header a::after { content: " →"; }
+    .try { margin: 8px 0 12px; color: var(--ink-2); font-size: 15px; }
+    .checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 16px; }
+    .checks label { display: flex; align-items: center; gap: 9px; font-size: 15px; cursor: pointer; padding: 4px 0; }
+    .checks input { width: 20px; height: 20px; accent-color: var(--good); margin: 0; flex: none; }
+    textarea { width: 100%; margin-top: 10px; min-height: 44px; resize: vertical; font: 15px/1.4 var(--sans); padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); }
+    textarea:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+    footer { margin-top: 40px; border-top: 1px solid var(--line); padding: 28px 0 44px; color: var(--ink-3); font-size: 13px; }
+    @media (max-width: 700px) {
+      .top nav { display: none; }
+      .theme { margin-left: auto; }
+      .progress { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="../" aria-label="WebXR Library: back to the lessons">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="10" width="28" height="15" rx="6" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="10.5" cy="17.5" r="3.2" fill="currentColor"/><circle cx="21.5" cy="17.5" r="3.2" fill="currentColor"/><path d="M13.5 25c1-2.3 4-2.3 5 0" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16 2 28 6.5 16 11 4 6.5z" fill="var(--brand)"/></svg>
+        WebXR Library
+      </a>
+      <nav aria-label="Site"><a href="../#lessons">Lessons</a><a href="./" aria-current="page">Testing checklist</a></nav>
+      <button class="theme" id="theme" type="button" aria-label="Switch between light and dark">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="intro">
+      <span class="eyebrow">For teachers and testers</span>
+      <h1>Testing the <em>lessons</em>.</h1>
+      <p class="lede">Before using a lesson with a class, try it once on a headset. This page walks you through it: what to check, how to read the frame rate, and how to send back anything that needs fixing. Your ticks and notes are kept on this device, so you can stop and come back.</p>
+    </div>
+
+    <section class="part" aria-labelledby="before">
+      <h2 id="before">1. Before you start</h2>
+      <ol>
+        <li><b>Charge the headset</b> and update it if it asks.</li>
+        <li><b>Do Space Setup</b> (Quest settings → Physical space → Space setup) in the room you will teach in: shared sessions in the same room line up from it.</li>
+        <li><b>Use the school Wi-Fi</b> that the class will use, so you test what the students will get.</li>
+        <li>Open this page in the headset’s browser (or open the lessons page and choose <b>Testing checklist</b>).</li>
+      </ol>
+    </section>
+
+    <section class="part" aria-labelledby="fps">
+      <h2 id="fps">2. Checking the frame rate</h2>
+      <p class="lede" style="font-size:16px">Every <b>Open</b> link below adds <code>?fps</code> to the lesson’s address: a small counter appears in the bottom-left of your view. Look around the whole lesson for about 10 seconds.</p>
+      <div class="key">
+        <div class="g"><b>Green number</b>The headset is keeping up: the lesson will feel smooth.</div>
+        <div class="o"><b>Orange number</b>It isn’t keeping up. Note the number in the lesson’s notes.</div>
+        <div><b>“lighter effects 1” or “2”</b>The lesson switched off some of its effects by itself to stay smooth. Note it: it will still work.</div>
+        <div><b>For a whole class</b>In a shared session, the teacher can choose <b>Teacher menu → Students → Effects → Light</b> to give every headset the lighter look from the start.</div>
+      </div>
+    </section>
+
+    <section class="part" aria-labelledby="each">
+      <h2 id="each">3. Each lesson</h2>
+      <p class="note" style="margin:0 0 12px">Start with the ones marked <b>check first</b>: they have the most detail. For each lesson, tick what works and write anything odd in its notes.</p>
+      <div class="bar">
+        <button class="btn primary" id="copy" type="button">Copy results</button>
+        <button class="btn" id="reset" type="button">Start again</button>
+        <span class="status" id="status" role="status"></span>
+        <span class="progress" id="progress"></span>
+      </div>
+      <div id="list"></div>
+    </section>
+
+    <section class="part" aria-labelledby="class">
+      <h2 id="class">4. A class session (two headsets)</h2>
+      <ol>
+        <li>On one headset, open a lesson and choose <b>Start a shared session</b>, ticking <b>We’re in the same room</b>. Note the four-letter code.</li>
+        <li>On the second headset, open the same lesson and <b>Join with code</b>.</li>
+        <li>Check that both see each other in the list, that the second headset’s lab lines up with the room, and that the teacher’s choice of activity reaches the student.</li>
+        <li>Try <b>Teacher menu → Students → Effects → Light</b> and back to <b>Full</b>: the student’s look should change within a few seconds.</li>
+      </ol>
+    </section>
+
+    <section class="part" aria-labelledby="report">
+      <h2 id="report">5. Sending your results</h2>
+      <ol>
+        <li>Press <b>Copy results</b> above: it copies every lesson’s ticks and notes as plain text.</li>
+        <li>Paste it into an email or a chat message to whoever looks after the WebXR Library.</li>
+        <li>For a problem, the most useful things to include are: <b>which lesson</b>, <b>what you did</b> just before, <b>what you expected</b> and <b>what happened</b>, and the frame-rate number if it was orange. A photo of the headset view helps too.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">WebXR Library · <a href="../">Back to the lessons</a></div>
+  </footer>
+
+  <script>
+    // The lessons: what to try in each. heavy = the most detailed ones, worth checking first.
+    const LESSONS = [
+      ['heart-lab', 'Heart Lab', 'Biology', true, 'Turn the heart; open it up; try Label it (drag names onto the dashed spots); watch the blood flow.'],
+      ['organs-lab', 'Identifying Organs', 'Biology', true, 'Put a few organs in the skeleton; then Functions: drag a card onto the dashed spot for its organ.'],
+      ['pc-builder', 'PC Builder Lab', 'Computer Science', true, 'Build a PC (motherboard, CPU, cooler, RAM, storage, graphics, power) and turn it on.'],
+      ['acid-lab', 'Acid Lab', 'Chemistry', true, 'Sort a few bottles on the pH scale; dip a test paper in a beaker; use the pH meter.'],
+      ['microscope-lab', 'Microscope Lab', 'Biology', true, 'Add a drop and a coverslip to a slide, put it on the stage, focus at ×100 then ×400.'],
+      ['hintze-hall', 'Hintze Hall', 'Museum', true, 'Look around the hall, walk to the stairs and up to Darwin.'],
+      ['reef-dive', 'Reef Dive', 'Biology', true, 'Look around for the sea creatures and identify one.'],
+      ['atomic-models', 'Atom Scale Lab', 'Chemistry', false, 'Pull a particle out of the atom and put it back; switch to the cloud view; build a molecule.'],
+      ['lithium-lab', 'Lithium Reactions', 'Chemistry', false, 'Drop lithium in the water (it fizzes); hold a metal in the Bunsen flame (the flame changes colour).'],
+      ['kinetics-lab', 'Kinetics Lab', 'Chemistry', false, 'Drop magnesium into acid and watch the bubbles; read the timer.'],
+      ['voltaic-lab', 'Voltaic Lab', 'Chemistry', false, 'Put two metal strips in a beaker, pour an electrolyte in, read the voltmeter.'],
+      ['waves-lab', 'Waves Lab', 'Physics', false, 'Change the frequency and amplitude; freeze the wave and measure its wavelength.'],
+      ['bounce-lab', 'Bounce Lab', 'Physics', false, 'Pick up a ball, drop it onto a mat and read the bounce height.'],
+      ['radiation-lab', 'Radiation Lab', 'Physics', false, 'Take the tongs, put a source in the holder, count for 10 seconds; add an absorber.'],
+      ['circular-lab', 'Circular Motion', 'Physics', false, 'Start the bung whirling; time some turns with the stopwatch.'],
+      ['kinematics-lab', 'Kinematics Lab', 'Physics', false, 'Drop the ball from the tower; swing the pendulum; bounce the spring.'],
+      ['pendulum-lab', 'Pendulum Lab', 'Physics', false, 'Start a swing, time ten swings, change the length.'],
+      ['cell-explorer', 'Cell Explorer', 'Biology', false, 'Try Label it (drag names onto the dashed spots); knock out an organelle.'],
+      ['enzyme-lab', 'Enzyme Lab', 'Biology', false, 'Cut the liver, drop it in the flask, put the stopper on: gas collects.'],
+      ['osmosis-lab', 'Osmosis Lab', 'Biology', false, 'Cut and weigh a potato piece, soak it, run the time-lapse.'],
+    ];
+    const CHECKS = [['loads', 'Opens and looks right'], ['smooth', 'Frame rate green'], ['works', 'The activity works'], ['hands', 'Easy with the controllers']];
+    const KEY = 'webxr-classes:checklist';
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { saved = {}; }
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch { /* private window: ticks just aren't kept */ } };
+
+    const list = document.getElementById('list');
+    for (const [id, name, subject, heavy, tryIt] of LESSONS) {
+      const s = saved[id] ?? (saved[id] = { checks: {}, notes: '' });
+      const el = document.createElement('article');
+      el.className = 'lesson';
+      el.innerHTML = `<header><h3></h3><span class="badge"></span>${heavy ? '<span class="badge heavy">check first</span>' : ''}<a></a></header><p class="try"></p><div class="checks"></div><textarea rows="1" placeholder="Notes: anything odd, the frame-rate number if it was orange…"></textarea>`;
+      el.querySelector('h3').textContent = name;
+      el.querySelector('.badge').textContent = subject;
+      const open = el.querySelector('header a');
+      open.href = `../lessons/${id}/?fps`;
+      open.textContent = 'Open with frame counter';
+      el.querySelector('.try').textContent = `Try: ${tryIt}`;
+      const checks = el.querySelector('.checks');
+      for (const [key, label] of CHECKS) {
+        const l = document.createElement('label');
+        const box = document.createElement('input');
+        box.type = 'checkbox';
+        box.checked = !!s.checks[key];
+        box.addEventListener('change', () => { s.checks[key] = box.checked; save(); update(); });
+        l.append(box, document.createTextNode(label));
+        checks.append(l);
+      }
+      const notes = el.querySelector('textarea');
+      notes.value = s.notes || '';
+      notes.addEventListener('input', () => { s.notes = notes.value; save(); });
+      el.dataset.id = id;
+      list.append(el);
+    }
+
+    function update() {
+      let done = 0;
+      for (const el of list.children) {
+        const s = saved[el.dataset.id];
+        const all = CHECKS.every(([k]) => s.checks[k]);
+        el.classList.toggle('done', all);
+        if (all) done++;
+      }
+      document.getElementById('progress').textContent = `${done} of ${LESSONS.length} lessons fully checked`;
+    }
+    update();
+
+    const status = document.getElementById('status');
+    const say = (t) => { status.textContent = t; clearTimeout(say.t); say.t = setTimeout(() => { status.textContent = ''; }, 4000); };
+
+    // Copy results: plain text, ready to paste into an email or a chat
+    document.getElementById('copy').addEventListener('click', async () => {
+      const lines = [`WebXR Library test results (${new Date().toLocaleDateString()}, ${navigator.userAgent.includes('OculusBrowser') ? 'Meta Quest' : 'browser'})`, ''];
+      for (const [id, name] of LESSONS) {
+        const s = saved[id];
+        const ticked = CHECKS.filter(([k]) => s.checks[k]).map(([, l]) => l);
+        const missing = CHECKS.filter(([k]) => !s.checks[k]).map(([, l]) => l);
+        if (!ticked.length && !s.notes) continue;
+        lines.push(`${name}: ${missing.length ? `not yet: ${missing.join(', ')}` : 'all fine'}`);
+        if (s.notes) lines.push(`  Notes: ${s.notes.replace(/\s+/g, ' ').trim()}`);
+      }
+      if (lines.length === 2) lines.push('(nothing ticked yet)');
+      const text = lines.join('\n');
+      try {
+        await navigator.clipboard.writeText(text);
+        say('Copied: paste it into an email or a message.');
+      } catch {
+        // no clipboard access: show the text in place so it can be selected and copied by hand
+        let box = document.getElementById('copy-text');
+        if (!box) {
+          box = document.createElement('textarea');
+          box.id = 'copy-text';
+          box.rows = 8;
+          document.querySelector('.bar').after(box);
+        }
+        box.value = text;
+        box.select();
+        say('Select the text below and copy it.');
+      }
+    });
+
+    // Start again: press twice (no pop-up)
+    const reset = document.getElementById('reset');
+    let armed = 0;
+    reset.addEventListener('click', () => {
+      if (performance.now() - armed > 3000) {
+        armed = performance.now();
+        reset.classList.add('armed');
+        reset.textContent = 'Sure? Press again';
+        setTimeout(() => { reset.classList.remove('armed'); reset.textContent = 'Start again'; }, 3000);
+        return;
+      }
+      armed = 0;
+      saved = {};
+      save();
+      location.reload();
+    });
+
+    // light / dark (shared with the lessons page)
+    document.getElementById('theme').addEventListener('click', () => {
+      const root = document.documentElement;
+      root.dataset.theme = root.dataset.theme !== 'dark' ? 'dark' : 'light';
+      try { localStorage.setItem('webxr-classes:theme', root.dataset.theme); } catch {}
+    });
+  </script>
+</body>
+</html>

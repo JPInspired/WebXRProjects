@@ -8,7 +8,9 @@ import * as THREE from 'three';
 //      step 1: reflections off (scene environment) and the strongest fixed foveation (fewer pixels at the edges)
 //      step 2: the glossy clear coat and sheen off every material
 //    A lesson can do more of its own at each step with onLite(level).
-// Nothing is saved: the next session starts with the full look again.
+//  • Light for everyone: the teacher can put every device in the class on the lighter look from the start
+//    (Teacher menu → Students → Effects), for older headsets. Anyone can also open a lesson with ?light.
+// Nothing is saved: the next session starts with the full look again (unless the teacher chose Light).
 
 const WARMUP = 4; // s after entering before judging (loading, placing the lab)
 const SLOW_FOR = 3; // s of slow frames before stepping down
@@ -26,6 +28,7 @@ export class PerfGuard {
     this.last = performance.now();
     this.forced = new URLSearchParams(location.search).has('fps');
     this.saved = null;
+    this.mode = new URLSearchParams(location.search).has('light') ? 'light' : 'auto'; // 'auto' | 'light'
 
     // the counter: a small sprite that follows your view
     this.canvas = document.createElement('canvas');
@@ -49,14 +52,25 @@ export class PerfGuard {
     return this.forced || !!this.app.isAdmin;
   }
 
+  /** 'auto' (the safety net decides, headsets only) or 'light' (the lighter look everywhere, now). */
+  setMode(mode) {
+    if (mode === this.mode) return;
+    this.mode = mode;
+    if (mode === 'light') while (this.level < 2) this.stepDown();
+    else if (!this.app.presenting) { this.restore(); this.level = 0; }
+    this.draw();
+  }
+
   /** Call when a headset session starts / ends. */
   start() {
+    if (this.mode === 'light') return;
     this.level = 0;
     this.slow = 0;
     this.wait = WARMUP;
   }
 
   end() {
+    if (this.mode === 'light') return;
     this.restore();
     this.level = 0;
   }
@@ -74,7 +88,10 @@ export class PerfGuard {
     this.fps = this.frames / this.acc;
     this.frames = 0;
     this.acc = 0;
-    if (this.app.presenting) this.judge(1);
+    if (this.mode === 'light') {
+      if (this.level < 2) while (this.level < 2) this.stepDown();
+      else this.lighten(); // parts added since (a rebuilt model, a new part) get the lighter look too
+    } else if (this.app.presenting) this.judge(1);
     this.draw();
   }
 
@@ -100,20 +117,24 @@ export class PerfGuard {
       app.scene.environment = null;
       try { app.renderer.xr.setFoveation(1); } catch { /* not supported */ }
     }
-    if (this.level === 2) {
-      app.scene.traverse((o) => {
-        const list = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
-        for (const m of list) {
-          if (!m.isMeshPhysicalMaterial || this.saved.mats.has(m)) continue;
-          this.saved.mats.set(m, { clearcoat: m.clearcoat, sheen: m.sheen });
-          m.clearcoat = 0;
-          m.sheen = 0;
-          m.needsUpdate = true;
-        }
-      });
-    }
+    if (this.level === 2) this.lighten();
     app.onLite?.(this.level);
-    console.info(`PerfGuard: ${this.fps.toFixed(0)} fps (target ${this.target}): lighter effects, step ${this.level}`);
+    console.info(`PerfGuard: ${this.mode === 'light' ? 'light mode' : `${this.fps.toFixed(0)} fps (target ${this.target})`}: lighter effects, step ${this.level}`);
+  }
+
+  /** Step 2: the glossy clear coat and sheen off every material in the scene. */
+  lighten() {
+    this.app.scene.environment = null;
+    this.app.scene.traverse((o) => {
+      const list = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
+      for (const m of list) {
+        if (!m.isMeshPhysicalMaterial || this.saved.mats.has(m)) continue;
+        this.saved.mats.set(m, { clearcoat: m.clearcoat, sheen: m.sheen });
+        m.clearcoat = 0;
+        m.sheen = 0;
+        m.needsUpdate = true;
+      }
+    });
   }
 
   restore() {
@@ -147,7 +168,7 @@ export class PerfGuard {
     g.fillText(`${Math.round(this.fps)} fps`, 20, 40);
     g.fillStyle = '#c8d0e0';
     g.font = '600 20px system-ui, sans-serif';
-    g.fillText(this.app.presenting ? `target ${this.target}${this.level ? ` · lighter effects ${this.level}` : ''}` : 'on screen', 20, 74);
+    g.fillText(this.mode === 'light' ? 'light mode (teacher)' : this.app.presenting ? `target ${this.target}${this.level ? ` · lighter effects ${this.level}` : ''}` : 'on screen', 20, 74);
     this.tex.needsUpdate = true;
   }
 }

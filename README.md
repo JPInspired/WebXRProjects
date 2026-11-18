@@ -536,6 +536,10 @@ A virtual-reality visit to the great central hall of the Natural History Museum,
 
 **Safety net:** in a headset, if a lesson can't keep up for about three seconds, it quietly switches off its heaviest effects, on that headset only: first the reflections (and more fixed foveation), then the glossy clear coat and sheen. The counter then says "lighter effects 1" or "2". Computers always keep the full look, and every new session starts with it again. See `shared/util/PerfGuard.js`; a lesson can switch off more of its own effects in `onLite(level)`.
 
+**Light for a whole class:** in a shared session, **Teacher menu → Students → Effects → Light** gives every device the lighter look from the start (no reflections or gloss), for older or slower headsets; **Full (automatic)** goes back. Anyone can also open a lesson with `?light` in its address.
+
+**Testing checklist:** `checklist/` (linked from the top of the lessons page) is a page for trying every lesson on a headset before a class: an *Open with frame counter* link, things to try and tick boxes for each lesson, kept on that device, and a **Copy results** button that turns them into a short report to email. Add a lesson to its `LESSONS` list when you add one to the site.
+
 ## Running it
 
 WebXR only works on **HTTPS** (or `localhost`).

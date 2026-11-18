@@ -589,7 +589,7 @@ export class LessonApp {
 
   /** The Admin menu: to the left of the controls, only for the admin. */
   initAdmin() {
-    this.admin = { lock: false }; // what the admin has set for everyone
+    this.admin = { lock: false, effects: 'auto' }; // what the admin has set for everyone
     this.lockedByAdmin = false; // (students) the admin has locked my menus
     this.adminPanel = new CanvasPanel({ width: 0.5, height: 0.8, name: 'admin', fit: 0.3 });
     this.adminPanel.mesh.position.set(-this.panelX - 0.56, PANEL_Y + 0.04, PANEL_Z + 0.08); // just beyond the controls, turned to face you
@@ -645,6 +645,12 @@ export class LessonApp {
       ...(this.presence.sameRoom ? [{ id: 'refind', label: 'Re-find room (all)', onClick: () => this.adminSend({ k: 'refind' }) }] : []),
     ], { height: 52, size: 21, gap: 8 });
     const students = this.presence.people.filter((p) => !p.you);
+    ui.heading('Effects (every device)', { size: 22 });
+    ui.buttons([
+      { id: 'effects-auto', label: 'Full (automatic)', active: this.admin.effects !== 'light', onClick: () => this.setClassEffects('auto') },
+      { id: 'effects-light', label: 'Light', active: this.admin.effects === 'light', onClick: () => this.setClassEffects('light') },
+    ], { height: 52, size: 21, gap: 8 });
+    ui.text('Light: no reflections or gloss, for older or slower headsets. Full still lightens any headset that struggles.', { size: 19, color: THEME.dim });
     if (!students.length) ui.text('Nobody else has joined yet.', { size: 21, color: THEME.dim });
     for (const person of students) {
       const armed = this.kickArmed?.id === person.id && performance.now() - this.kickArmed.t < 3000;
@@ -674,12 +680,20 @@ export class LessonApp {
 
   /** Everything the admin has set, sent to everyone now and then (and to anyone who joins). */
   broadcastAdmin(to) {
-    if (this.isAdmin) this.adminSend({ k: 'state', lock: this.admin.lock, lesson: this.adminLessonState?.() ?? null }, to);
+    if (this.isAdmin) this.adminSend({ k: 'state', lock: this.admin.lock, effects: this.admin.effects, lesson: this.adminLessonState?.() ?? null }, to);
   }
 
   onPeerJoinedAdmin(id) {
     this.broadcastAdmin(id);
     if (this.roomRefOut) this.presence.roomCh?.send(this.roomRefOut, id);
+  }
+
+  /** Teacher: the look for every device in the class ('auto' = full, lightened only where needed; 'light'). */
+  setClassEffects(mode) {
+    this.admin.effects = mode;
+    this.perf?.setMode(mode);
+    this.broadcastAdmin();
+    this.refresh();
   }
 
   toggleStudentLock() {
@@ -711,6 +725,7 @@ export class LessonApp {
         if (lock) this.state.placing = false;
         this.refresh();
       }
+      if (d.effects) this.perf?.setMode(d.effects);
       this.onAdminLesson?.(d.lesson);
     } else if (d.k === 'kick') {
       this.presence.leave();

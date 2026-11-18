@@ -121,6 +121,11 @@
     .step h3 { font: 500 23px/1.2 var(--serif); margin: 8px 0 8px; letter-spacing: -0.01em; }
     .step p { margin: 0; color: var(--ink-2); font-size: 15px; }
 
+    /* ── testing checklist link ── */
+    .testing .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; padding-top: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+    .testing p { margin: 0; color: var(--ink-2); max-width: 46em; }
+    .testing b { color: var(--ink); }
+
     /* ── lessons ── */
     .lessons { padding: 70px 0 30px; }
     .head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 8px; }
@@ -239,7 +244,7 @@
         <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="10" width="28" height="15" rx="6" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="10.5" cy="17.5" r="3.2" fill="currentColor"/><circle cx="21.5" cy="17.5" r="3.2" fill="currentColor"/><path d="M13.5 25c1-2.3 4-2.3 5 0" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16 2 28 6.5 16 11 4 6.5z" fill="var(--brand)"/></svg>
         WebXR Library
       </a>
-      <nav aria-label="Page"><a href="#how">How it works</a><a href="#lessons">Lessons</a></nav>
+      <nav aria-label="Page"><a href="#how">How it works</a><a href="#lessons">Lessons</a><a href="checklist/">Testing checklist</a></nav>
       <button class="theme" id="theme" type="button" aria-label="Switch between light and dark">
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
         <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
@@ -276,6 +281,13 @@
         <div class="step"><span class="n">1</span><h3>Open it on a headset</h3><p>Visit this page in the Meta Quest browser (or any WebXR headset). No app store, no installs. It works on any computer screen too.</p></div>
         <div class="step"><span class="n">2</span><h3>Start a class session</h3><p>Pick a lesson and start a shared session. Students join with a four-letter code; in the same room, everyone’s lab lines up with the real classroom.</p></div>
         <div class="step"><span class="n">3</span><h3>Teach from your own menu</h3><p>Choose the activity and level for everyone, put predictions on the class board and reveal the answers, while each student works on their own bench.</p></div>
+      </div>
+    </section>
+
+    <section class="testing" aria-label="Testing the lessons">
+      <div class="wrap">
+        <p><b>Trying the lessons before a class?</b> The testing checklist walks you through each one on a headset, with its frame rate, and gives you a report to send back.</p>
+        <a class="btn" href="checklist/">Open the testing checklist</a>
       </div>
     </section>
 
@@ -504,6 +516,7 @@
   <footer>
     <div class="wrap">
       <div><b>WebXR Library</b><br>Mixed reality lessons that run in the browser.</div>
+      <div><a href="checklist/">Testing checklist</a></div>
       <div>Heart model: BodyParts3D, © The Database Center for Life Science, CC BY-SA 2.1 Japan.<br>Other third-party models and scans are credited in each lesson’s CREDITS.md.</div>
     </div>
   </footer>
