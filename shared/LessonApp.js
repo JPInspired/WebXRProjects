@@ -10,6 +10,7 @@ import { initStartScreen } from './ui/StartScreen.js';
 import { PerfGuard } from './util/PerfGuard.js';
 import { sound } from './util/sound.js';
 import { Sparks } from './fx/Sparks.js';
+import { makeClassroom } from './fx/Classroom.js';
 
 // Everything every WebXR lesson needs, so each lesson only adds its own content:
 //  • three.js scene, desktop camera + orbit controls, lights, floor grid
@@ -78,6 +79,9 @@ export class LessonApp {
     this.initXRButtons();
     this.refresh();
     this.sparks = new Sparks(this.scene); // the finished-task sparks (celebrate)
+    // the subject's classroom around the lesson (shared/fx/Classroom.js: one switch there turns them all off)
+    this.classroom = makeClassroom(this);
+    if (this.classroom) this.grid.visible = false;
     this.perf = new PerfGuard(this); // frames-per-second counter (teacher, or ?fps) and the headset safety net
     this.clock = new THREE.Clock();
     this.renderer.setAnimationLoop((t, frame) => this.frame(frame));
@@ -914,7 +918,8 @@ export class LessonApp {
   onSessionStart(session, isAR) {
     this.presenting = true;
     this.scene.background = isAR ? null : this.background;
-    this.grid.visible = !isAR;
+    this.grid.visible = !isAR && !this.classroom;
+    this.classroom?.setAR(isAR);
     document.body.classList.add('in-xr');
     this.needsPlacement = true;
     this.framesSinceStart = 0;
@@ -942,7 +947,8 @@ export class LessonApp {
     this.reticle.visible = false;
     this.state.placing = false;
     this.scene.background = this.background;
-    this.grid.visible = true;
+    this.grid.visible = !this.classroom;
+    this.classroom?.setAR(false);
     document.body.classList.remove('in-xr');
     this.perf?.end();
     this.onXREnd?.();
@@ -1006,6 +1012,7 @@ export class LessonApp {
     this.perf.update();
     this.interaction.update();
     this.sparks.update(dt);
+    this.classroom?.update();
     this.update(dt, frame);
     if (this.presence) {
       this.presence.update(dt);

@@ -55,6 +55,16 @@ Shared code gives every lesson the same hands-on feel, so a new lesson gets it f
 - **Sounds** (`shared/util/sound.js`): one soft, warm family for every lesson: tap (buttons), pick and put (hands: played automatically unless the lesson makes its own sound), correct, wrong, done, and lab sounds. `sound.loop('bubbles' | 'fizz' | 'hum')` gives sounds that last, used for the Enzyme Lab's bubbling, the Kinetics Lab's fizzing and the PC Builder's fans. No audio files.
 - **A finished task:** pass `done: true` with an explanation (`this.explain({ title, text, done: true })`), or call `this.celebrate()`: a chime, a buzz in both controllers, a green glow round the card and a few sparks. Used when every part is labelled or placed, a quiz is finished, or a computer starts.
 
+## Subject rooms
+
+Each lesson stands in a light, simple classroom for its subject (`shared/fx/Classroom.js`): a chemistry lab with a fume cupboard and a periodic table, a physics lab with a wooden floor and a solar system poster, a biology lab with plants and a fish tank, and a computer room with desks and monitors. Windows, a whiteboard with the subject's equations, posters, a clock and a door are painted onto the walls. The rooms show on a computer screen and in full virtual reality; in mixed reality the real classroom shows instead, so they hide. Hintze Hall and Reef Dive have places of their own and keep them.
+
+They are built to stay light on a headset: the walls, floor and ceiling are pictures drawn once when the lesson opens, all the furniture is one merged shape, and nothing is lit in real time (the shading is painted in), so a room costs about eight draw calls.
+
+- **Switching them off:** set `enabled` to `false` in `ROOMS` at the top of `shared/fx/Classroom.js` and the dark grid comes back in every lesson. To try a lesson without its room, add `?noroom` to its address.
+- Which room a lesson gets is the `SUBJECT` list in the same file.
+- The Kinematics Lab opens the ceiling to the sky while its life-size tower is showing, and the Atom Scale Lab hides the room in its scale views, which reach far beyond the walls.
+
 ## Shared sessions (work alongside colleagues)
 
 Every lesson can be opened **solo** or in a **shared session**:
@@ -600,6 +610,7 @@ shared/                            used by every lesson
   util/sound.js                    synthesised sound effects (one family for every lesson, plus lasting loops)
   fx/Flows.js                      animated flows between points (used for processes)
   fx/Sparks.js                     the sparks when a task is finished
+  fx/Classroom.js                  the subject rooms (one switch at the top turns them off)
   ui/HoverGlow.js                  the glow on whatever you are about to grab
 guide/                             a teacher guide for every lesson (made by tools/guides/build.mjs from tools/guides/lessons.mjs)
 checklist/                         the testing checklist

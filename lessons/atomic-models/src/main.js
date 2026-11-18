@@ -257,6 +257,8 @@ class App extends LessonApp {
     this.tray.group.visible = s.mode === 'atom' || this.buildingMolecules;
     this.tray.items.visible = s.mode !== 'reactions'; // reactions: no new atoms (the bin stays, to show it refuses)
     this.room.group.visible = s.mode === 'scale' && s.scaleSub === 'myroom';
+    // the scale views reach far beyond the classroom walls (or show a room of their own)
+    this.classroom?.setHidden(s.mode === 'scale' && s.scaleSub !== 'compare');
     if (this.room.group.visible && !this.presenting) this.room.useDemoRoom(DESKTOP_LAB_POS);
     const trayKind = s.mode === 'atom' ? 'atom' : 'molecule';
     if (this.tray.group.visible && trayKind !== this.trayKind) {

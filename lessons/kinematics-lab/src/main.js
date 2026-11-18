@@ -173,6 +173,7 @@ class App extends LessonApp {
   toggleLife() {
     this.state.life = !this.state.life;
     this.tower.setVisible(this.state.life);
+    this.classroom?.setCeiling(!this.state.life); // the pole rises through the ceiling
     sound.click();
     if (this.state.life) {
       if (!this.presenting) {
