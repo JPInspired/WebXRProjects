@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { METALS } from '../data/lithium.js';
 import { pop, fizz, bang } from './sounds.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { benchTop, bunsenBurner, metalMaterial, glassMaterial, liquidMaterial } from '../../../../shared/lab/kit.js';
 
 // The bench, as in the original lesson: five metal cubes (lithium, and four mystery metals B–E), a Bunsen
 // burner, and a tank of water — plus a safety screen that slides across in front of the tank.
@@ -23,26 +25,33 @@ const WATER_Y = TOP + 0.07;
 const CUBE = 0.014;
 const SLOTS = ['A', 'B', 'C', 'D', 'E'];
 
-const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.5, ...o });
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.5, envMapIntensity: 0.6, ...o });
+const cubeGeo = () => new RoundedBoxGeometry(CUBE, CUBE, CUBE, 2, CUBE * 0.12); // a cut cube of soft metal
+/** A flame shape (turned): a wide soft outer flame, or a small inner cone. Origin at its base. */
+const flameShape = (pts) => new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r, y)), 24);
 
 export class Bench {
   constructor(app) {
     this.app = app;
     this.group = new THREE.Group();
     app.lab.add(this.group);
-    const top = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.012, 0.4), mat(0xe9ecf2, { roughness: 0.4 }));
-    top.position.set(0, TOP - 0.006, 0.06);
+    const top = benchTop(0.92, 0.4, { color: 0x2a3140 });
+    top.position.set(0, TOP, 0.06);
     this.group.add(top);
 
     // the tray of metal cubes (stored under oil, in little dishes)
     this.cubes = SLOTS.map((slot, i) => {
       const home = new THREE.Vector3(TRAY.x + (i - 2) * 0.055, TOP + 0.004 + CUBE / 2, TRAY.z);
-      const dish = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.018, 0.008, 24), mat(0xd8e6f2, { transparent: true, opacity: 0.6, roughness: 0.1 }));
-      dish.position.set(home.x, TOP + 0.004, home.z);
+      // a glass dish with a little oil in it (these metals are kept under oil, away from air and water)
+      const dish = new THREE.Mesh(new THREE.LatheGeometry([[0, 0], [0.019, 0], [0.021, 0.001], [0.021, 0.009], [0.0198, 0.009], [0.0198, 0.0015], [0, 0.0015]].map(([r, y]) => new THREE.Vector2(r, y)), 32), glassMaterial());
+      dish.position.set(home.x, TOP, home.z);
+      const oil = new THREE.Mesh(new THREE.CylinderGeometry(0.0196, 0.0196, 0.004, 28), liquidMaterial(0xf2d77a, 0.45));
+      oil.position.set(home.x, TOP + 0.0035, home.z);
+      this.group.add(oil);
       const tag = makeLabel(slot === 'A' ? 'A · Lithium' : `${slot} · ?`, { height: 0.012, size: 36 });
       tag.position.set(home.x, TOP + 0.04, home.z + 0.02);
       this.group.add(dish, tag);
-      const mesh = new THREE.Mesh(new THREE.BoxGeometry(CUBE, CUBE, CUBE), mat(0xb9bec6, { metalness: 0.75, roughness: 0.35 }));
+      const mesh = new THREE.Mesh(cubeGeo(), metalMaterial('li'));
       mesh.position.copy(home);
       const cube = { slot, mesh, home, where: 'tray', test: null };
       mesh.userData = { handler: this, cube };
@@ -51,16 +60,17 @@ export class Bench {
     });
 
     // Bunsen burner: base, barrel, and a flame whose colour changes
-    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.035, 0.012, 24), mat(0x2b2f3a));
-    base.position.set(BURNER.x, TOP + 0.006, BURNER.z);
-    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.09, 16), mat(0xb8bec8, { metalness: 0.6, roughness: 0.3 }));
-    barrel.position.set(BURNER.x, TOP + 0.057, BURNER.z);
-    this.group.add(base, barrel);
-    this.flameMat = new THREE.MeshBasicMaterial({ color: 0x4f8bff, transparent: true, opacity: 0.75, depthWrite: false });
-    this.flame = new THREE.Mesh(new THREE.ConeGeometry(0.012, 0.05, 16, 1, true), this.flameMat);
-    this.flame.position.set(BURNER.x, TOP + 0.127, BURNER.z);
-    this.innerFlame = new THREE.Mesh(new THREE.ConeGeometry(0.006, 0.025, 12, 1, true), new THREE.MeshBasicMaterial({ color: 0xbfe0ff, transparent: true, opacity: 0.8, depthWrite: false }));
-    this.innerFlame.position.set(BURNER.x, TOP + 0.114, BURNER.z);
+    const burner = bunsenBurner({ barrel: 0.084 });
+    burner.position.set(BURNER.x, TOP, BURNER.z);
+    burner.userData.setFlame(false);
+    this.group.add(burner);
+    const flameBase = TOP + burner.userData.barrelTop;
+    // glowing (additive) flames: a soft outer flame whose colour changes, and a bright blue inner cone
+    this.flameMat = new THREE.MeshBasicMaterial({ color: 0x4f8bff, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
+    this.flame = new THREE.Mesh(flameShape([[0.0072, 0], [0.0092, 0.006], [0.0099, 0.014], [0.0096, 0.024], [0.0085, 0.034], [0.0068, 0.044], [0.0045, 0.052], [0.0022, 0.058], [0, 0.062]]), this.flameMat);
+    this.flame.position.set(BURNER.x, flameBase, BURNER.z);
+    this.innerFlame = new THREE.Mesh(flameShape([[0.0062, 0], [0.006, 0.005], [0.0052, 0.011], [0.0038, 0.017], [0.002, 0.022], [0, 0.026]]), new THREE.MeshBasicMaterial({ color: 0x5fd4ff, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
+    this.innerFlame.position.set(BURNER.x, flameBase, BURNER.z);
     const bTag = makeLabel('Bunsen burner', { height: 0.012, size: 36 });
     bTag.position.set(BURNER.x, TOP + 0.19, BURNER.z);
     this.group.add(this.flame, this.innerFlame, bTag);
@@ -68,10 +78,10 @@ export class Bench {
     this.flameColour = null;
 
     // the tank of water
-    const glass = new THREE.Mesh(new THREE.BoxGeometry(TANK_W, TANK_H, TANK_D), new THREE.MeshStandardMaterial({ color: 0xd8eeff, transparent: true, opacity: 0.18, roughness: 0.05, depthWrite: false }));
+    const glass = new THREE.Mesh(new RoundedBoxGeometry(TANK_W, TANK_H, TANK_D, 3, 0.006), glassMaterial());
     glass.position.set(TANK.x, TOP + TANK_H / 2, TANK.z);
     glass.renderOrder = 3;
-    this.water = new THREE.Mesh(new THREE.BoxGeometry(TANK_W - 0.006, WATER_Y - TOP, TANK_D - 0.006), new THREE.MeshStandardMaterial({ color: 0x5fb4ff, transparent: true, opacity: 0.32, roughness: 0.1, depthWrite: false }));
+    this.water = new THREE.Mesh(new RoundedBoxGeometry(TANK_W - 0.006, WATER_Y - TOP, TANK_D - 0.006, 2, 0.004), liquidMaterial(0x8fc8f0, 0.38));
     this.water.position.set(TANK.x, (WATER_Y + TOP) / 2, TANK.z);
     const wTag = makeLabel('Water', { height: 0.012, size: 36 });
     wTag.position.set(TANK.x, TOP + TANK_H + 0.025, TANK.z - TANK_D / 2);
@@ -81,8 +91,13 @@ export class Bench {
     this.screen = new THREE.Group();
     const pane = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.16, 0.006), new THREE.MeshStandardMaterial({ color: 0xcfe8ff, transparent: true, opacity: 0.28, roughness: 0.05, depthWrite: false }));
     pane.position.y = 0.09;
-    const frame = new THREE.Mesh(new THREE.BoxGeometry(0.27, 0.012, 0.03), mat(0x3d4766));
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(0.27, 0.012, 0.03), mat(0x3d4766, { metalness: 0.5, roughness: 0.4 }));
     frame.position.y = 0.006;
+    for (const sx of [-1, 1]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.165, 0.01), mat(0x9aa0aa, { metalness: 0.8, roughness: 0.3 }));
+      post.position.set(sx * 0.133, 0.09, 0);
+      this.screen.add(post);
+    }
     const sTag = makeLabel('Safety screen', { height: 0.012, size: 36 });
     sTag.position.y = 0.185;
     this.screen.add(pane, frame, sTag);
@@ -232,6 +247,9 @@ export class Bench {
   }
 
   update(dt) {
+    const ft = performance.now() / 1000;
+    this.flame.scale.y = (this.flameColour ? 1.35 : 1) * (1 + 0.06 * Math.sin(ft * 23) + 0.04 * Math.sin(ft * 37 + 1));
+    this.innerFlame.scale.y = 1 + 0.04 * Math.sin(ft * 31);
     const r = this.reaction;
     if (r) {
       r.t += dt;
@@ -312,7 +330,7 @@ export class Bench {
     } else pop();
     // the cube is used up; a fresh piece comes from the oil jar
     r.c.mesh.geometry.dispose();
-    r.c.mesh.geometry = new THREE.BoxGeometry(CUBE, CUBE, CUBE);
+    r.c.mesh.geometry = cubeGeo();
     r.c.mesh.scale.setScalar(1);
     r.c.mesh.position.copy(r.c.home);
     r.c.where = 'tray';
