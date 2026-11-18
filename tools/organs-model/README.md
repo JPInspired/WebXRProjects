@@ -19,6 +19,6 @@ lessons don't use it.
 What it does: converts millimetres to metres in body coordinates (x = the body's left, y = up from the soles of
 the feet, z = forward), so every organ keeps its real place; removes scan specks; trims the great vessels a few
 centimetres from the heart; cuts the top off the skull with a clean horizontal cut (the skull cap); simplifies for
-Meta Quest (about 145,000 triangles in all) and compresses the result (meshopt). With the fold shadows from `shade.mjs`, about 1.1 MB.
+Meta Quest (about 173,000 triangles in all; the brain gets the most detail, 42,000, for its folds) and compresses the result (meshopt). With the fold shadows from `shade.mjs`, about 1.3 MB.
 
 Licence of the data: CC BY-SA 2.1 Japan (see `lessons/organs-lab/CREDITS.md`).

@@ -19,7 +19,7 @@ await MeshoptEncoder.ready;
 
 // organ → STL files and how many triangles to keep (Quest: about 75,000 for all the organs)
 const ORGANS = {
-  brain: { files: BRAIN.map(([id]) => id), tris: 14000, minPiece: 30 },
+  brain: { files: BRAIN.map(([id]) => id), tris: 42000, minPiece: 30 }, // detailed: the folds (gyri) are what students look at
   heart: { files: ['FMA7274', 'FMA3736', 'FMA66326', 'FMA4720', 'FMA10951', 'FMA66643'], tris: 7000, minPiece: 200, trimTo: 'FMA7274' },
   lungRight: { files: ['FMA7333', 'FMA7383', 'FMA7337'], tris: 5000 },
   lungLeft: { files: ['FMA7370', 'FMA7371'], tris: 5000 },
