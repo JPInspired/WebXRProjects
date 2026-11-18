@@ -530,6 +530,12 @@ A virtual-reality visit to the great central hall of the Natural History Museum,
 
 **The model:** the 2-million-triangle scan with 8K textures is reduced to 1M triangles and keeps its full 8K textures, GPU-compressed as KTX2 (ETC1S, about 45 MB of GPU memory each), so it runs on a Quest 3 (about 40 MB download). It is drawn unlit because its lighting is baked into the textures. Walking and teleporting use the scan itself as floor and walls, via fast raycasts ([three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh), MIT, loaded from jsDelivr).
 
+## Smooth on a headset (frame rate)
+
+**Checking the frame rate:** add `?fps` to a lesson's address (for example `…/lessons/heart-lab/?fps`), or run a shared session as the teacher: a small counter in the bottom-left of your view shows frames per second. Green means the headset is keeping up (at least 85% of its own rate, usually 72 or 90 on a Quest); orange means it isn't.
+
+**Safety net:** in a headset, if a lesson can't keep up for about three seconds, it quietly switches off its heaviest effects, on that headset only: first the reflections (and more fixed foveation), then the glossy clear coat and sheen. The counter then says "lighter effects 1" or "2". Computers always keep the full look, and every new session starts with it again. See `shared/util/PerfGuard.js`; a lesson can switch off more of its own effects in `onLite(level)`.
+
 ## Running it
 
 WebXR only works on **HTTPS** (or `localhost`).

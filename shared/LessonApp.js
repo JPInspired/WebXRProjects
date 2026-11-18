@@ -7,6 +7,7 @@ import { Presence, sessionFromURL } from './net/Presence.js';
 import { RoomScan, solveRoom, fingerprint } from './net/RoomAlign.js';
 import { newSessionCode } from './net/code.js';
 import { initStartScreen } from './ui/StartScreen.js';
+import { PerfGuard } from './util/PerfGuard.js';
 
 // Everything every WebXR lesson needs, so each lesson only adds its own content:
 //  • three.js scene, desktop camera + orbit controls, lights, floor grid
@@ -20,6 +21,8 @@ import { initStartScreen } from './ui/StartScreen.js';
 //   update(dt, frame)    per-frame animation
 //   grabTargets()        objects that can be picked up / tapped
 //   onXRStart(session, isAR), onXREnd(), onXRFrame(frame, refSpace)
+//   onLite(level)        the headset is struggling: 1–2 = switch off more of the lesson's heavy effects, 0 = back to full
+//                        (shared/util/PerfGuard.js already turns off reflections, clear coat and sheen)
 //
 // Shared sessions (?session=CODE in the URL): everyone keeps their own models and sees the others' work
 // beside them (no avatars: in mixed reality you see the real people). A lesson takes part by providing:
@@ -72,6 +75,7 @@ export class LessonApp {
     this.initSessionUI(session);
     this.initXRButtons();
     this.refresh();
+    this.perf = new PerfGuard(this); // frames-per-second counter (teacher, or ?fps) and the headset safety net
     this.clock = new THREE.Clock();
     this.renderer.setAnimationLoop((t, frame) => this.frame(frame));
   }
@@ -881,6 +885,7 @@ export class LessonApp {
     document.body.classList.add('in-xr');
     this.needsPlacement = true;
     this.framesSinceStart = 0;
+    this.perf?.start();
     this.onXRStart?.(session, isAR);
     // recentring (or lost tracking) moves the headset's coordinates: the room line-up must be redone
     this.renderer.xr.getReferenceSpace()?.addEventListener?.('reset', () => this.onTrackingReset());
@@ -906,6 +911,7 @@ export class LessonApp {
     this.scene.background = this.background;
     this.grid.visible = true;
     document.body.classList.remove('in-xr');
+    this.perf?.end();
     this.onXREnd?.();
     // Each new headset session has a new coordinate system: the room frame is found again from the scan.
     this.presence?.clearRoom();
@@ -964,6 +970,7 @@ export class LessonApp {
     } else {
       this.controls.update();
     }
+    this.perf.update();
     this.interaction.update();
     this.update(dt, frame);
     if (this.presence) {
