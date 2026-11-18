@@ -140,12 +140,14 @@ export class RealHeart {
     const m = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.5, metalness: 0, side: THREE.DoubleSide });
     m.userData.inner = { value: new THREE.Color(0x5e1520) };
     m.userData.fat = { value: 0 }; // epicardial fat (realistic look; only parts whose model has it)
+    m.userData.cutFlat = { value: 0 }; // 1: where it is cut, a flat colour (uInner), like a cut section in a textbook
+    m.userData.endo = { value: 0 }; // 1: the chambers' inner lining in a deeper, streaky red (heart wall only)
     m.userData.hasFat = false;
     m.userData.fibre = { value: 0 }; // muscle fibres (realistic look, heart muscle only)
     m.userData.valve = null; // { ring, axis, open, R, kind }
     const self = this;
     m.onBeforeCompile = (sh) => {
-      Object.assign(sh.uniforms, self.U, { uInner: m.userData.inner, uFibre: m.userData.fibre, uFat: m.userData.fat });
+      Object.assign(sh.uniforms, self.U, { uInner: m.userData.inner, uFibre: m.userData.fibre, uFat: m.userData.fat, uCutFlat: m.userData.cutFlat, uEndo: m.userData.endo });
       const fat = m.userData.hasFat;
       const v = m.userData.valve;
       if (v) Object.assign(sh.uniforms, { uRing: { value: v.ring }, uAxis: { value: v.axis }, uOpen: v.open, uR: { value: v.R } });
@@ -155,7 +157,7 @@ export class RealHeart {
           uniform float uAtr, uVen, uWeak;
           ${v ? 'uniform vec3 uRing, uAxis; uniform float uOpen, uR;' : ''}
           ${fat ? 'attribute float _fat;' : ''}
-          varying vec3 vObj; varying float vFat;`)
+          varying vec3 vObj; varying float vFat; varying vec3 vNrmObj;`)
         .replace('#include <begin_vertex>', `#include <begin_vertex>
           vec3 p = transformed;
           ${v && v.kind === 'av' ? `
@@ -188,15 +190,25 @@ export class RealHeart {
             p += (cV - p) * wV * fV * uVen * 0.09 * (1.0 - uWeak * side * 0.6);
           }
           vObj = p;
+          vNrmObj = objectNormal;
           vFat = ${fat ? '_fat' : '0.0'};
           transformed = p;`);
       sh.fragmentShader = sh.fragmentShader
         .replace('#include <common>', `#include <common>
-          uniform vec3 uInner; uniform float uIsch, uFibre, uFat; uniform vec3 uLad[6];
-          varying vec3 vObj; varying float vFat;
+          uniform vec3 uInner; uniform float uIsch, uFibre, uFat, uCutFlat, uEndo; uniform vec3 uLad[6];
+          uniform vec3 uRAc, uLAc, uRVc, uLVc;
+          varying vec3 vObj; varying float vFat; varying vec3 vNrmObj;
           float fatMix = 0.0;`)
         .replace('#include <map_fragment>', `#include <map_fragment>
-          if (!gl_FrontFacing) diffuseColor.rgb = uInner; // inside the muscle, where it is cut
+          if (uEndo > 0.0 && gl_FrontFacing) { // the chambers' inner lining: deeper red, with the ridges of muscle inside
+            vec3 cs[4] = vec3[4](uRAc, uLAc, uRVc, uLVc);
+            float dmin = 10.0; vec3 cc = uRAc;
+            for (int i = 0; i < 4; i++) { float dd = distance(vObj, cs[i]); if (dd < dmin) { dmin = dd; cc = cs[i]; } }
+            float inward = dot(normalize(vNrmObj), normalize(cc - vObj));
+            float endo = smoothstep(-0.05, 0.35, inward) * (1.0 - smoothstep(0.55, 0.85, dmin)) * uEndo;
+            float trab = sin(dot(vObj, vec3(11.0, 53.0, 17.0)) + sin(vObj.x * 29.0 + vObj.z * 13.0) * 1.8) * 0.5 + 0.5;
+            diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.42, 0.04, 0.035) * (0.7 + 0.5 * trab), endo);
+          }
           if (uFibre > 0.0) { // fine muscle fibres and mottling (no texture needed)
             float fib = sin(vObj.x * 70.0 + sin(vObj.y * 23.0) * 3.0 + vObj.z * 31.0) * sin(vObj.y * 61.0 - vObj.z * 17.0 + sin(vObj.x * 19.0) * 2.0);
             float mot = sin(vObj.x * 9.0 + 1.3) * sin(vObj.y * 7.0 + 0.7) * sin(vObj.z * 8.0 + 2.1);
@@ -213,6 +225,11 @@ export class RealHeart {
             float d = 10.0;
             for (int i = 0; i < 6; i++) d = min(d, distance(vObj, uLad[i]));
             diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.2, 0.13, 0.22), (1.0 - smoothstep(0.07, 0.18, d)) * uIsch * 0.9);
+          }`)
+        .replace('#include <opaque_fragment>', `#include <opaque_fragment>
+          if (!gl_FrontFacing && uCutFlat > 0.5) {
+            float mar = sin(vObj.x * 37.0 + sin(vObj.y * 21.0) * 2.0) * sin(vObj.y * 33.0 + vObj.z * 19.0); // a faint grain
+            gl_FragColor = vec4(uInner * (0.95 + 0.05 * mar), 1.0);
           }`)
         .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
           roughnessFactor = mix(roughnessFactor, 0.32, fatMix);`);
@@ -363,8 +380,15 @@ export class RealHeart {
       m.clearcoat = view === 'real' ? 0.65 : 0.1; // the wet sheen
       m.clearcoatRoughness = 0.28;
       m.userData.fat.value = view === 'real' ? 1 : 0;
-      // where the muscle is cut: a darker shade of the part
-      m.userData.inner.value.set(view === 'real' ? 0x6e1e26 : new THREE.Color(c).multiplyScalar(0.55));
+      // where it is cut (the opened-up heart): heart muscle as a pale band, so each wall and the septum stand out;
+      // vessels show their dark opening; valves and the rest just show their own colour
+      const wall = ['rightAtrium', 'leftAtrium', 'rightVentricle', 'leftVentricle', 'septum'].includes(id);
+      const vessel = ['aorta', 'pulmonaryArtery', 'pulmonaryVeins', 'venaCava', 'coronaryArteries', 'cardiacVeins'].includes(id);
+      m.userData.cutFlat.value = wall || vessel ? 1 : 0;
+      m.userData.endo.value = view === 'real' && wall ? 1 : 0;
+      if (wall) m.userData.inner.value.set(view === 'real' ? 0xe0a097 : new THREE.Color(c).lerp(new THREE.Color(0xffffff), 0.55));
+      else if (vessel) m.userData.inner.value.set(view === 'real' ? 0x4a0c12 : new THREE.Color(c).multiplyScalar(0.45));
+      else m.userData.inner.value.set(c);
       m.userData.fibre.value = view === 'real' && ['rightAtrium', 'leftAtrium', 'rightVentricle', 'leftVentricle', 'septum', 'chordae'].includes(id) ? 1 : 0;
     }
   }
