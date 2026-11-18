@@ -14,4 +14,7 @@ the card, or when a card is in view on a phone). You only need this after adding
 5. Add the lesson's card to `index.html` (copy an existing card in its subject's section and change the
    `data-lesson`, the image names, the tags, the title and the description).
 
+The share picture (`assets/share.jpg`, shown when the lessons page link is shared) is made with
+`node share-picture.mjs http://localhost:8080/` while the project is served as above.
+
 Some pictures show third-party models: see `assets/lessons/CREDITS.md`.

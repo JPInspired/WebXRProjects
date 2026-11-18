@@ -16,6 +16,8 @@ or organisation (e.g. a school's or company's) or another computer, and it keeps
    `.github/workflows/pages.yml` deploys every push to `main`.
 3. The site address becomes `https://<new-owner>.github.io/webxr-classes/`. GitHub redirects the old
    *repository* address, but **not** the old Pages site, so share the new link (and bookmark it on the headsets).
+4. In `index.html`, change the site address in the two `og:url` / `og:image` lines near the top (the preview
+   shown when the link is shared, which needs a full address). Everything else works under any address.
 
 ## Option B: copy to a new repository, or to another computer
 
@@ -32,7 +34,8 @@ To run on a computer without GitHub: serve the folder with any static web server
 
 ## Nothing to edit in the code
 
-- All links inside the project are relative, so it works under any address.
+- All links inside the project are relative, so it works under any address. The one exception is the link preview
+  (`og:url` and `og:image` at the top of `index.html`): update its address after a move (see A.4).
 - Shared sessions keep working across the move: devices just need to open the lessons from the same address.
 - The only settings files: `shared/net/config.js` (networking), and each lesson’s `config.js` (optional AI expert
   servers, all off by default).
