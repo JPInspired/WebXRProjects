@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { ORGANELLES, CELLS, PROCESSES } from '../data/cells.js';
 import * as O from './organelles.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 // One cell (animal, plant or bacterium), cut open so you can see inside.
 //  • every organelle is registered by id, so it can be named, tapped, pulled out or "knocked out"
@@ -87,10 +88,10 @@ export class Cell {
     const mem = O.shellMat(0xf2a7b5, 0.4, clip);
     this.membraneMats.push(mem);
     const membrane = new THREE.Group();
-    membrane.add(new THREE.Mesh(new THREE.SphereGeometry(R, 64, 48), mem));
-    membrane.add(new THREE.Mesh(new THREE.SphereGeometry(R * 0.985, 64, 48), O.shellMat(0xe57f98, 0.25, clip)));
+    membrane.add(new THREE.Mesh(O.blobSphere(R, 0.02, 5), mem));
+    membrane.add(new THREE.Mesh(O.blobSphere(R * 0.985, 0.02, 5), O.shellMat(0xe57f98, 0.25, clip)));
     this.add('membrane', membrane);
-    this.add('cytoplasm', new THREE.Mesh(new THREE.SphereGeometry(R * 0.975, 48, 32), O.shellMat(0xffe7ee, 0.08, clip)));
+    this.add('cytoplasm', new THREE.Mesh(O.blobSphere(R * 0.975, 0.02, 5, 48, 32), O.shellMat(0xffe7ee, 0.08, clip)));
 
     const N = new THREE.Vector3(-0.03, 0.02, -0.06);
     const nr = 0.075;
@@ -148,13 +149,14 @@ export class Cell {
     const clip = this.clip;
     const [W, H, D] = [0.5, 0.3, 0.3];
     const wall = new THREE.Group();
-    wall.add(new THREE.Mesh(new THREE.BoxGeometry(W, H, D), O.shellMat(0x7fb069, 0.55, clip)));
-    wall.add(new THREE.Mesh(new THREE.BoxGeometry(W - 0.016, H - 0.016, D - 0.016), O.shellMat(0x5d8f4a, 0.3, clip)));
+    const box = (w, h, d, r) => new RoundedBoxGeometry(w, h, d, 5, r);
+    wall.add(new THREE.Mesh(box(W, H, D, 0.04), O.shellMat(0x7fb069, 0.55, clip)));
+    wall.add(new THREE.Mesh(box(W - 0.016, H - 0.016, D - 0.016, 0.034), O.shellMat(0x5d8f4a, 0.3, clip)));
     this.add('cellWall', wall, this.group);
     const mem = O.shellMat(0xb5e48c, 0.32, clip);
     this.membraneMats.push(mem);
-    this.add('membrane', new THREE.Mesh(new THREE.BoxGeometry(W - 0.03, H - 0.03, D - 0.03), mem));
-    this.add('cytoplasm', new THREE.Mesh(new THREE.BoxGeometry(W - 0.036, H - 0.036, D - 0.036), O.shellMat(0xeaf7d8, 0.07, clip)));
+    this.add('membrane', new THREE.Mesh(box(W - 0.03, H - 0.03, D - 0.03, 0.03), mem));
+    this.add('cytoplasm', new THREE.Mesh(box(W - 0.036, H - 0.036, D - 0.036, 0.028), O.shellMat(0xeaf7d8, 0.07, clip)));
     const vac = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 32), O.shellMat(0x9fd8ff, 0.35, clip));
     vac.scale.set(0.19, 0.098, 0.1);
     vac.position.set(0.02, -0.005, -0.01);
