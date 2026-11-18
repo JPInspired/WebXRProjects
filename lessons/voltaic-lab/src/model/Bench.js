@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { METALS, METAL_IDS, ELECTROLYTES, ELECTROLYTE_IDS, METER_R, cellEMF } from '../data/voltaic.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { makeBeaker, reagentBottle, benchTop, metalMaterial, liquidMaterial } from '../../../../shared/lab/kit.js';
 
 // The bench.
 //   Core: four beakers. Drag two metal strips from the tray into a beaker (one on each side) and pour an
@@ -23,7 +25,14 @@ const STRIP = { w: 0.012, h: 0.11, d: 0.0025 };
 const STRIP_DEPTH = 0.07; // how far it sits in the liquid
 const SNAP = 0.06;
 
-const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.5, ...o });
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.5, envMapIntensity: 0.6, ...o });
+
+/** An empty glass beaker from the lab kit (this lesson adds its own liquid). */
+function glassBeaker(r, h) {
+  const b = makeBeaker(r, h, 0xffffff, 0.1);
+  b.userData.liquid.visible = false;
+  return b;
+}
 const glass = new THREE.MeshStandardMaterial({ color: 0xd8eeff, transparent: true, opacity: 0.25, roughness: 0.08, side: THREE.DoubleSide, depthWrite: false });
 
 function canvasTex(w, h) {
@@ -38,7 +47,8 @@ function canvasTex(w, h) {
 function makeStrip(metal) {
   const g = new THREE.Group();
   const m = METALS[metal];
-  const body = new THREE.Mesh(new THREE.BoxGeometry(STRIP.w, STRIP.h, STRIP.d), mat(m.color, { metalness: 0.85, roughness: metal === 'pb' || metal === 'fe' ? 0.55 : 0.3 }));
+  const body = new THREE.Mesh(new RoundedBoxGeometry(STRIP.w, STRIP.h, STRIP.d, 1, 0.0008), metalMaterial(metal, m.color).clone()); // its own copy: it darkens as the cell runs down
+  body.material.userData.base = body.material.color.getHex();
   const coat = new THREE.Mesh(new THREE.BoxGeometry(STRIP.w * 1.12, STRIP_DEPTH, STRIP.d * 2.2), mat(0xb8633a, { metalness: 0.4, roughness: 0.8 }));
   coat.position.y = -STRIP.h / 2 + STRIP_DEPTH / 2;
   coat.visible = false;
@@ -72,8 +82,8 @@ export class Bench {
     this.selected = 0;
     this.tmp = new THREE.Vector3();
 
-    const top = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.012, 0.5), mat(0xe9ecf2, { roughness: 0.4 }));
-    top.position.set(0, TOP - 0.006, 0.02);
+    const top = benchTop(0.92, 0.5, { color: 0x2a3140 });
+    top.position.set(0, TOP, 0.02);
     this.group.add(top);
 
     // ── cell stations: core (4 single beakers) and advanced (2 pairs) ──
@@ -81,7 +91,7 @@ export class Bench {
     this.advCells = [-0.27, 0.27].map((x, i) => this.makeAdvCell(x, i));
 
     // ── metal tray ──
-    const tray = new THREE.Mesh(new THREE.BoxGeometry(0.33, 0.008, 0.07), mat(0x3a4256));
+    const tray = new THREE.Mesh(new RoundedBoxGeometry(0.33, 0.008, 0.07, 2, 0.003), mat(0x4a5266, { roughness: 0.7 }));
     tray.position.set(TRAY.x + 0.13, TOP + 0.004, TRAY.z);
     this.group.add(tray);
     this.tray = tray;
@@ -104,20 +114,17 @@ export class Bench {
     this.bottles = ELECTROLYTE_IDS.map((id, i) => {
       const e = ELECTROLYTES[id];
       const g = new THREE.Group();
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.05, 16), new THREE.MeshStandardMaterial({ color: e.color, transparent: true, opacity: 0.8, roughness: 0.15 }));
-      body.position.y = 0.025;
-      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.009, 0.014, 12), mat(0xffffff, { transparent: true, opacity: 0.6 }));
-      neck.position.y = 0.057;
-      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.0065, 0.0065, 0.006, 12), mat(0x2a6bd8));
-      cap.position.y = 0.067;
+      const bottle = reagentBottle({ r: 0.014, h: 0.06, liquid: e.color, cap: 0x2a6bd8, label: e.short });
       const tag = makeLabel(e.short, { height: 0.009, size: 34 });
       tag.position.y = 0.083;
-      g.add(body, neck, cap, tag);
+      g.add(bottle, tag);
+      const picks = [];
+      bottle.traverse((m) => { if (m.isMesh) picks.push(m); });
       g.position.set(BOTTLES.x + i * 0.04, TOP, BOTTLES.z + (i % 2) * 0.03);
       g.userData.home = g.position.clone();
-      for (const m of [body, neck, cap]) m.userData = { handler: this, bottle: id };
+      for (const m of picks) m.userData = { handler: this, bottle: id };
       this.group.add(g);
-      return { id, group: g, picks: [body, neck, cap] };
+      return { id, group: g, picks };
     });
 
     // ── salt bridges (advanced): a strip of filter paper soaked in potassium nitrate, bent into a U ──
@@ -144,13 +151,26 @@ export class Bench {
     // ── multimeter ──
     this.meter = new THREE.Group();
     this.meter.position.copy(METER);
-    const mbody = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.03, 0.15), mat(0xf2b230, { roughness: 0.6 }));
+    const mbody = new THREE.Mesh(new RoundedBoxGeometry(0.12, 0.03, 0.15, 4, 0.01), mat(0xf2b230, { roughness: 0.75 })); // the rubber holster
     mbody.position.y = 0.015;
+    const panel = new THREE.Mesh(new RoundedBoxGeometry(0.1, 0.004, 0.13, 2, 0.003), mat(0x2b2f3a, { roughness: 0.5 }));
+    panel.position.set(0, 0.0305, 0);
+    this.meter.add(panel);
+    for (const [sx, col] of [[-0.03, 0x15171c], [0, 0xd42a2a], [0.03, 0xd42a2a]]) {
+      const sock = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.004, 16), mat(col, { roughness: 0.4 }));
+      sock.position.set(sx, 0.033, 0.06);
+      const hole = new THREE.Mesh(new THREE.CylinderGeometry(0.0022, 0.0022, 0.0045, 12), mat(0x050506));
+      hole.position.copy(sock.position);
+      this.meter.add(sock, hole);
+    }
     this.screen = canvasTex(320, 150);
     const face = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 0.047), new THREE.MeshBasicMaterial({ map: this.screen.t, toneMapped: false }));
     face.rotation.x = -Math.PI / 2 + 0.35;
     face.position.set(0, 0.04, -0.03);
-    this.modeBtn = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.008, 24), mat(0x2b2f3a));
+    this.modeBtn = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.019, 0.008, 32), mat(0x3a3f4a, { roughness: 0.45 })); // the dial
+    const pointer = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.002, 0.014), mat(0xf2f2f2));
+    pointer.position.set(0, 0.0045, -0.008);
+    this.modeBtn.add(pointer);
     this.modeBtn.position.set(0, 0.033, 0.035);
     this.modeBtn.userData = { handler: this, meterMode: true, tapOnly: true };
     const modeTag = makeLabel('V / mA', { height: 0.009, size: 32 });
@@ -174,11 +194,9 @@ export class Bench {
     g.position.set(x, TOP, BACK_Z);
     const r = 0.042;
     const h = 0.09;
-    const wall = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.95, h, 28, 1, true), glass);
-    wall.position.y = h / 2;
-    const base = new THREE.Mesh(new THREE.CircleGeometry(r * 0.95, 28).rotateX(-Math.PI / 2), glass);
-    base.position.y = 0.001;
-    const liquid = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.94, r * 0.9, 0.065, 28), new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.55, roughness: 0.1 }));
+    const wall = glassBeaker(r, h);
+    const base = new THREE.Group();
+    const liquid = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.94, r * 0.92, 0.065, 28), liquidMaterial(0xffffff, 0.55));
     liquid.position.y = 0.0335;
     liquid.visible = false;
     const pick = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 12), new THREE.MeshBasicMaterial({ visible: false }));
@@ -204,11 +222,9 @@ export class Bench {
       b.position.x = dx;
       const r = 0.038;
       const h = 0.085;
-      const wall = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.95, h, 28, 1, true), glass);
-      wall.position.y = h / 2;
-      const base = new THREE.Mesh(new THREE.CircleGeometry(r * 0.95, 28).rotateX(-Math.PI / 2), glass);
-      base.position.y = 0.001;
-      const liquid = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.94, r * 0.9, 0.06, 28), new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.6, roughness: 0.1 }));
+      const wall = glassBeaker(r, h);
+      const base = new THREE.Group();
+      const liquid = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.94, r * 0.92, 0.06, 28), liquidMaterial(0xffffff, 0.6));
       liquid.position.y = 0.031;
       liquid.visible = false;
       const tag = makeLabel(' ', { height: 0.01, size: 32 });
@@ -388,7 +404,7 @@ export class Bench {
       const w = cell.wear;
       const neg = k === negK && emf;
       s.userData.body.scale.set(neg ? 1 - 0.55 * w : 1, 1, neg ? 1 - 0.5 * w : 1);
-      s.userData.body.material.color.setHex(METALS[k === 0 ? cell.left : cell.right].color).multiplyScalar(neg ? 1 - 0.35 * w : 1);
+      s.userData.body.material.color.setHex(s.userData.body.material.userData.base).multiplyScalar(neg ? 1 - 0.35 * w : 1);
       const other = k === 0 ? cell.right : cell.left;
       const coatMetal = this.level === 'advanced' ? (k === 0 ? cell.left : cell.right) : null;
       s.userData.coat.visible = !neg && emf && w > 0.05 && this.level === 'advanced';

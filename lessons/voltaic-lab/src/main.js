@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { studioReflections } from '../../../shared/util/reflections.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
 import { PREDICTIONS, ANSWERS, METALS, ELECTROLYTES, BATTERIES, cellEMF } from './data/voltaic.js';
@@ -50,6 +51,7 @@ class App extends LessonApp {
   }
 
   initLesson() {
+    studioReflections(this); // metal strips, glass and liquids
     this.lab.remove(this.explainPanel.mesh);
     this.explainPanel = new CanvasPanel({ width: 0.62, height: 0.24, name: 'card' });
     this.explainPanel.mesh.position.set(0, 0.47, -0.2);
