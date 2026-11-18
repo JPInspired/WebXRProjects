@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { studioReflections } from '../../../shared/util/reflections.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
 import { SAMPLES, SAMPLE_IDS, PARTS, PART_IDS, FIELD, QUIZ, QUIZ_ADVANCED, ANSWERS, ABOUT_LABEL, labelsFor } from './data/micro.js';
@@ -48,6 +49,7 @@ class App extends LessonApp {
   }
 
   initLesson() {
+    studioReflections(this); // glass slides, the pipette and the microscope's metal and enamel
     this.lab.remove(this.explainPanel.mesh);
     this.explainPanel = new CanvasPanel({ width: 0.68, height: 0.25, name: 'card' });
     this.explainPanel.mesh.position.set(0, 0.47, -0.06);

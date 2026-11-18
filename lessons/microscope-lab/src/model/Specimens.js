@@ -45,18 +45,45 @@ const GEN = {
           const x0 = off + k * 300;
           const nx = x0 + 40 + r() * 220;
           const ny = y0 + 14 + r() * 42;
+          // the cell's corners, nudged a little (its own random numbers, so the cell positions stay the same)
+          const jr = rng(1000 + row * 10 + k);
+          const j = () => (jr() - 0.5) * 9;
+          const quad = [[x0 + 4 + j(), y0 + 4 + j()], [x0 + 296 + j(), y0 + 4 + j()], [x0 + 296 + j(), y0 + 66 + j()], [x0 + 4 + j(), y0 + 66 + j()]];
+          const tint = 0.92 + jr() * 0.12;
+          const grains = Array.from({ length: 70 }, () => [x0 + 10 + jr() * 280, y0 + 8 + jr() * 54, 0.8 + jr() * 1.6]);
           wrap(() => {
-            x.fillStyle = '#e8c878';
-            x.fillRect(x0, y0, 300, 70);
-            x.fillStyle = '#f6e6b4';
-            x.fillRect(x0 + 8, y0 + 8, 284, 54);
-            for (let g = 0; g < 30; g++) { x.fillStyle = 'rgba(160,110,30,0.25)'; x.fillRect(x0 + 4 + ((g * 37) % 292), y0 + 3 + ((g * 13) % 64), 2, 2); }
-            x.strokeStyle = '#7d5216';
-            x.lineWidth = 4;
-            x.strokeRect(x0, y0, 300, 70);
-            ellipse(x, nx, ny, 15, 11);
-            x.fillStyle = '#8a5a12';
+            // the wall: a darker double line round every cell
+            x.fillStyle = '#b98f42';
+            x.fillRect(x0 - 2, y0 - 2, 304, 74);
+            x.beginPath();
+            quad.forEach(([px, py], i) => (i ? x.lineTo(px, py) : x.moveTo(px, py)));
+            x.closePath();
+            const gr = x.createLinearGradient(x0, y0, x0, y0 + 70);
+            gr.addColorStop(0, `rgba(${Math.round(236 * tint)},${Math.round(214 * tint)},${Math.round(160 * tint)},1)`);
+            gr.addColorStop(0.5, `rgba(${Math.round(248 * tint)},${Math.round(232 * tint)},${Math.round(186 * tint)},1)`);
+            gr.addColorStop(1, `rgba(${Math.round(232 * tint)},${Math.round(208 * tint)},${Math.round(152 * tint)},1)`);
+            x.fillStyle = gr;
             x.fill();
+            x.strokeStyle = 'rgba(120,80,20,0.55)';
+            x.lineWidth = 1.5;
+            x.stroke();
+            // cytoplasm: fine granules, thicker towards the walls
+            for (const [gx, gy, gs] of grains) {
+              x.fillStyle = 'rgba(150,105,35,0.28)';
+              x.beginPath();
+              x.arc(gx, gy, gs, 0, Math.PI * 2);
+              x.fill();
+            }
+            // the nucleus, with its nucleolus
+            ellipse(x, nx, ny, 15, 11);
+            const ng = x.createRadialGradient(nx - 4, ny - 3, 1, nx, ny, 15);
+            ng.addColorStop(0, '#a8742a');
+            ng.addColorStop(1, '#7a4c0e');
+            x.fillStyle = ng;
+            x.fill();
+            x.strokeStyle = 'rgba(70,40,5,0.7)';
+            x.lineWidth = 1.2;
+            x.stroke();
             ellipse(x, nx + 3, ny - 2, 4, 3);
             x.fillStyle = '#4e3008';
             x.fill();
@@ -83,18 +110,43 @@ const GEN = {
         for (let i = 0; i < 9; i++) { const a = (i / 9) * Math.PI * 2 + r() * 0.3; const d = c.s * (0.8 + r() * 0.35); pts.push([c.x + Math.cos(a) * d, c.y + Math.sin(a) * d]); }
         const n = { x: c.x + (r() - 0.5) * c.s * 0.4, y: c.y + (r() - 0.5) * c.s * 0.4 };
         const bact = r() < 0.5 ? { x: pts[2][0] + 6, y: pts[2][1] + 4 } : null;
+        const jr = rng(Math.round(c.x * 7 + c.y));
+        const folds = Array.from({ length: 3 }, () => [c.x + (jr() - 0.5) * c.s, c.y + (jr() - 0.5) * c.s, jr() * Math.PI, c.s * (0.3 + jr() * 0.4)]);
+        const specks = Array.from({ length: 40 }, () => [c.x + (jr() - 0.5) * c.s * 1.5, c.y + (jr() - 0.5) * c.s * 1.5, 0.4 + jr() * 0.8]);
         wrap(() => {
           x.beginPath();
-          pts.forEach(([px, py], i) => (i ? x.lineTo(px, py) : x.moveTo(px, py)));
+          // a smooth outline through the corner points (cells are soft, not polygons)
+          const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+          const m0 = mid(pts[pts.length - 1], pts[0]);
+          x.moveTo(m0[0], m0[1]);
+          pts.forEach((p, i) => { const m = mid(p, pts[(i + 1) % pts.length]); x.quadraticCurveTo(p[0], p[1], m[0], m[1]); });
           x.closePath();
-          x.fillStyle = 'rgba(172,200,240,0.85)';
+          const g = x.createRadialGradient(c.x, c.y, c.s * 0.1, c.x, c.y, c.s * 1.1);
+          g.addColorStop(0, 'rgba(196,216,246,0.7)');
+          g.addColorStop(0.75, 'rgba(160,190,238,0.8)');
+          g.addColorStop(1, 'rgba(120,160,228,0.9)');
+          x.fillStyle = g;
           x.fill();
-          x.strokeStyle = '#3e6fc4';
-          x.lineWidth = 1.4;
+          x.strokeStyle = 'rgba(52,96,190,0.75)';
+          x.lineWidth = 1.1;
           x.stroke();
+          x.save();
+          x.clip();
+          // fine specks, and the creases where the thin cell has folded
+          for (const [sx, sy, sr] of specks) { x.fillStyle = 'rgba(50,90,180,0.22)'; x.beginPath(); x.arc(sx, sy, sr, 0, Math.PI * 2); x.fill(); }
+          x.strokeStyle = 'rgba(60,100,190,0.28)';
+          x.lineWidth = 0.9;
+          for (const [fx, fy, fa, fl] of folds) { x.beginPath(); x.moveTo(fx - Math.cos(fa) * fl, fy - Math.sin(fa) * fl); x.quadraticCurveTo(fx + Math.sin(fa) * 4, fy - Math.cos(fa) * 4, fx + Math.cos(fa) * fl, fy + Math.sin(fa) * fl); x.stroke(); }
+          x.restore();
           for (let g = 0; g < 25; g++) { x.fillStyle = 'rgba(60,100,190,0.3)'; x.fillRect(c.x + (r() - 0.5) * c.s, c.y + (r() - 0.5) * c.s, 1, 1); }
+          ellipse(x, n.x, n.y, 6.5, 5.6);
+          x.fillStyle = 'rgba(150,180,235,0.6)'; // a pale halo round the nucleus
+          x.fill();
           ellipse(x, n.x, n.y, 5, 4.2);
-          x.fillStyle = '#1d3f8f';
+          const ng = x.createRadialGradient(n.x - 1.5, n.y - 1.2, 0.5, n.x, n.y, 5);
+          ng.addColorStop(0, '#3d63b8');
+          ng.addColorStop(1, '#16307a');
+          x.fillStyle = ng;
           x.fill();
           if (bact) for (let b = 0; b < 14; b++) { ellipse(x, bact.x + ((b * 7) % 11) - 5, bact.y + ((b * 5) % 9) - 4, 0.9, 0.6); x.fillStyle = '#23409a'; x.fill(); }
         });
@@ -121,15 +173,29 @@ const GEN = {
             const cy = side < 0.4 ? y0 + 5 : side < 0.8 ? y0 + 30 : y0 + 6 + r() * 23;
             chl.push([cx, cy, r() * 3]);
           }
+          const jr = rng(2000 + row * 10 + k);
+          const j = () => (jr() - 0.5) * 3.5;
+          const quad = [[x0 + 1.5 + j(), y0 + 1.5 + j()], [x0 + 108.5 + j(), y0 + 1.5 + j()], [x0 + 108.5 + j(), y0 + 33.5 + j()], [x0 + 1.5 + j(), y0 + 33.5 + j()]];
           wrap(() => {
-            x.fillStyle = '#d8eec0';
-            x.fillRect(x0, y0, 110, 35);
-            x.fillStyle = '#eef8e2';
-            x.fillRect(x0 + 8, y0 + 8, 94, 19);
-            x.strokeStyle = '#5c8a3a';
-            x.lineWidth = 2.2;
-            x.strokeRect(x0, y0, 110, 35);
-            for (const [cx, cy, a] of chl) { ellipse(x, cx, cy, 3.2, 2.2, a); x.fillStyle = '#2f8f2f'; x.fill(); }
+            x.fillStyle = '#7fa65a'; // the wall between cells
+            x.fillRect(x0 - 1, y0 - 1, 112, 37);
+            x.beginPath();
+            quad.forEach(([px, py], i) => (i ? x.lineTo(px, py) : x.moveTo(px, py)));
+            x.closePath();
+            const g = x.createLinearGradient(x0, y0, x0, y0 + 35);
+            g.addColorStop(0, '#d4ebbb');
+            g.addColorStop(0.5, '#eef8e2');
+            g.addColorStop(1, '#d4ebbb');
+            x.fillStyle = g;
+            x.fill();
+            for (const [cx, cy, a] of chl) {
+              ellipse(x, cx, cy, 3.2, 2.2, a);
+              const cg = x.createRadialGradient(cx - 0.8, cy - 0.6, 0.2, cx, cy, 3.3);
+              cg.addColorStop(0, '#5cbf4a');
+              cg.addColorStop(1, '#1f6e22');
+              x.fillStyle = cg;
+              x.fill();
+            }
           });
           for (const [cx, cy] of chl) f.push({ type: 'chloroplast', x: cx % 440, y: cy, r: 4 });
           f.push({ type: 'vacuole', x: (x0 + 55) % 440, y: y0 + 17, r: 9 });
@@ -279,6 +345,24 @@ const FIXED = { onion: [600, 210], pondweed: [220, 140], blood: [120, 140], gut:
 /** Where the slide sits under the lens: on a cell, not on empty glass. */
 const centre = (id) => FIXED[id] ?? (() => { const f = tile(id).features.find((x) => x.type === (id === 'cheek' ? 'nucleus' : 'algae')); return [f.x, f.y]; })();
 
+let grainCanvas = null;
+/** A square of fine random noise (made once). */
+function grain() {
+  if (grainCanvas) return grainCanvas;
+  grainCanvas = document.createElement('canvas');
+  grainCanvas.width = grainCanvas.height = 256;
+  const g = grainCanvas.getContext('2d');
+  const img = g.createImageData(256, 256);
+  const r = rng(77);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = 90 + r() * 76;
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+    img.data[i + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  return grainCanvas;
+}
+
 /**
  * Draw the view through the eyepiece into a square canvas `c`.
  * p: { sample, mag, blur, t, pins: [{ label, x, y }], ready (slide on stage) }
@@ -313,7 +397,7 @@ export function renderView(c, p, sharp) {
   const j0 = Math.floor(top / T.H);
   for (let i = i0; i * T.W < left + field; i++) {
     for (let j = j0; j * T.H < top + field; j++) {
-      s.drawImage(T.canvas, (i * T.W - left) * k, (j * T.H - top) * k, T.W * k + 0.5, T.H * k + 0.5);
+      s.drawImage(T.canvas, (i * T.W - left) * k, (j * T.H - top) * k, T.W * k + 1.5, T.H * k + 1.5);
     }
   }
   if (p.sample === 'pond') {
@@ -359,9 +443,23 @@ export function renderView(c, p, sharp) {
   x.beginPath();
   x.arc(S / 2, S / 2, S / 2 - 4, 0, Math.PI * 2);
   x.clip();
-  x.filter = p.blur > 0.4 ? `blur(${p.blur.toFixed(1)}px)` : 'none';
+  const soft = 0.45 * (S / 512); // even in focus, a real lens is never razor sharp
+  x.filter = `blur(${Math.max(soft, p.blur).toFixed(2)}px)`;
   x.drawImage(sharp, 0, 0);
   x.filter = 'none';
+  // grain, and light that is a little brighter in the middle
+  x.globalCompositeOperation = 'overlay';
+  x.globalAlpha = 0.09;
+  x.drawImage(grain(), 0, 0, S, S);
+  x.globalAlpha = 1;
+  const hot = x.createRadialGradient(S * 0.48, S * 0.46, 0, S / 2, S / 2, S * 0.5);
+  hot.addColorStop(0, 'rgba(255,255,240,0.5)');
+  hot.addColorStop(1, 'rgba(0,0,0,0.25)');
+  x.globalAlpha = 0.35;
+  x.fillStyle = hot;
+  x.fillRect(0, 0, S, S);
+  x.globalAlpha = 1;
+  x.globalCompositeOperation = 'source-over';
   // a soft dark edge, like a real eyepiece
   const g = x.createRadialGradient(S / 2, S / 2, S * 0.38, S / 2, S / 2, S / 2);
   g.addColorStop(0, 'rgba(0,0,0,0)');
