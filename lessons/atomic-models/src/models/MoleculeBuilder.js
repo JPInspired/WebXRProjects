@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { glossy } from './looks.js';
 import { bySymbol, VDW_RADII } from '../data/elements.js';
 import { BUILD_ATOMS, bondLength, bondEnergy, idealAngle, formulaOf, formulaKey, KNOWN } from '../data/bonding.js';
 import { sound } from '../../../../shared/util/sound.js';
@@ -62,7 +63,7 @@ export class MoleculeBuilder {
     this.sphere = new THREE.SphereGeometry(1, 32, 20);
     this.cylinder = new THREE.CylinderGeometry(1, 1, 1, 12);
     this.mats = new Map();
-    this.bondMat = new THREE.MeshStandardMaterial({ color: 0xd8dbe8, roughness: 0.5 });
+    this.bondMat = glossy(0xd8dbe8, { roughness: 0.4, clearcoat: 0.5 });
     this.strainMat = new THREE.MeshStandardMaterial({ color: 0xff8a5c, emissive: 0x802000, roughness: 0.5 });
     this.pairGeo = new THREE.SphereGeometry(0.0055, 12, 8);
     this.pairMat = new THREE.MeshStandardMaterial({ color: 0x4cc9ff, emissive: 0x1a8fd0, emissiveIntensity: 1.2 });
@@ -83,7 +84,7 @@ export class MoleculeBuilder {
   // ───────────── model ─────────────
 
   material(sym) {
-    if (!this.mats.has(sym)) this.mats.set(sym, new THREE.MeshStandardMaterial({ color: bySymbol(sym).color, roughness: 0.35 }));
+    if (!this.mats.has(sym)) this.mats.set(sym, glossy(bySymbol(sym).color));
     return this.mats.get(sym);
   }
 

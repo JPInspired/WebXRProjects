@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { shellsFor } from '../data/elements.js';
 import { clearGroup } from '../../../../shared/ui/labels.js';
+import { glossy, halo, trail, softDot } from './looks.js';
 
 // Bohr-style atom: packed nucleus of protons + neutrons, electrons on shells.
 // NOT to scale (the Scale mode shows the real proportions).
@@ -47,8 +48,8 @@ export class AtomModel {
 
     this.geoNucleon = new THREE.SphereGeometry(NUCLEON_R, 24, 16);
     this.geoElectron = new THREE.SphereGeometry(0.009, 16, 12);
-    this.matP = new THREE.MeshStandardMaterial({ color: COLORS.proton, roughness: 0.35 });
-    this.matN = new THREE.MeshStandardMaterial({ color: COLORS.neutron, roughness: 0.45 });
+    this.matP = glossy(COLORS.proton);
+    this.matN = glossy(COLORS.neutron, { roughness: 0.4 });
     this.matE = new THREE.MeshStandardMaterial({ color: COLORS.electron, emissive: 0x1a8fd0, emissiveIntensity: 1.3 });
     this.shared = new Set([this.geoNucleon, this.geoElectron, this.matP, this.matN, this.matE]);
 
@@ -90,6 +91,7 @@ export class AtomModel {
       this.nucleus.add(m);
     });
     this.nucleusRadius = maxR + NUCLEON_R;
+    this.nucleus.add(halo(0xff8a6a, this.nucleusRadius * 4, 0.25));
   }
 
   buildElectrons(e, view) {
@@ -111,9 +113,10 @@ export class AtomModel {
       const tilt = new THREE.Group();
       tilt.rotation.set(0.35 + k * 0.55, k * 1.15, 0);
       const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(r, 0.0013, 6, 128),
-        new THREE.MeshBasicMaterial({ color: 0x8c9bff, transparent: true, opacity: 0.4 }),
+        new THREE.TorusGeometry(r, 0.0012, 6, 160),
+        new THREE.MeshBasicMaterial({ color: 0x6f86ff, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }),
       );
+      ring.raycast = () => {};
       tilt.add(ring);
       const orbit = new THREE.Group();
       for (let i = 0; i < count; i++) {
@@ -121,7 +124,8 @@ export class AtomModel {
         const el = new THREE.Mesh(this.geoElectron, this.matE);
         el.userData.part = 'electron';
         el.position.set(Math.cos(a) * r, Math.sin(a) * r, 0);
-        orbit.add(el);
+        el.add(halo(COLORS.electron, 0.04, 0.8));
+        orbit.add(el, trail(r, a, Math.min(1.4, (Math.PI * 2) / count * 0.7), COLORS.electron));
       }
       orbit.userData.speed = 1.1 / (k + 1);
       tilt.add(orbit);
@@ -145,16 +149,16 @@ export class AtomModel {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     this.cloud = new THREE.Points(geo, new THREE.PointsMaterial({
-      color: COLORS.electron, size: 0.0035, transparent: true, opacity: 0.6,
-      depthWrite: false, blending: THREE.AdditiveBlending,
+      color: COLORS.electron, size: 0.008, map: softDot(), transparent: true, opacity: 0.9,
+      depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false,
     }));
     this.electrons.add(this.cloud);
   }
 
   /** Every proton, neutron and (in shell view) electron can be picked up. */
   get grabTargets() {
-    const t = [...this.nucleus.children];
-    for (const o of this.orbits) t.push(...o.children);
+    const t = this.nucleus.children.filter((c) => c.userData.part);
+    for (const o of this.orbits) t.push(...o.children.filter((c) => c.userData.part));
     return t;
   }
 

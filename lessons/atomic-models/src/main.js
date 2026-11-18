@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { studioReflections } from '../../../shared/util/reflections.js';
 import { getElement, MAX_Z, bySymbol } from './data/elements.js';
 import { AtomModel } from './models/AtomModel.js';
 import { MoleculeModel } from './models/MoleculeModel.js';
@@ -44,6 +45,7 @@ class App extends LessonApp {
   // ───────────── setup ─────────────
 
   initLesson() {
+    studioReflections(this); // glossy particles and atoms
     this.atom = new AtomModel();
     this.molecule = new MoleculeModel();
     this.scale = new ScaleExplorer();

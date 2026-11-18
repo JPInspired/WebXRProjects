@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { MOLECULES } from '../data/molecules.js';
 import { bySymbol, VDW_RADII, IONIC_RADII } from '../data/elements.js';
 import { clearGroup } from '../../../../shared/ui/labels.js';
+import { glossy } from './looks.js';
 
 // 1 Å (10⁻¹⁰ m) is shown as 10 cm → the model is magnified one billion times.
 export const MOLECULE_SCALE = 0.1;
@@ -21,7 +22,7 @@ export class MoleculeModel {
     this.key = '';
     this.materials = new Map();
     this.sphere = new THREE.SphereGeometry(1, 32, 20);
-    this.bondMat = new THREE.MeshStandardMaterial({ color: 0xd8dbe8, roughness: 0.5 });
+    this.bondMat = glossy(0xd8dbe8, { roughness: 0.4, clearcoat: 0.5 });
     this.extentA = 0;
     this.fit = 1;
   }
@@ -29,7 +30,7 @@ export class MoleculeModel {
   material(symbol) {
     if (!this.materials.has(symbol)) {
       const el = bySymbol(symbol);
-      this.materials.set(symbol, new THREE.MeshStandardMaterial({ color: el ? el.color : 0xff00ff, roughness: 0.35 }));
+      this.materials.set(symbol, glossy(el ? el.color : 0xff00ff));
     }
     return this.materials.get(symbol);
   }

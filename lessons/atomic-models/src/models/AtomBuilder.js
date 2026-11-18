@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { glossy } from './looks.js';
 import { MAX_Z } from '../data/elements.js';
 import { COLORS } from './AtomModel.js';
 import * as X from '../chemist/explain.js';
@@ -48,9 +49,7 @@ export class AtomBuilder {
     }
     app.explain(X.particlePicked(kind, fromAtom, before, { ...app.state.atom }));
 
-    const mesh = new THREE.Mesh(this.geo, new THREE.MeshStandardMaterial({
-      color: COLORS[kind], emissive: kind === 'electron' ? 0x1a8fd0 : 0x000000, roughness: 0.35,
-    }));
+    const mesh = new THREE.Mesh(this.geo, glossy(COLORS[kind], { emissive: kind === 'electron' ? 0x1a8fd0 : 0x000000 }));
     mesh.scale.setScalar(kind === 'electron' ? 0.012 : 0.016);
     mesh.position.copy(app.lab.worldToLocal(world.clone()));
     app.lab.add(mesh);
