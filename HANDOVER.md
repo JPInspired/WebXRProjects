@@ -7,9 +7,11 @@ or organisation (e.g. a school's or company's) or another computer, and it keeps
 ## Where it lives now
 
 - Repository: https://github.com/JPInspired/WebXRProjects (Inspired Education Group), moved there on 18 November 2026
-  with its full history and its restore points (git tags): `v1.0` (the first library) and `v1.1` (every lesson
-  polished, the shared lab kit, the frame-rate counter and safety net, the testing checklist). To see or go back to
-  one: `git checkout v1.1` (or download it from the repository's Tags page on GitHub).
+  with its full history and its restore points (git tags): `v1.0` (the first library), `v1.1` (every lesson
+  polished, the shared lab kit, the frame-rate counter and safety net, the testing checklist) and `v1.2` (the same
+  feel in every lesson, teacher guides, lesson cards with time and ages, Inspired-style wording). To see or go back
+  to one: `git checkout v1.2` (or download it from the repository's Tags page on GitHub). To put the live website
+  back to one: `git revert --no-edit <tag>..HEAD`, then push: this undoes everything since, keeping the history.
 - Website: https://jpinspired.github.io/WebXRProjects/ (deployed by GitHub Actions on every push to `main`).
 - The earlier home, `antoniosousapedro99-png/webxr-classes`, was a personal account and is no longer updated.
 
