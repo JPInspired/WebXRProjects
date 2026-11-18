@@ -4,6 +4,13 @@ Everything needed to run WebXR Classes is in this repository. There is no build 
 our own, no passwords or API keys, and no account tied to the code. It can be moved to another GitHub account
 or organisation (e.g. a school's or company's) or another computer, and it keeps working without code changes.
 
+## Where it lives now
+
+- Repository: https://github.com/JPInspired/WebXRProjects (Inspired Education Group), moved there on 18 November 2026
+  with its full history and the `v1.0` restore point.
+- Website: https://jpinspired.github.io/WebXRProjects/ (deployed by GitHub Actions on every push to `main`).
+- The earlier home, `antoniosousapedro99-png/webxr-classes`, was a personal account and is no longer updated.
+
 ## What you need
 
 - A copy of this repository (with its history, ideally).

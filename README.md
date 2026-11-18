@@ -534,7 +534,7 @@ A virtual-reality visit to the great central hall of the Natural History Museum,
 
 WebXR only works on **HTTPS** (or `localhost`).
 
-**GitHub Pages (recommended).** Under *Settings → Pages*, set *Source* to **GitHub Actions**. Every push to `main` then deploys via `.github/workflows/pages.yml`. Open `https://<user>.github.io/webxr-classes/` in the **Meta Quest Browser** and press **Enter Mixed Reality**.
+**GitHub Pages (recommended).** Under *Settings → Pages*, set *Source* to **GitHub Actions**. Every push to `main` then deploys via `.github/workflows/pages.yml`. Open `https://<user>.github.io/<repository>/` (currently https://jpinspired.github.io/WebXRProjects/) in the **Meta Quest Browser** and press **Enter Mixed Reality**.
 
 **Locally:**
 
