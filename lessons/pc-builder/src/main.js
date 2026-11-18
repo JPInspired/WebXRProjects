@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
 import { CASES } from './data/parts.js';
@@ -50,6 +51,10 @@ class App extends LessonApp {
     const lamp = new THREE.PointLight(0xffffff, 1.6, 1.6, 1.2);
     lamp.position.set(0.1, 0.25, 0.45);
     this.lab.add(lamp);
+    // soft studio reflections, so metal parts (heatsinks, brackets, the heat spreaders) look like metal
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmrem.dispose();
 
     this.pc = new PCBuild(this);
     this.lab.add(this.pc.group);
