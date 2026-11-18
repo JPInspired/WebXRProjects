@@ -49,7 +49,7 @@ export function drawControls(ui, app) {
     const q = app.quiz;
     ui.text(`${q.right} of ${q.total} labelled${q.wrong ? ` · ${q.wrong} wrong tr${q.wrong === 1 ? 'y' : 'ies'}` : ''}`, { size: 28, weight: 700, color: q.right === q.total && q.total ? '#7ee2a8' : THEME.text });
     ui.buttons([{ id: 'quiz-restart', label: 'Start again', onClick: () => app.restartQuiz() }], { height: 52, size: 23 });
-    ui.text('Drag each name onto the right part of your heart. Open it up to reach the valves and the septum.', { size: 21, color: THEME.dim });
+    ui.text('Drag each name onto the spot whose line points to that part. Open it up to see the valves and the septum.', { size: 21, color: THEME.dim });
   }
 
   if (app.soloTeacher) drawTeacher(ui, app);

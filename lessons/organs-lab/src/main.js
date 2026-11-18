@@ -85,7 +85,7 @@ class App extends LessonApp {
       build: ['Build the body', this.state.level === 'advanced'
         ? 'No names this time: work out each organ from its shape and put it where it belongs. Press “Check my body” on the left when you are ready.'
         : 'Pick up each organ from the desk and put it in its place in your skeleton. It snaps in when you are close. Stuck? Press its name on the right for a hint.'],
-      functions: ['What does each organ do?', 'Drag each function card from the desk onto the organ that does that job.'],
+      functions: ['What does each organ do?', 'Drag each function card from the desk onto the dashed spot whose line points to the organ that does that job (or straight onto the organ).'],
       systems: ['Body systems', 'Your skeleton is complete. Each system lights up in turn: what does it do, and what does it need from the others?'],
       quiz: ['Quiz', 'Ten questions on the right. Your score goes on the class board.'],
     }[mode];

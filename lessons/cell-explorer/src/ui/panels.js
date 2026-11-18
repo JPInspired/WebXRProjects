@@ -34,7 +34,7 @@ export function drawControls(ui, app) {
     const q = app.quiz;
     ui.text(`${q.right} of ${q.total} labelled${q.wrong ? ` · ${q.wrong} wrong tr${q.wrong === 1 ? 'y' : 'ies'}` : ''}`, { size: 30, weight: 700, color: q.right === q.total ? '#7ee2a8' : THEME.text });
     ui.buttons([{ id: 'quiz-restart', label: 'Start again', onClick: () => app.restartQuiz() }], { height: 56, size: 24 });
-    ui.text('Drag each name tag onto the right part of the cell. Right answers stick; wrong ones come back with a hint.', { size: 22, color: THEME.dim });
+    ui.text('Drag each name tag onto the spot whose line points to that part. Right answers stick; wrong ones come back with a hint.', { size: 22, color: THEME.dim });
   } else if (s.mode === 'process') {
     ui.buttons(TOURS[s.cellType].map((step, i) => ({
       id: `step-${i}`, label: step.title, active: s.tourStep === i, onClick: () => app.tourTo(i),

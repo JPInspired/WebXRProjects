@@ -25,6 +25,8 @@ export const SKEL_YAW = -0.3; // turned a little towards the student
 const SNAP = 0.07; // Core: how close (m) counts as "in the right place"
 const CHECK = 0.05; // Advanced: how close counts as right when checked
 const WRONG = 0.08; // dropped this close to another organ's place: a mistake
+const NODE = 0.075; // a card dropped this close to a card spot (beside the body) sticks there
+const ON_ORGAN = 0.045; // or this close to an organ's surface
 const TORSO = { min: new THREE.Vector3(-0.3, 0.7, -0.25), max: new THREE.Vector3(0.3, 1.75, 0.3) };
 
 /** Opacity, switching the material to transparent (and back) only when it changes. */
@@ -195,7 +197,24 @@ export class Body {
       const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 }));
       line.visible = false;
       this.skel.add(line);
-      return { id: c.id, c, group, mesh, mat, line, where: 'off', matched: false, target: null, wrongFlash: 0 };
+      // the empty spot where this card sticks: a dashed outline, with a dot where its line starts and ends
+      const node = new THREE.Group();
+      const [w, h] = [0.14, 0.07];
+      const outline = new THREE.LineSegments(
+        new THREE.EdgesGeometry(new THREE.PlaneGeometry(w, h)),
+        new THREE.LineDashedMaterial({ color: 0xfff1a8, dashSize: 0.008, gapSize: 0.006, transparent: true, opacity: 0.9 }),
+      );
+      outline.computeLineDistances();
+      const fill = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: 0xfff1a8, transparent: true, opacity: 0.08, depthWrite: false, side: THREE.DoubleSide }));
+      const dotMat = new THREE.MeshBasicMaterial({ color: 0xfff1a8 });
+      const dot = new THREE.Mesh(new THREE.SphereGeometry(0.006, 12, 8), dotMat);
+      node.add(outline, fill, dot);
+      node.visible = false;
+      this.skel.add(node);
+      const tip = new THREE.Mesh(new THREE.SphereGeometry(0.0055, 12, 8), dotMat); // where the line touches the organ
+      tip.visible = false;
+      this.skel.add(tip);
+      return { id: c.id, c, group, mesh, mat, line, node, dot, fill, tip, where: 'off', matched: false, target: null, wrongFlash: 0 };
     });
     this.reset();
   }
@@ -264,6 +283,17 @@ export class Body {
         k.slot = new THREE.Vector3(Number(side) * 0.32, y, 0.1);
       }
     }
+    // each spot's line ends on the organ's surface (the side facing you, towards the spot), not its hidden middle
+    for (const k of list) {
+      const ps = this.cardPieces(k.id);
+      const p = ps.length > 1 ? ps.reduce((a, q) => (q.home.x > a.home.x ? q : a)) : ps[0];
+      k.anchor = this.surfacePoint(p, k.slot);
+      const start = new THREE.Vector3(k.slot.x - Math.sign(k.slot.x) * 0.07, k.slot.y, k.slot.z);
+      k.line.geometry.setFromPoints([start, k.anchor]);
+      k.node.position.copy(k.slot);
+      k.dot.position.set(-Math.sign(k.slot.x) * 0.07, 0, 0);
+      k.tip.position.copy(k.anchor);
+    }
   }
 
   piece(id) {
@@ -329,6 +359,55 @@ export class Body {
       this.paintCard(k);
       if (this.cardsOut) this.cardToDesk(k, true);
     }
+  }
+
+  /** A point on the visible surface of an organ, on the side of `towards` (body coordinates). */
+  surfacePoint(p, towards) {
+    const pos = p.mesh.geometry.getAttribute('position');
+    const dir = towards.clone().sub(p.home).setY(0).normalize();
+    let best = -Infinity;
+    const v = new THREE.Vector3();
+    const out = p.home.clone();
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i);
+      // facing you (forward), towards the card's side, and near the organ's middle height
+      const score = v.z * 1.2 + v.x * dir.x * 0.8 - Math.abs(v.y) * 0.6;
+      if (score > best) {
+        best = score;
+        out.copy(p.home).add(v);
+      }
+    }
+    return out;
+  }
+
+  /** Which card spot (of the cards not yet matched) a world point is on, if any. */
+  nodeAt(world) {
+    let best = null;
+    for (const k of this.activeCards) {
+      if (k.matched || !k.node.visible) continue;
+      const d = this.dist(world, k.node.getWorldPosition(new THREE.Vector3()));
+      if (d < NODE && (!best || d < best.d)) best = { k, d };
+    }
+    return best?.k ?? null;
+  }
+
+  /** The organ whose surface a world point is nearest (within reach), if any. */
+  organAt(world) {
+    let best = null;
+    const v = new THREE.Vector3();
+    for (const p of this.active) {
+      const obj = p.where === 'body' ? p.group : p.ghost;
+      const mesh = p.where === 'body' ? p.mesh : p.ghost;
+      mesh.updateWorldMatrix(true, false);
+      const pos = mesh.geometry.getAttribute('position');
+      for (let i = 0; i < pos.count; i += 3) {
+        v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld);
+        const d = this.dist(world, v);
+        if (d < ON_ORGAN && (!best || d < best.d)) best = { p, d };
+      }
+      void obj;
+    }
+    return best?.p ?? null;
   }
 
   showCards(on) {
@@ -416,8 +495,6 @@ export class Body {
     k.where = 'slot';
     k.group.visible = true;
     this.animate(k.group, this.skel, k.slot, 1);
-    const pts = [new THREE.Vector3(k.slot.x - Math.sign(k.slot.x) * 0.07, k.slot.y, k.slot.z), k.anchor.clone().setZ(Math.max(k.anchor.z, 0.02))];
-    k.line.geometry.setFromPoints(pts);
     k.line.visible = true;
   }
 
@@ -594,15 +671,16 @@ export class Body {
       move: (w) => {
         k.group.position.copy(this.group.worldToLocal(w.clone())).add(off);
         k.group.lookAt(this.app.viewCamera().getWorldPosition(new THREE.Vector3()));
+        this.hoverNode = this.nodeAt(k.group.getWorldPosition(new THREE.Vector3()));
       },
       release: () => {
+        this.hoverNode = null;
         const at = k.group.getWorldPosition(new THREE.Vector3());
-        let best = null;
-        for (const p of this.active) {
-          const d = this.dist(at, (p.where === 'body' ? p.group : p.ghost).getWorldPosition(new THREE.Vector3()));
-          if (!best || d < best.d) best = { p, d };
-        }
-        if (best && best.d < WRONG && best.p.o.card === k.id) {
+        const node = this.nodeAt(at);
+        const organ = node ? null : this.organAt(at);
+        const target = node ? this.cardPieces(node.id)[0] : organ;
+        const best = target ? { p: target, d: 0 } : null;
+        if (best && best.p.o.card === k.id) {
           k.matched = true;
           this.paintCard(k);
           this.cardToSlot(k);
@@ -611,7 +689,7 @@ export class Body {
             this.toBody(p);
           }
           this.app.onCardMatched(k);
-        } else if (best && best.d < WRONG && this.overBody(at)) {
+        } else if (best) {
           this.cardWrong++;
           k.wrongFlash = 1.2;
           this.paintCard(k, true);
@@ -679,7 +757,17 @@ export class Body {
     setOpacity(this.boneMat, sys ? 0.45 : 1);
     if (!sys && this.ribs === 'solid') setOpacity(this.ribMat, 1);
     else if (sys) setOpacity(this.ribMat, Math.min(ribOp, 0.45));
+    const spots = this.cardsOut && this.app.state.mode === 'functions';
     for (const c of this.cards) {
+      const open = spots && this.activeCards.includes(c) && !c.matched;
+      c.node.visible = open;
+      c.tip.visible = open || (c.matched && c.where === 'slot');
+      if (open) {
+        c.line.visible = true;
+        const lit = this.hoverNode === c;
+        c.fill.material.opacity = lit ? 0.35 : 0.08 + 0.04 * Math.sin(t * 3);
+        c.node.scale.setScalar(lit ? 1.08 : 1);
+      } else if (!c.matched || c.where !== 'slot') c.line.visible = false;
       if (c.wrongFlash > 0) {
         c.wrongFlash -= dt;
         if (c.wrongFlash <= 0) this.paintCard(c);

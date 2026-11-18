@@ -216,7 +216,7 @@ class App extends LessonApp {
     if (mode === 'label') {
       this.heart.model.rotation.set(0, 0, 0);
       this.quiz.start(this.heart, s.level);
-      s.explain = { title: 'Label the heart', text: `Drag each of the ${this.quiz.total} names onto the right part of your heart. Open it up to reach the parts inside. Then explain to a partner what each one does.` };
+      s.explain = { title: 'Label the heart', text: `Drag each of the ${this.quiz.total} names onto its spot: follow each spot's line to its part. (You can also drop a name straight onto the part.) Open the heart up to see the parts inside. Then explain to a partner what each one does.` };
     } else if (mode === 'flow') {
       this.journeyTo(0, true);
     } else if (mode === 'cycle') {

@@ -79,7 +79,7 @@ class App extends LessonApp {
     this.quiz.group.visible = mode === 'label';
     if (mode === 'label') {
       this.quiz.start(this.cell);
-      s.explain = { title: 'Label it', text: `Drag each of the ${this.quiz.total} name tags onto the right part of the ${CELLS[s.cellType].name.toLowerCase()}.` };
+      s.explain = { title: 'Label it', text: `Drag each of the ${this.quiz.total} name tags onto its spot: follow each spot's line to its part of the ${CELLS[s.cellType].name.toLowerCase()}. (You can also drop a tag straight onto the part.)` };
     } else if (mode === 'process') {
       this.tourTo(0, true);
     } else if (mode === 'compare') {

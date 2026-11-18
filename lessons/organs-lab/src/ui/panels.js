@@ -35,7 +35,7 @@ export function drawControls(ui, app) {
     }
     ui.buttons([{ id: 'restart', label: 'Start again', onClick: () => app.restart() }], { height: 46, size: 19 });
   } else if (s.mode === 'functions') {
-    ui.text('Drag each card from the desk onto the organ that does that job. Right: it becomes a label. Wrong: it goes back.', { size: 20, color: THEME.dim });
+    ui.text('Drag each card onto the dashed spot whose line points to the organ that does that job. Right: it sticks. Wrong: it goes back.', { size: 20, color: THEME.dim });
     ui.buttons([{ id: 'cards-reset', label: 'Take all the cards back', onClick: () => app.resetCards() }], { height: 46, size: 19 });
   } else if (s.mode === 'systems') {
     if (app.controlsSystem) {

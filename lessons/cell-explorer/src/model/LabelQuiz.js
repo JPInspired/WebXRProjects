@@ -2,9 +2,11 @@ import * as THREE from 'three';
 import { ORGANELLES } from '../data/cells.js';
 import { font, roundRect } from '../../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../../shared/util/sound.js';
+import { LabelSpots } from '../../../../shared/ui/LabelSpots.js';
 
-// "Label it": name tags float beside the cell. Drag each one onto the right part of the cell.
-// The tag sticks if it's right; if not, it comes back with a hint about what to look for.
+// "Label it": name tags wait below the cell; beside it, a spot for each part with a line to that part.
+// Drag each name onto its spot (or straight onto the part). It sticks if it's right; if not, it comes back with a
+// hint about what to look for.
 
 const LOOK = {
   membrane: 'the thin outer layer that wraps the whole cell',
@@ -58,6 +60,14 @@ export class LabelQuiz {
     app.lab.add(this.group);
     this.tags = [];
     this.raycaster = new THREE.Raycaster();
+    this.spots = new LabelSpots(app, this.group, { w: 0.13, h: 0.0325 });
+  }
+
+  /** The model's bounds, in this group's space. */
+  modelBox(objects) {
+    const box = new THREE.Box3();
+    for (const o of objects) box.expandByObject(o);
+    return new THREE.Box3(this.group.worldToLocal(box.min.clone()), this.group.worldToLocal(box.max.clone()));
   }
 
   start(cell) {
@@ -72,19 +82,29 @@ export class LabelQuiz {
       const j = Math.floor(Math.random() * (i + 1));
       [ids[i], ids[j]] = [ids[j], ids[i]];
     }
-    const perCol = Math.ceil(ids.length / 2);
+    cell.group.updateMatrixWorld(true);
+    const parts = ids.map((id) => ({ id, objects: cell.parts.get(id) ?? [] }));
+    const box = this.modelBox(parts.flatMap((p) => p.objects));
+    this.spots.build(parts, box);
+    const cols = 4;
     ids.forEach((id, i) => {
-      const col = i < perCol ? -1 : 1;
-      const row = i < perCol ? i : i - perCol;
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+      const inRow = Math.min(cols, ids.length - row * cols);
       const tag = new THREE.Mesh(new THREE.PlaneGeometry(0.13, 0.0325),
         new THREE.MeshBasicMaterial({ map: tagTexture(ORGANELLES[id].name, 'idle'), transparent: true, toneMapped: false, depthTest: false }));
       tag.renderOrder = 8;
-      tag.position.set(col * 0.33, 0.2 - row * 0.05, 0.1);
-      tag.rotation.y = -col * 0.35;
+      tag.position.set((col - (inRow - 1) / 2) * (0.13 + 0.015), box.min.y - 0.05 - row * (0.0325 + 0.014), box.max.z + 0.06 + row * 0.02);
+      tag.rotation.x = -0.35; // tilted up towards you, like cards on a desk
       tag.userData = { handler: this, tag: id, home: tag.position.clone(), done: false };
       this.group.add(tag);
       this.tags.push(tag);
     });
+  }
+
+  home(tag) {
+    tag.position.copy(tag.userData.home);
+    tag.rotation.set(-0.35, 0, 0);
   }
 
   get total() {
@@ -104,10 +124,12 @@ export class LabelQuiz {
     if (o.userData.done) return null;
     const lab = this.app.lab;
     const offset = o.position.clone().sub(lab.worldToLocal(world.clone()));
-    o.rotation.y = 0;
+    o.rotation.set(0, 0, 0);
+    this.spots.held = o;
     return {
       move: (w) => o.position.copy(lab.worldToLocal(w.clone())).add(offset),
       release: () => {
+        this.spots.held = null;
         this.drop(o);
       },
     };
@@ -124,9 +146,10 @@ export class LabelQuiz {
 
   drop(tag) {
     const id = tag.userData.tag;
-    const hit = this.partBehind(tag);
-    if (!hit) {
-      tag.position.copy(tag.userData.home);
+    const spot = this.spots.at(tag.getWorldPosition(new THREE.Vector3()));
+    const hit = spot ? { id: spot } : this.partBehind(tag);
+    if (!hit || !ORGANELLES[hit.id]) {
+      this.home(tag);
       return;
     }
     if (hit.id === id) {
@@ -134,10 +157,10 @@ export class LabelQuiz {
       tag.userData.done = true;
       this.setLook(tag, 'right');
       // stick it just in front of the part it labels
-      const eye = this.app.viewCamera().getWorldPosition(new THREE.Vector3());
-      const p = hit.point.clone().add(eye.clone().sub(hit.point).normalize().multiplyScalar(0.03));
-      tag.position.copy(this.app.lab.worldToLocal(p));
-      tag.scale.setScalar(0.8);
+      const at = this.spots.place(id);
+      if (at) tag.position.copy(at);
+      tag.rotation.set(0, 0, 0);
+      this.spots.done(id);
       sound.bond();
       this.app.interaction.pulse(0.5, 40);
       if (this.right === this.total) {
@@ -155,7 +178,7 @@ export class LabelQuiz {
       setTimeout(() => {
         if (!tag.userData.done) this.setLook(tag, 'idle');
       }, 1200);
-      tag.position.copy(tag.userData.home);
+      this.home(tag);
     }
   }
 
