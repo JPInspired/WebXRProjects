@@ -14,6 +14,7 @@ import { makeClassroom } from './fx/Classroom.js';
 import { makeLoading } from './fx/Loading.js';
 import { makeClassTools } from './ui/ClassTools.js';
 import { makeRoomLineUp } from './net/RoomLineUp.js';
+import { makeRealRoom } from './fx/RealRoom.js';
 
 // Everything every WebXR lesson needs, so each lesson only adds its own content:
 //  • three.js scene, desktop camera + orbit controls, lights, floor grid
@@ -84,6 +85,7 @@ export class LessonApp {
     this.initSessionUI(session);
     this.initXRButtons();
     this.loading?.started();
+    this.realRoom = makeRealRoom(this); // the real room in mixed reality: lab on a table, board on a wall (shared/fx/RealRoom.js)
     this.refresh();
     this.sparks = new Sparks(this.scene); // the finished-task sparks (celebrate)
     // the subject's classroom around the lesson (shared/fx/Classroom.js: one switch there turns them all off)
@@ -250,6 +252,7 @@ export class LessonApp {
     const b = [{ id: 'recenter', label: this.presenting ? 'Bring lab to me' : 'Reset view', onClick: () => this.recenter() }];
     if (this.hitTestSource) b.push({ id: 'place', label: s.placing ? 'Tap to drop here' : 'Place on surface', active: s.placing, disabled: s.locked, onClick: () => this.togglePlacing() });
     b.push({ id: 'seated', label: s.seated ? 'Seated: on' : 'Seated: off', active: s.seated, onClick: () => this.toggleSeated() });
+    if (this.realRoom && (this.isAR || !this.presenting)) b.push({ id: 'realroom', label: this.realRoom.on ? 'Real room: on' : 'Real room: off', active: this.realRoom.on, onClick: () => this.realRoom.toggle() });
     b.push({ id: 'lock', label: s.locked ? 'Lab locked' : 'Lab unlocked', active: s.locked, onClick: () => this.toggleLocked() });
     b.push({ id: 'speak', label: s.speak ? 'Voice: on' : 'Voice: off', active: s.speak, onClick: () => this.toggleSpeak(), disabled: !('speechSynthesis' in window) });
     b.push(this.lessonsButton());
@@ -386,6 +389,7 @@ export class LessonApp {
 
   confirmPlacement() {
     this.state.placing = false;
+    this.labMovedAt = performance.now(); // placed by hand: RealRoom leaves it there
     this.refresh();
   }
 
@@ -949,6 +953,8 @@ export class LessonApp {
 
   onSessionStart(session, isAR) {
     this.presenting = true;
+    this.isAR = isAR;
+    this.realRoom?.sessionStart();
     this.scene.background = isAR ? null : this.background;
     this.grid.visible = !isAR && !this.classroom;
     this.classroom?.setAR(isAR);
@@ -1039,6 +1045,7 @@ export class LessonApp {
       this.onXRFrame?.(frame, this.renderer.xr.getReferenceSpace());
       // same room: every headset lines itself up from its room scan (nothing to press)
       if (this.presence?.sameRoom && (this.roomScan ??= new RoomScan()).update(frame, this.renderer.xr.getReferenceSpace())) this.updateRoomFrame();
+      else if (!this.presence?.sameRoom && this.realRoom?.active) (this.roomScan ??= new RoomScan()).update(frame, this.renderer.xr.getReferenceSpace());
       this.updateMenuButton();
     } else {
       this.controls.update();
@@ -1049,6 +1056,7 @@ export class LessonApp {
     this.classroom?.update();
     this.loading?.update(dt);
     this.update(dt, frame);
+    this.realRoom?.update(); // after the lesson has placed its board
     if (this.presence) {
       this.presence.update(dt);
       this.sessionRedraw = (this.sessionRedraw ?? 0) + dt;

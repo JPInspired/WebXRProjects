@@ -14,8 +14,9 @@ or organisation (e.g. a school's or company's) or another computer, and it keeps
   2026: automatic reconnection, the Network Check page, bare hands, the loading screen and the Class tools; also a
   GitHub Release, downloadable as one zip from the Releases page). Each newer feature also has an off
   switch: the rooms in `shared/fx/Classroom.js` (`ROOMS.enabled`), reconnection in `shared/net/config.js` (`autoReconnect`), bare-hand help in `shared/ui/Hands.js`
-  (`HANDS.enabled`), the loading screen and fades in `shared/fx/Loading.js` (`LOADING.enabled`) and the Class tools in
-  `shared/ui/ClassTools.js` (`CLASS_TOOLS.enabled`). To see or go back
+  (`HANDS.enabled`), the loading screen and fades in `shared/fx/Loading.js` (`LOADING.enabled`) the Class tools in
+  `shared/ui/ClassTools.js` (`CLASS_TOOLS.enabled`), the visible room line-up and floor marks in `shared/net/RoomLineUp.js`
+  (`ROOM_LINEUP.enabled`) and the real-room features in `shared/fx/RealRoom.js` (`REAL_ROOM.enabled`). To see or go back
   to one: `git checkout v1.2` (or download it from the repository's Tags page on GitHub). To put the live website
   back to one: `git revert --no-edit <tag>..HEAD`, then push: this undoes everything since, keeping the history.
 - Offline copies: `Documents/WebXR-Backups/` on the original computer holds a git bundle of the whole history (every

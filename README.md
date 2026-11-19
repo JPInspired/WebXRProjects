@@ -78,6 +78,14 @@ The switch: `HANDS.enabled` in `shared/ui/Hands.js` (or `?nohands` in a lesson's
 
 The switch: `LOADING.enabled` in `shared/fx/Loading.js` (or `?nofade` in a lesson's address).
 
+## Using the real room (mixed reality)
+
+`shared/fx/RealRoom.js` uses the headset's room scan (Space Setup):
+
+- **The lab sits on a real table.** When the scan shows a table or desk in front of you at a working height (between 10 and 75 cm below your eyes: a desk when seated, a bench when standing), the lab is placed on its top when the lesson starts. A lab you have moved yourself stays where you put it.
+- **The class board goes on a real wall.** When the board stands behind your bench (on your own, or in different rooms), it moves flat against the real wall in that direction, between 1 and 4.5 m away. Same-room sessions keep the board where the teacher put it, so everyone shares it.
+- **The toggle:** ⚙ Settings › This headset › **Real room: on / off**, remembered on each headset. `REAL_ROOM.enabled = false` turns it off everywhere. Hintze Hall and Reef Dive are left out.
+
 ## Subject rooms
 
 Each lesson stands in a light, simple classroom for its subject (`shared/fx/Classroom.js`): a chemistry lab with a fume cupboard and a periodic table, a physics lab with a wooden floor and a solar system poster, a biology lab with plants and a fish tank, and a computer room with desks and monitors. Windows, a whiteboard with the subject's equations, posters, a clock and a door are painted onto the walls. The rooms show on a computer screen and in full virtual reality; in mixed reality the real classroom shows instead, so they hide. Hintze Hall and Reef Dive have places of their own and keep them.
@@ -146,6 +154,12 @@ Only the person who started the session is ever admin. If their headset drops ou
 1. **Same network only.** Each device asks a STUN server for its network's public address. Devices behind the same school router share it, so it becomes part of the session's name (as a one-way hash; the address isn't sent anywhere). Only devices on the same network can find each other, even with the right code. No Wi-Fi name (SSID) is needed. A school with several public addresses side by side still works: only the first three numbers must match (`networkPrefix`).
 2. **Introductions** go through three fixed public Nostr relays (`relayUrls`). Only short, encrypted connection notes pass through them.
 3. **Lesson data** then flows directly between the devices, inside the school network.
+
+**Lining up, shown and with a fallback** (`shared/net/RoomLineUp.js`; `ROOM_LINEUP.enabled = false` goes back to the silent automatic line-up):
+
+- Entering the headset in a same-room session, a card says **Lining Up With the Room…**, then **Lined Up With the Room**, and the room's outline is drawn on the floor for a few seconds so everyone can see that it matches the real walls.
+- A headset that cannot line up says why: **This Headset Has Not Scanned the Room** (with where to do Space Setup), or **Not Sure Which Way Round**.
+- **Floor marks** (Teacher menu → Students → Room Line-Up → Floor Marks): put two pieces of tape on the floor about two metres apart, A and B. Every headset is asked to point at A and pinch (or pull the trigger), then at B. The room frame is then A on the floor, facing B: the same for everyone, with no room scan needed. **Re-find room (all)** asks everyone to point at the marks again; **Automatic** goes back to the room scans.
 
 **Reconnecting by itself** (`autoReconnect` in `shared/net/config.js`; `false` turns it off). Every device sends a small "still here" every 2 seconds, from a timer that keeps running when the page is not drawing. Someone not heard from for 7 seconds is marked **not responding** in the Players list. A device that has lost touch rejoins the same session on its own, with the same id, so its desk and work come straight back for everyone:
 

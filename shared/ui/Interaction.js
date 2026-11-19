@@ -445,6 +445,7 @@ export class Interaction {
   releaseLab(c) {
     if (this.labGrabber !== c) return;
     this.labGrabber = null;
+    this.app.labMovedAt = performance.now(); // moved by hand: RealRoom leaves it there
     const lab = this.app.lab;
     this.app.scene.attach(lab);
     // Keep the lab upright: only keep its rotation around the vertical axis.
