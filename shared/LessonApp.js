@@ -6,6 +6,7 @@ import { THEME } from './ui/CanvasPanel.js';
 import { Presence, sessionFromURL } from './net/Presence.js';
 import { RoomScan, solveRoom, fingerprint } from './net/RoomAlign.js';
 import { newSessionCode } from './net/code.js';
+import { openLobby } from './net/lobby.js';
 import { initStartScreen } from './ui/StartScreen.js';
 import { PerfGuard } from './util/PerfGuard.js';
 import { sound } from './util/sound.js';
@@ -66,6 +67,8 @@ export class LessonApp {
     const session = sessionFromURL();
     if (session) {
       this.presence = new Presence(this, { lessonId: this.lessonId, ...session });
+      // the teacher's lesson tells students who type only the code (top of the lessons page) where to go
+      if (session.host) openLobby(session.code, { lesson: this.lessonId, sameRoom: session.sameRoom }, session.net).catch((e) => console.warn('Lobby:', e.message));
       this.sessionPanel = new CanvasPanel({ width: 0.5, height: session.sameRoom ? 0.19 : 0.14, name: 'session' });
       this.sessionPanel.mesh.position.set(-this.panelX, PANEL_Y + (session.sameRoom ? -0.475 : -0.45), PANEL_Z);
       this.sessionPanel.mesh.rotation.y = 0.42;
@@ -825,7 +828,7 @@ export class LessonApp {
     if (session) {
       url.searchParams.set('session', session.code);
       url.searchParams.delete('host'); // the shared link makes others join, not host
-      box.innerHTML = `<p><strong>Shared session <span class="code">${session.code}</span></strong> · ${session.sameRoom ? 'same room' : 'different rooms'}<br>Colleagues join from the lessons page with this code, or with this link.${session.sameRoom ? ' Each headset lines itself up with the room automatically (it needs to have scanned the room once: Quest Settings › Physical space › Space Setup).' : ''}</p>
+      box.innerHTML = `<p><strong>Shared session <span class="code">${session.code}</span></strong> · ${session.sameRoom ? 'same room' : 'different rooms'}<br>Students join at the top of the lessons page with this code, or with this link.${session.sameRoom ? ' Each headset lines itself up with the room automatically (it needs to have scanned the room once: Quest Settings › Physical space › Space Setup).' : ''}</p>
         <div class="buttons"><button class="secondary" id="copy-link">Copy link</button><button class="secondary" id="leave-session">Leave session</button></div>`;
       box.querySelector('#copy-link').onclick = (e) => {
         navigator.clipboard?.writeText(url.toString()).then(() => { e.target.textContent = 'Link copied'; }).catch(() => prompt('Copy this link:', url.toString()));

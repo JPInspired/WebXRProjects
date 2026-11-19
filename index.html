@@ -92,6 +92,21 @@
     :root[data-theme="dark"] .theme .moon { display: block; }
 
     /* ── opening ── */
+    .joinbar { border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--brand) 7%, var(--bg)); }
+    .joinbar .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding-top: 14px; padding-bottom: 14px; }
+    .joinbar .say { font-size: 15px; color: var(--ink-2); }
+    .joinbar .say b { color: var(--ink); margin-right: 6px; }
+    .joinbar form { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+    .joinbar input { font: 500 15px var(--sans); padding: 10px 14px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); min-width: 0; }
+    .joinbar #class-code { font-family: ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: 0.2em; width: 7.2em; text-align: center; }
+    .joinbar #class-name { width: 11em; }
+    .joinbar .btn { padding: 10px 20px; }
+    .joinbar .status { flex-basis: 100%; margin: 0; font-size: 14px; color: var(--ink-3); min-height: 0; }
+    .joinbar .status:empty { display: none; }
+    .joinbar .status.bad { color: #c0392b; }
+    :root[data-theme="dark"] .joinbar .status.bad { color: #ff8a80; }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .joinbar .status.bad { color: #ff8a80; } }
+    @media (max-width: 640px) { .joinbar form { margin-left: 0; width: 100%; } .joinbar #class-name { flex: 1; } .joinbar .btn { flex-basis: 100%; justify-content: center; } }
     .hero { position: relative; overflow: hidden; }
     .hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 24px; min-height: min(78vh, 720px); padding-top: 40px; padding-bottom: 40px; }
     .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
@@ -261,6 +276,18 @@
   </header>
 
   <main id="top">
+    <section class="joinbar" id="join-class" aria-label="Join a class">
+      <div class="wrap">
+        <p class="say"><b>Joining a Class?</b>Enter the code your teacher shares, on the same Wi-Fi as the teacher.</p>
+        <form id="class-join">
+          <input id="class-code" maxlength="4" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Class code">
+          <input id="class-name" maxlength="24" placeholder="Your name" autocomplete="nickname" aria-label="Your name">
+          <button class="btn primary" id="class-go">Join the Class</button>
+        </form>
+        <p class="status" id="class-status" role="status"></p>
+      </div>
+    </section>
+
     <section class="hero">
       <div class="wrap">
         <div>
@@ -287,7 +314,7 @@
     <section class="how" id="how" aria-label="How it works">
       <div class="wrap">
         <div class="step"><span class="n">1</span><h3>Open on Any Headset</h3><p>Visit this page in the Meta Quest browser or on any WebXR headset. There is nothing to install, and every lesson also works on a computer screen.</p></div>
-        <div class="step"><span class="n">2</span><h3>Bring the Class Together</h3><p>Choose a lesson and start a shared session. Students join with a four-letter code and, in the same room, every lab aligns with the real classroom.</p></div>
+        <div class="step"><span class="n">2</span><h3>Bring the Class Together</h3><p>Choose a lesson and start a shared session. Students enter its four-character code at the top of this page and, in the same room, every lab aligns with the real classroom.</p></div>
         <div class="step"><span class="n">3</span><h3>Lead From the Teacher Menu</h3><p>Set the activity and level for everyone, gather predictions on the class board and reveal the answers, while each student works at their own bench.</p></div>
       </div>
     </section>
@@ -592,6 +619,7 @@
 
   <script type="module">
     import { newSessionCode } from './shared/net/code.js';
+    import { findClass } from './shared/net/lobby.js';
 
     // ── light / dark ──
     const root = document.documentElement;
@@ -607,6 +635,50 @@
     nameInput.addEventListener('input', () => {
       try { localStorage.setItem('webxr-classes:name', nameInput.value.trim()); } catch {}
     });
+
+    // ── joining a class with only its code: the teacher's lesson says which lesson it is (shared/net/lobby.js) ──
+    {
+      const form = document.getElementById('class-join');
+      const codeIn = document.getElementById('class-code');
+      const nameIn = document.getElementById('class-name');
+      const status = document.getElementById('class-status');
+      const goBtn = document.getElementById('class-go');
+      const say = (text, bad = false) => { status.textContent = text; status.classList.toggle('bad', bad); };
+      nameIn.value = nameInput.value;
+      const keepName = (from, to) => from.addEventListener('input', () => {
+        to.value = from.value;
+        try { localStorage.setItem('webxr-classes:name', from.value.trim()); } catch {}
+      });
+      keepName(nameIn, nameInput);
+      keepName(nameInput, nameIn);
+      codeIn.addEventListener('input', () => { codeIn.value = codeIn.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); say(''); });
+      const params = new URLSearchParams(location.search);
+      const net = params.get('net') || 'p2p'; // (?net=local: test with tabs on one computer)
+      let busy = false;
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        if (busy) return;
+        const code = codeIn.value;
+        if (code.length !== 4) return say('Enter the four-character code your teacher shares.', true);
+        busy = true;
+        goBtn.disabled = true;
+        say(`Looking for class ${code}…`);
+        try {
+          const found = await findClass(code, { net });
+          say('Class found. Opening the lesson…');
+          const url = new URL(`lessons/${found.lesson}/`, location.href);
+          url.searchParams.set('session', code);
+          if (found.sameRoom) url.searchParams.set('room', 'same');
+          if (net !== 'p2p') url.searchParams.set('net', net);
+          location.href = url.toString();
+        } catch (err) {
+          say(err.message, true);
+          busy = false;
+          goBtn.disabled = false;
+        }
+      };
+      if (params.get('join')) { codeIn.value = params.get('join').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4); }
+    }
 
     // ── subject filter: one button per section (made from the sections, so adding a section adds its button) ──
     const filters = document.getElementById('filters');

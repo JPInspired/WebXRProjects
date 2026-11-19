@@ -70,7 +70,9 @@ They are built to stay light on a headset: the walls, floor and ceiling are pict
 Every lesson can be opened **solo** or in a **shared session**:
 
 1. On the lessons page, enter your name, pick a lesson and choose **Start a shared session**. You get a 4-letter code, e.g. `K7QM`, shown in the lesson and on a small panel under the controls in the headset.
-2. A colleague picks the same lesson and chooses **Join with code**, or opens the link from **Copy link**.
+2. Students type the code into **Joining a Class?** at the very top of the lessons page (with their name) and press **Join the Class**: the page asks the teacher's open lesson which lesson it is and whether the class is in the same room, then opens it for them. They can also pick the same lesson and choose **Join with code**, or open the link from **Copy link**.
+
+   How the code finds the lesson (`shared/net/lobby.js`): the teacher's lesson (the one that started the session) also waits in a small lobby named after the code, on the same network-only connection as the lessons. A student's page joins that lobby, receives the lesson's name, and leaves. So the teacher's lesson must be open for students to join this way; if nobody answers within 20 seconds the page says so.
 
 **Players panel:** under the info panel (mirroring the session panel under the controls) a **Players** button opens a list of everyone in the session: who is the admin and, in the same room, whether each headset has found the room.
 
@@ -604,7 +606,7 @@ assets/lessons/                    each lesson’s picture and hover loop for th
 shared/                            used by every lesson
   LessonApp.js                     three.js + WebXR setup, lab + panels, placement, render loop
   net/                             shared sessions: transport (P2P / same-device), presence (people, desks, copies),
-                                   RoomAlign (each headset finds the shared room frame from its room scan), config
+                                   RoomAlign (each headset finds the shared room frame from its room scan), lobby (join with only the code), config
   vendor/                          Trystero (MIT) bundled as one file
   ui/                              canvas panels, labels, mouse/touch/controller/hand input, and the lesson start screen (start.css, StartScreen.js)
   util/sound.js                    synthesised sound effects (one family for every lesson, plus lasting loops)
