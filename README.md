@@ -55,6 +55,18 @@ Shared code gives every lesson the same hands-on feel, so a new lesson gets it f
 - **Sounds** (`shared/util/sound.js`): one soft, warm family for every lesson: tap (buttons), pick and put (hands: played automatically unless the lesson makes its own sound), correct, wrong, done, and lab sounds. `sound.loop('bubbles' | 'fizz' | 'hum')` gives sounds that last, used for the Enzyme Lab's bubbling, the Kinetics Lab's fizzing and the PC Builder's fans. No audio files.
 - **A finished task:** pass `done: true` with an explanation (`this.explain({ title, text, done: true })`), or call `this.celebrate()`: a chime, a buzz in both controllers, a green glow round the card and a few sparks. Used when every part is labelled or placed, a quiz is finished, or a computer starts.
 
+## Using bare hands
+
+Every lesson works with tracked hands as well as controllers (`shared/ui/Hands.js`, used by `shared/ui/Interaction.js`):
+
+- **Pinch** to point, press and pick up, as before. A small **ring** sits between thumb and index finger: it closes as you pinch, turns white when it is on something it can act on and green while pinching. It swells briefly where a controller would buzz.
+- **Touch** any menu button with a fingertip to press it. The button lights up as the finger comes close and presses once; the finger must come back out before it presses again.
+- **Close your hand** round something to grab it, and open it to let go. Hands also reach a little further than controllers (6 cm instead of 3.5 cm), and whatever a hand holds is smoothed, so tracking wobble does not shake it.
+- **Wrist menu:** turn a palm towards your face and two round buttons appear above it. Touch them with the other hand: **Menus** hides or shows every panel (like B on a controller) and **Move** makes the next pinch-and-hold on empty space move the whole lab (like the grip).
+- **Drawn hands** appear in VR (the subject rooms). In mixed reality your real hands are visible, so only the ring is drawn.
+
+The switch: `HANDS.enabled` in `shared/ui/Hands.js` (or `?nohands` in a lesson's address) turns all of this off and leaves plain pinching.
+
 ## Subject rooms
 
 Each lesson stands in a light, simple classroom for its subject (`shared/fx/Classroom.js`): a chemistry lab with a fume cupboard and a periodic table, a physics lab with a wooden floor and a solar system poster, a biology lab with plants and a fish tank, and a computer room with desks and monitors. Windows, a whiteboard with the subject's equations, posters, a clock and a door are painted onto the walls. The rooms show on a computer screen and in full virtual reality; in mixed reality the real classroom shows instead, so they hide. Hintze Hall and Reef Dive have places of their own and keep them.

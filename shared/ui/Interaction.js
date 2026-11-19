@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { makeLabel } from './labels.js';
 import { sound } from '../util/sound.js';
 import { HoverGlow } from './HoverGlow.js';
+import { makeHands } from './Hands.js';
 
 // One input layer for everything:
 //  • mouse / touch on a normal screen (with OrbitControls)
@@ -16,8 +17,11 @@ import { HoverGlow } from './HoverGlow.js';
 // The feel is the same in every lesson: whatever you are about to grab glows softly (and the controller gives a
 // tiny tick when you reach it), picking up and putting down make a soft sound (unless the lesson makes its own),
 // menu buttons tap, and things that are put somewhere ease into place instead of jumping there.
+// Bare hands get extra help (Hands.js): drawn hands in VR, touch-to-press buttons, a pinch ring, fist grabs,
+// a wrist menu, a slightly larger reach, and smoothing of whatever they hold.
 
-const NEAR = 0.035; // reach distance (m) for grabbing directly with a hand or controller
+const NEAR = 0.035; // reach distance (m) for grabbing directly with a controller
+const HAND_NEAR = 0.06; // ... and with a tracked hand (pinching precisely in mid-air is harder)
 const TAP_MS = 350;
 const DRAG_PX = 24; // canvas pixels a pinch / press must move on a panel before it scrolls instead of clicking
 
@@ -51,6 +55,7 @@ export class Interaction {
     this.lastUpdate = performance.now();
 
     for (let i = 0; i < 2; i++) this.setupController(i);
+    this.handsFx = makeHands(this); // null when switched off (Hands.js)
   }
 
   // ───────────── picking ─────────────
@@ -78,7 +83,7 @@ export class Interaction {
    * closest relative to its size — so a small part inside the bounds of a big, hollow one
    * (a mitochondrion beside curved ER sheets) still wins.
    */
-  nearest(point) {
+  nearest(point, reach = NEAR) {
     let best = null;
     let bestScore = Infinity;
     const c = new THREE.Vector3();
@@ -90,7 +95,7 @@ export class Interaction {
       const r = o.geometry.boundingSphere.radius * Math.max(s.x, s.y, s.z);
       c.copy(o.geometry.boundingSphere.center).applyMatrix4(o.matrixWorld);
       const d = c.distanceTo(point);
-      if (d - r > NEAR) continue; // out of reach
+      if (d - r > reach) continue; // out of reach
       const score = d / Math.max(r, 0.01);
       if (score < bestScore) {
         best = o;
@@ -134,21 +139,21 @@ export class Interaction {
 
   /** What a controller/hand would act on: something within reach first, then whatever its ray hits. */
   pick(c) {
-    const near = this.nearest(this.sourcePoint(c));
+    const near = this.nearest(this.sourcePoint(c), this.handsFx && c.userData.inputSource?.hand ? HAND_NEAR : NEAR);
     if (near) return { object: near, direct: true };
     return this.castFromController(c);
   }
 
   // ───────────── grabbing ─────────────
 
-  startGrab(source, object, mode) {
+  startGrab(source, object, mode, anchor = null) {
     const handle = new THREE.Object3D();
     object.getWorldPosition(handle.position);
     const world = handle.position.clone();
     const session = object.userData.handler.grab?.(object, mode, world);
     if (!session) return false;
     this.app.scene.add(handle);
-    if (source !== 'mouse') source.attach(handle);
+    if (source !== 'mouse') (anchor ?? source).attach(handle); // (a fist grab holds on to the wrist)
     this.active.set(source, { session, handle, object, from: world.clone() });
     this.pulse(0.3, 20, source);
     sound.pick();
@@ -222,6 +227,7 @@ export class Interaction {
     const sources = source ? [source] : [...this.active.keys()];
     for (const s of sources) {
       if (s === 'mouse' || !s) continue;
+      if (s.userData.inputSource?.hand) this.handsFx?.flash(s); // hands can't buzz: the pinch ring flashes
       s.userData.inputSource?.gamepad?.hapticActuators?.[0]?.pulse?.(intensity, ms);
     }
   }
@@ -343,6 +349,12 @@ export class Interaction {
     c.addEventListener('selectstart', () => {
       if (this.app.state.placing) return;
       const hit = this.pick(c);
+      // the wrist menu's Move: pinch and hold on nothing to move the whole lab
+      if (this.handsFx?.moveNext && !hit?.panel && !hit?.object) {
+        c.userData.movingLab = true;
+        this.grabLab(c);
+        return;
+      }
       c.userData.pending = hit ? { ...hit, t: performance.now() } : null;
       c.userData.drag = hit?.panel?.scrollable ? { panel: hit.panel, v0: hit.uv.y, scroll0: hit.panel.scroll } : null;
       if (hit?.object && !this.startGrab(c, hit.object, 'single')) {
@@ -354,6 +366,7 @@ export class Interaction {
         this.app.confirmPlacement();
         return;
       }
+      if (c.userData.movingLab) return;
       const dragged = c.userData.drag?.moving;
       c.userData.drag = null;
       if (c.userData.pending?.panel && !dragged) {
@@ -364,6 +377,12 @@ export class Interaction {
       }
     });
     c.addEventListener('selectend', () => {
+      if (c.userData.movingLab) {
+        c.userData.movingLab = false;
+        this.releaseLab(c);
+        if (this.handsFx) this.handsFx.moveNext = false;
+        return;
+      }
       const pending = c.userData.pending;
       c.userData.pending = null;
       c.userData.drag = null;
@@ -421,13 +440,20 @@ export class Interaction {
   // ───────────── every frame ─────────────
 
   update() {
-    for (const { session, handle } of this.active.values()) {
-      session.move(handle.getWorldPosition(new THREE.Vector3()));
-    }
-
     const now = performance.now();
     const dt = Math.min(0.1, (now - this.lastUpdate) / 1000);
     this.lastUpdate = now;
+    for (const [src, g] of this.active) {
+      const p = g.handle.getWorldPosition(new THREE.Vector3());
+      if (this.handsFx && src !== 'mouse' && src.userData.inputSource?.hand) {
+        // smooth out hand-tracking jitter: small wobbles are damped, real movements are followed at once
+        g.smooth ??= p.clone();
+        const k = Math.min(1, 0.3 + 6 * g.smooth.distanceTo(p));
+        p.copy(g.smooth.lerp(p, k));
+      }
+      g.session.move(p);
+    }
+    this.handsFx?.update(dt);
     this.updateSettling(dt);
     const hovers = new Map();
     let hoverObject = null;
@@ -481,6 +507,7 @@ export class Interaction {
       }
       this.app.renderer.domElement.style.cursor = b ? 'pointer' : hit?.object ? 'grab' : '';
     }
+    this.handsFx?.hovers(hovers); // buttons being touched light up too
     for (const p of this.app.panels) p.setHover(hovers.get(p) ?? null);
     this.showHover(hoverObject);
     // what's held glows a little too, so it's clear what you've got
