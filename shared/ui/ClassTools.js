@@ -76,7 +76,7 @@ class ClassTools {
 
   setPaused(on) {
     this.paused = on;
-    sound.beep();
+    (on ? sound.pause : sound.resume)();
     this.send();
   }
 
@@ -96,7 +96,7 @@ class ClassTools {
 
   look() {
     this.lookEnd = performance.now() + LOOK_MS;
-    sound.beep();
+    sound.attention();
     this.send();
   }
 
@@ -122,7 +122,7 @@ class ClassTools {
     const now = performance.now();
     if (!!t.paused !== this.paused) {
       this.paused = !!t.paused;
-      if (this.paused) sound.beep();
+      (this.paused ? sound.pause : sound.resume)();
       this.app.refresh();
     }
     if (t.timerLeft == null) this.timerEnd = 0;
@@ -131,7 +131,7 @@ class ClassTools {
       if (!this.timerEnd || Math.abs(end - this.timerEnd) > 1500) this.timerEnd = end; // (ignore small delays)
       this.timerTotal = t.timerTotal;
     }
-    if (t.lookLeft > 0 && this.lookEnd < now) sound.beep();
+    if (t.lookLeft > 0 && this.lookEnd < now) sound.attention();
     this.lookEnd = t.lookLeft > 0 ? now + t.lookLeft : 0;
   }
 

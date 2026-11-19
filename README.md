@@ -85,6 +85,14 @@ The switch: `LOADING.enabled` in `shared/fx/Loading.js` (or `?nofade` in a lesso
 - **The lab sits on a real table.** When the scan shows a table or desk in front of you at a working height (between 10 and 75 cm below your eyes: a desk when seated, a bench when standing), the lab is placed on its top when the lesson starts. A lab you have moved yourself stays where you put it.
 - **The class board goes on a real wall.** When the board stands behind your bench (on your own, or in different rooms), it moves flat against the real wall in that direction, between 1 and 4.5 m away. Same-room sessions keep the board where the teacher put it, so everyone shares it.
 - **The toggle:** ⚙ Settings › This headset › **Real room: on / off**, remembered on each headset. `REAL_ROOM.enabled = false` turns it off everywhere. Hintze Hall and Reef Dive are left out.
+- **Resting on the surface** (`shared/fx/Grounding.js`): when the lab stands on a real surface (Place on surface, or a desk found by the real room) it casts a soft shadow onto it. When the lab appears, it grows into place over half a second, and when it lands a ring of light spreads across the surface, with a soft sound. It floats without a shadow when it is in front of you or in your hand. Part of Real room; `GROUNDING.enabled = false` turns it off everywhere.
+- **Hands in front** (Quest 3): ⚙ Settings › **Hands in front: on / off**, off unless chosen. When on, the headset's depth sensing is used, so your real hands (and anything real) in front of the lab hide the parts behind them, as real objects would. It takes effect the next time you enter mixed reality. This uses three.js 0.161 (the lessons' version since 20 November 2026; Hintze Hall and Reef Dive stay on 0.160).
+
+## The house style (panels and sound)
+
+Every panel is drawn by `shared/ui/CanvasPanel.js`, so they all share one look: a background shaded from top to bottom, a fine edge, a short accent bar under each title, headings with a fine rule after them, buttons that glow when chosen or pointed at, button text sized by the button's height, and a part-filled last row that shares out the full width. Panels fit round their content (no empty band at the bottom) and fade in over a moment when they appear. `STYLE.enabled = false` at the top of that file brings back the plain look of v2.1.
+
+Sounds come from `shared/util/sound.js`, made in code (no audio files): one soft family for buttons, a faint tick when a button lights up in the headset, opening and closing cards, picking up and putting down, right and wrong answers, a finished task, the lab arriving and landing, and the teacher's Pause, Resume and Look Here. Each headset can switch sound off: ⚙ Settings › **Sound: on / off**, remembered on the headset. The frame-rate counter now shows only in the headset (for the teacher), or anywhere with `?fps`.
 
 ## Subject rooms
 

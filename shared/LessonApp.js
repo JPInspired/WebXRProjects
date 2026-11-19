@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CanvasPanel } from './ui/CanvasPanel.js';
 import { Interaction } from './ui/Interaction.js';
-import { THEME } from './ui/CanvasPanel.js';
+import { THEME, STYLE, panelFrame } from './ui/CanvasPanel.js';
 import { Presence, sessionFromURL } from './net/Presence.js';
 import { RoomScan, solveRoom, fingerprint } from './net/RoomAlign.js';
 import { newSessionCode } from './net/code.js';
@@ -15,6 +15,7 @@ import { makeLoading } from './fx/Loading.js';
 import { makeClassTools } from './ui/ClassTools.js';
 import { makeRoomLineUp } from './net/RoomLineUp.js';
 import { makeRealRoom } from './fx/RealRoom.js';
+import { makeGrounding } from './fx/Grounding.js';
 
 // Everything every WebXR lesson needs, so each lesson only adds its own content:
 //  • three.js scene, desktop camera + orbit controls, lights, floor grid
@@ -78,14 +79,21 @@ export class LessonApp {
       this.sessionPanel.mesh.rotation.y = 0.42;
       this.lab.add(this.sessionPanel.mesh);
       this.sessionPanel.setBuilder((ui) => this.drawSession(ui));
+      if (STYLE.enabled) {
+        this.sessionPanel.onResize = () => this.layoutStacks();
+        this.sessionPanel.setFit(0.06);
+      }
       this.panels.push(this.sessionPanel);
       this.initPlayerList();
       this.initAdmin();
     }
+    // house style: the explanation card fits round its words (shared/ui/CanvasPanel.js STYLE)
+    if (STYLE.enabled) this.explainPanel?.setFit(0.1);
     this.initSessionUI(session);
     this.initXRButtons();
     this.loading?.started();
     this.realRoom = makeRealRoom(this); // the real room in mixed reality: lab on a table, board on a wall (shared/fx/RealRoom.js)
+    this.grounding = makeGrounding(this); // its shadow on the real surface, and arriving (shared/fx/Grounding.js)
     this.refresh();
     this.sparks = new Sparks(this.scene); // the finished-task sparks (celebrate)
     // the subject's classroom around the lesson (shared/fx/Classroom.js: one switch there turns them all off)
@@ -148,8 +156,8 @@ export class LessonApp {
     this.lab.position.copy(this.labPos);
     this.scene.add(this.lab);
 
-    this.controlPanel = new CanvasPanel({ width: 0.5, height: 0.72, name: 'controls', fit: 0.3 });
-    this.infoPanel = new CanvasPanel({ width: 0.5, height: 0.72, name: 'info', fit: 0.3 });
+    this.controlPanel = new CanvasPanel({ width: 0.5, height: 0.72, name: 'controls', fit: STYLE.enabled ? 0.16 : 0.3 });
+    this.infoPanel = new CanvasPanel({ width: 0.5, height: 0.72, name: 'info', fit: STYLE.enabled ? 0.16 : 0.3 });
     // the panels below each side menu follow its bottom edge as it grows and shrinks
     this.controlPanel.onResize = () => this.layoutStacks();
     this.infoPanel.onResize = () => this.layoutStacks();
@@ -170,7 +178,7 @@ export class LessonApp {
     const bottom = (p) => p.mesh.position.y - p.shownHeight / 2;
     const below = (above, panel, gap = 0.02) => {
       if (!panel) return;
-      panel.mesh.position.y = bottom(above) - gap - panel.heightM / 2;
+      panel.mesh.position.y = bottom(above) - gap - panel.shownHeight / 2;
     };
     below(this.controlPanel, this.sessionPanel);
     below(this.infoPanel, this.playersPanel);
@@ -253,8 +261,15 @@ export class LessonApp {
     if (this.hitTestSource) b.push({ id: 'place', label: s.placing ? 'Tap to drop here' : 'Place on surface', active: s.placing, disabled: s.locked, onClick: () => this.togglePlacing() });
     b.push({ id: 'seated', label: s.seated ? 'Seated: on' : 'Seated: off', active: s.seated, onClick: () => this.toggleSeated() });
     if (this.realRoom && (this.isAR || !this.presenting)) b.push({ id: 'realroom', label: this.realRoom.on ? 'Real room: on' : 'Real room: off', active: this.realRoom.on, onClick: () => this.realRoom.toggle() });
+    if (this.realRoom?.on && (this.isAR || !this.presenting)) {
+      // real hands (and things) in front hide the lab behind them: Quest 3, from the next time you enter
+      const h = this.realRoom.handsInFront;
+      const later = this.presenting && h !== !!this.depthRequested ? ' (next time)' : '';
+      b.push({ id: 'occlude', label: `Hands in front: ${h ? 'on' : 'off'}${later}`, active: h, onClick: () => this.realRoom.toggleHands() });
+    }
     b.push({ id: 'lock', label: s.locked ? 'Lab locked' : 'Lab unlocked', active: s.locked, onClick: () => this.toggleLocked() });
     b.push({ id: 'speak', label: s.speak ? 'Voice: on' : 'Voice: off', active: s.speak, onClick: () => this.toggleSpeak(), disabled: !('speechSynthesis' in window) });
+    b.push({ id: 'sound', label: sound.muted ? 'Sound: off' : 'Sound: on', active: !sound.muted, onClick: () => { sound.muted = !sound.muted; this.refresh(); } });
     b.push(this.lessonsButton());
     return b;
   }
@@ -316,7 +331,7 @@ export class LessonApp {
         this.lab.remove(this.popupPanel.mesh);
         this.panels = this.panels.filter((p) => p !== this.popupPanel);
       }
-      this.popupPanel = new CanvasPanel({ width, height, name: 'popup' });
+      this.popupPanel = new CanvasPanel({ width, height, name: 'popup', fit: STYLE.enabled ? 0.15 : 0 }); // (house style: fits round its content)
       this.popupPanel.w = width;
       this.popupPanel.h = height;
       this.popupPanel.mesh.position.set(0, PANEL_Y + 0.02, 0.3);
@@ -331,12 +346,14 @@ export class LessonApp {
       builder(ui);
     });
     this.popupPanel.scroll = 0;
+    if (!this.popupPanel.mesh.visible || this.popupOpen !== title) sound.open();
     this.popupPanel.mesh.visible = true;
     this.popupOpen = title;
     this.refresh();
   }
 
   closePopup() {
+    if (this.popupPanel?.mesh.visible) sound.close();
     if (this.popupPanel) this.popupPanel.mesh.visible = false;
     this.popupOpen = null;
     this.refresh();
@@ -388,6 +405,7 @@ export class LessonApp {
   }
 
   confirmPlacement() {
+    if (this.reticle?.visible) this.grounding?.landed(); // dropped onto a real surface
     this.state.placing = false;
     this.labMovedAt = performance.now(); // placed by hand: RealRoom leaves it there
     this.refresh();
@@ -471,6 +489,7 @@ export class LessonApp {
       ctx.fillText(person.name, x + 24, ui.y + 2);
       x += w + 14;
     }
+    ui.y += 30; // (so the panel fits round the names)
   }
 
   // ───────────── player list (a panel beside the others) ─────────────
@@ -632,7 +651,7 @@ export class LessonApp {
   initAdmin() {
     this.admin = { lock: false, effects: 'auto' }; // what the admin has set for everyone
     this.lockedByAdmin = false; // (students) the admin has locked my menus
-    this.adminPanel = new CanvasPanel({ width: 0.5, height: 0.8, name: 'admin', fit: 0.3 });
+    this.adminPanel = new CanvasPanel({ width: 0.5, height: 0.8, name: 'admin', fit: STYLE.enabled ? 0.2 : 0.3 });
     this.adminPanel.mesh.position.set(-this.panelX - 0.56, PANEL_Y + 0.04, PANEL_Z + 0.08); // just beyond the controls, turned to face you
     this.adminPanel.mesh.rotation.y = 0.62;
     this.adminTab = 'lesson';
@@ -933,9 +952,14 @@ export class LessonApp {
 
   async startSession(type) {
     try {
-      const session = await navigator.xr.requestSession(type, {
-        optionalFeatures: ['local-floor', 'hand-tracking', 'hit-test', 'plane-detection'],
-      });
+      const options = { optionalFeatures: ['local-floor', 'hand-tracking', 'hit-test', 'plane-detection'] };
+      // real hands in front of the lab hide it (Quest 3's depth sensing; three.js draws the real depth first)
+      this.depthRequested = type === 'immersive-ar' && !!this.realRoom?.handsInFront;
+      if (this.depthRequested) {
+        options.optionalFeatures.push('depth-sensing');
+        options.depthSensing = { usagePreference: ['gpu-optimized'], dataFormatPreference: ['luminance-alpha', 'float32', 'unsigned-short'] };
+      }
+      const session = await navigator.xr.requestSession(type, options);
       let refType = 'local-floor';
       try {
         await session.requestReferenceSpace('local-floor');
@@ -955,6 +979,7 @@ export class LessonApp {
     this.presenting = true;
     this.isAR = isAR;
     this.realRoom?.sessionStart();
+    this.grounding?.sessionStart();
     this.scene.background = isAR ? null : this.background;
     this.grid.visible = !isAR && !this.classroom;
     this.classroom?.setAR(isAR);
@@ -1012,6 +1037,8 @@ export class LessonApp {
     this.lab.position.copy(pos).addScaledVector(dir, this.state.seated ? 0.68 : 0.85);
     this.lab.position.y = pos.y - (this.state.seated ? 0.22 : 0.15);
     this.lab.rotation.set(0, Math.atan2(-dir.x, -dir.z), 0);
+    this.grounding?.lifted(); // floating in front of you: no shadow
+    this.grounding?.arrive();
   }
 
   updateHitTest(frame) {
@@ -1055,8 +1082,10 @@ export class LessonApp {
     this.sparks.update(dt);
     this.classroom?.update();
     this.loading?.update(dt);
+    panelFrame();
     this.update(dt, frame);
     this.realRoom?.update(); // after the lesson has placed its board
+    this.grounding?.update(dt);
     if (this.presence) {
       this.presence.update(dt);
       this.sessionRedraw = (this.sessionRedraw ?? 0) + dt;

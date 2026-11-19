@@ -4,8 +4,14 @@ import * as THREE from 'three';
 // The same panel works with a mouse, touch, XR controllers and hand pinches:
 // whatever ray hits it gives us a UV coordinate, which we map to a button.
 
+// The house style (one look for every panel in every lesson). STYLE.enabled = false goes back to the plain
+// panels of v2.1: flat background, white hover outline, no fade-in, no tidy-up of button sizes.
+export const STYLE = { enabled: true };
+
 export const THEME = {
   bg: 'rgba(14, 18, 32, 0.9)',
+  bgTop: 'rgba(30, 37, 66, 0.94)', // the panel's background shades from this at the top…
+  bgBottom: 'rgba(11, 14, 27, 0.94)', // …to this at the bottom
   border: 'rgba(124, 140, 255, 0.55)',
   text: '#eef1ff',
   dim: '#a3abd1',
@@ -19,9 +25,16 @@ export const THEME = {
 };
 
 const PRESS_MS = 170; // how long a pressed button shows as pressed
+const APPEAR_MS = 220; // how long a panel takes to fade in
+let frame = 0; // counts the lesson's frames (panelFrame(), called once a frame by LessonApp)
+/** Once a frame: lets panels tell "drawn last frame too" from "hidden until now". */
+export const panelFrame = () => frame++;
 
 const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 export const font = (size, weight = 400) => `${weight} ${size}px ${FONT}`;
+
+/** House style: one text size for a given button height, the same in every lesson (long labels still shrink to fit). */
+const labelSize = (height) => Math.round(Math.min(30, Math.max(18, height * 0.4)));
 
 const SCROLLBAR_W = 58; // width of the scroll buttons (canvas px)
 
@@ -54,6 +67,7 @@ export class CanvasPanel {
       new THREE.MeshBasicMaterial({ map: this.texture, transparent: true, toneMapped: false }),
     );
     this.mesh.name = name;
+    this.mesh.frustumCulled = false; // (so turning away and back does not count as the panel appearing again)
     this.mesh.userData.panel = this;
     this.buttons = [];
     this.hoverId = null;
@@ -67,6 +81,28 @@ export class CanvasPanel {
     this.onResize = null;
     this.pressed = null; // { id, t }: the button just pressed (drawn pressed in for a moment)
     this.doneAt = 0; // when a task finished: the panel's border glows green for a few seconds
+    this.pxPerMeter = pxPerMeter;
+    // House style: a panel fades in over a moment whenever it appears (it was hidden, or is new).
+    this.seenFrame = -9;
+    this.shownAt = 0;
+    this.mesh.onBeforeRender = () => {
+      if (!STYLE.enabled) return;
+      const now = performance.now();
+      if (frame - this.seenFrame > 1) this.shownAt = now; // not drawn last frame: it has just appeared
+      this.seenFrame = frame;
+      const k = Math.min(1, (now - this.shownAt) / APPEAR_MS);
+      this.mesh.material.opacity = 1 - (1 - k) ** 3;
+    };
+  }
+
+  /**
+   * Shrink to fit the content from now on (min: the smallest height, m). For panels made with a fixed height
+   * whose content is often shorter, which otherwise leaves an empty band at the bottom.
+   */
+  setFit(min) {
+    if (this.fit) return;
+    this.fit = Math.round(min * this.pxPerMeter);
+    this.redraw();
   }
 
   /** The panel's height in metres as it is showing now. */
@@ -111,11 +147,33 @@ export class CanvasPanel {
     const H = this.fit ? this.shownPx : canvas.height;
     ctx.clearRect(0, 0, W, canvas.height);
     roundRect(ctx, 4, 4, W - 8, H - 8, 36);
-    ctx.fillStyle = THEME.bg;
-    ctx.fill();
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = THEME.border;
-    ctx.stroke();
+    if (STYLE.enabled) {
+      // shaded from a lighter top to a deeper bottom, with a soft sheen along the top edge
+      const bg = ctx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, THEME.bgTop);
+      bg.addColorStop(Math.min(1, 260 / H), 'rgba(18, 23, 42, 0.93)');
+      bg.addColorStop(1, THEME.bgBottom);
+      ctx.fillStyle = bg;
+      ctx.fill();
+      const edge = ctx.createLinearGradient(0, 0, 0, H);
+      edge.addColorStop(0, 'rgba(150, 165, 255, 0.85)');
+      edge.addColorStop(1, 'rgba(110, 125, 240, 0.35)');
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = edge;
+      ctx.stroke();
+      ctx.save();
+      roundRect(ctx, 10, 10, W - 20, H - 20, 30);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.stroke();
+      ctx.restore();
+    } else {
+      ctx.fillStyle = THEME.bg;
+      ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = THEME.border;
+      ctx.stroke();
+    }
     const done = this.doneGlow;
     if (done > 0) {
       ctx.save();
@@ -295,7 +353,21 @@ class PanelDrawer {
 
   heading(text, { size = 30 } = {}) {
     this.gap(6);
+    const y = this.y;
     this.text(text.toUpperCase(), { size, weight: 700, color: THEME.accent });
+    if (STYLE.enabled) {
+      // a fine rule from the end of the heading to the right edge
+      const { ctx } = this;
+      ctx.font = font(size, 700);
+      const end = this.pad + Math.min(ctx.measureText(text.toUpperCase()).width, this.contentWidth) + 18;
+      if (this.y - y < size * 1.5 && end < this.right - 30) {
+        const g = ctx.createLinearGradient(end, 0, this.right, 0);
+        g.addColorStop(0, 'rgba(154, 168, 255, 0.35)');
+        g.addColorStop(1, 'rgba(154, 168, 255, 0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(end, y + size * 0.55, this.right - end, 2);
+      }
+    }
     this.gap(2);
   }
 
@@ -344,6 +416,14 @@ class PanelDrawer {
     roundRect(ctx, this.pad, this.y, this.contentWidth, h, 20);
     ctx.fillStyle = THEME.box;
     ctx.fill();
+    if (STYLE.enabled) {
+      // an accent stripe down the left edge
+      ctx.save();
+      ctx.clip();
+      ctx.fillStyle = 'rgba(123, 136, 255, 0.7)';
+      ctx.fillRect(this.pad, this.y, 6, h);
+      ctx.restore();
+    }
     const y0 = this.y;
     this.y += 20;
     this.text(str, { size, color, x: this.pad + 24, width: inner });
@@ -366,7 +446,21 @@ class PanelDrawer {
     }
     roundRect(ctx, x, y, w, h, 16);
     ctx.fillStyle = disabled ? THEME.btnDisabled : active ? THEME.btnActive : hover ? THEME.btnHover : (color || THEME.btn);
-    ctx.fill();
+    if (STYLE.enabled && !disabled && (active || hover)) {
+      // lit from within: a soft glow of its own colour around it
+      ctx.save();
+      ctx.shadowColor = active ? 'rgba(110, 125, 255, 0.75)' : 'rgba(140, 155, 255, 0.45)';
+      ctx.shadowBlur = active ? 18 : 12;
+      ctx.fill();
+      ctx.restore();
+    } else ctx.fill();
+    if (STYLE.enabled && !disabled && active) {
+      const g = ctx.createLinearGradient(0, y, 0, y + h);
+      g.addColorStop(0, '#7b88ff');
+      g.addColorStop(1, '#4b5cf0');
+      ctx.fillStyle = g;
+      ctx.fill();
+    }
     if (!disabled) {
       // light from above: brighter at the top edge
       const g = ctx.createLinearGradient(0, y, 0, y + h);
@@ -385,8 +479,8 @@ class PanelDrawer {
       ctx.restore();
     }
     if (hover) {
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = STYLE.enabled ? 2.5 : 3;
+      ctx.strokeStyle = STYLE.enabled ? 'rgba(255, 255, 255, 0.8)' : '#ffffff';
       ctx.stroke();
     }
     x -= inset; y -= inset + 1; w += inset * 2; h += inset * 2;
@@ -420,6 +514,15 @@ class PanelDrawer {
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(text, this.pad, this.y + d / 2);
+    if (STYLE.enabled) {
+      // a short accent bar under the title
+      const g = ctx.createLinearGradient(this.pad, 0, this.pad + 64, 0);
+      g.addColorStop(0, '#7b88ff');
+      g.addColorStop(1, 'rgba(123, 136, 255, 0.2)');
+      ctx.fillStyle = g;
+      roundRect(ctx, this.pad, this.y + d / 2 + s * 0.62, 64, 5, 2.5);
+      ctx.fill();
+    }
     icons.forEach((ic, i) => {
       const x = this.right - (icons.length - i) * (d + 12) + 12;
       this.button({ ...ic, id: ic.id }, x, this.y, d, d, 34);
@@ -433,12 +536,9 @@ class PanelDrawer {
    */
   tabs(specs, { height = 58, size = 22, gap = 8, cols = specs.length } = {}) {
     const { ctx } = this;
-    const w = (this.contentWidth - gap * (cols - 1)) / cols;
+    if (STYLE.enabled) size = labelSize(height, size);
     specs.forEach((spec, i) => {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      const x = this.pad + col * (w + gap);
-      const y = this.y + row * (height + gap);
+      const { x, y, w } = this.cell(i, specs.length, cols, height, gap);
       if (spec.active) this.button(spec, x, y, w, height, size);
       else {
         const id = spec.id ?? `auto-${this.auto++}`;
@@ -446,8 +546,8 @@ class PanelDrawer {
         roundRect(ctx, x + 1.5, y + 1.5, w - 3, height - 3, 16);
         ctx.fillStyle = hover ? THEME.btnHover : 'rgba(255,255,255,0.03)';
         ctx.fill();
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = hover ? '#ffffff' : THEME.border;
+        ctx.lineWidth = STYLE.enabled ? 2 : 2.5;
+        ctx.strokeStyle = hover ? (STYLE.enabled ? 'rgba(255,255,255,0.8)' : '#ffffff') : STYLE.enabled ? 'rgba(124, 140, 255, 0.4)' : THEME.border;
         ctx.stroke();
         let s = size;
         ctx.font = font(s, 600);
@@ -466,13 +566,25 @@ class PanelDrawer {
 
   /** A grid of buttons, `cols` per row (defaults to all in one row). */
   buttons(specs, { cols = specs.length, height = 76, size = 30, gap = 14 } = {}) {
-    const w = (this.contentWidth - gap * (cols - 1)) / cols;
+    if (STYLE.enabled) size = labelSize(height, size);
     specs.forEach((spec, i) => {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      this.button(spec, this.pad + col * (w + gap), this.y + row * (height + gap), w, height, size);
+      const { x, y, w } = this.cell(i, specs.length, cols, height, gap);
+      this.button(spec, x, y, w, height, size);
     });
     this.y += Math.ceil(specs.length / cols) * (height + gap);
+  }
+
+  /**
+   * Where the i-th of n buttons goes in a grid of `cols` columns. In the house style a part-filled last row
+   * shares out the full width (no lone half-width button with an empty space beside it).
+   */
+  cell(i, n, cols, height, gap) {
+    const row = Math.floor(i / cols);
+    const rows = Math.ceil(n / cols);
+    const inRow = STYLE.enabled && row === rows - 1 ? n - row * cols : cols;
+    const col = i - row * cols;
+    const w = (this.contentWidth - gap * (inRow - 1)) / inRow;
+    return { x: this.pad + col * (w + gap), y: this.y + row * (height + gap), w };
   }
 
   /** Horizontal bar with a label and value, e.g. for energy. */

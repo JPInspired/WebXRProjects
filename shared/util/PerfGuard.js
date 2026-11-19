@@ -2,7 +2,8 @@ import * as THREE from 'three';
 
 // Keeps lessons smooth on a headset.
 //  • A frames-per-second counter, in the bottom-left corner of your view: shown to the teacher in a shared
-//    session (the admin), or to anyone who opens a lesson with ?fps in its address (e.g. lesson/?fps).
+//    session (the admin) while in the headset, or to anyone who opens a lesson with ?fps in its address
+//    (e.g. lesson/?fps), on a computer too.
 //  • A safety net: in a headset, if a lesson can't keep up with the headset's frame rate for a few seconds, it
 //    switches off its heaviest effects, one step at a time, on that headset only (computers keep the full look):
 //      step 1: reflections off (scene environment) and the strongest fixed foveation (fewer pixels at the edges)
@@ -49,7 +50,7 @@ export class PerfGuard {
   }
 
   get show() {
-    return this.forced || !!this.app.isAdmin;
+    return this.forced || (!!this.app.isAdmin && !!this.app.presenting);
   }
 
   /** 'auto' (the safety net decides, headsets only) or 'light' (the lighter look everywhere, now). */

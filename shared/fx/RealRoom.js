@@ -8,11 +8,14 @@ import * as THREE from 'three';
 //    rooms), it moves flat against the real wall it would otherwise float through or in front of.
 //    Same-room sessions keep the board where the teacher put it, so everyone shares it.
 // Each headset can turn this off in ⚙ Settings › This headset › Real room (remembered on the headset).
+// Also here: Hands in front (Settings › Hands in front, off unless chosen): on Quest 3, real hands and things
+// between you and the lab hide the parts behind them (the headset's depth sensing, from the next time you enter).
 // One switch turns it off everywhere: REAL_ROOM.enabled = false. Hintze Hall and Reef Dive are left out.
 
 export const REAL_ROOM = { enabled: true };
 const SKIP = ['hintze-hall', 'reef-dive'];
 const KEY = 'webxr-classes:realroom';
+const HANDS_KEY = 'webxr-classes:handsinfront';
 const UP = new THREE.Vector3(0, 1, 0);
 
 export function makeRealRoom(app) {
@@ -26,6 +29,11 @@ class RealRoom {
     let saved = null;
     try { saved = localStorage.getItem(KEY); } catch {}
     this.on = saved !== 'off';
+    // Hands in front (Quest 3): real hands and things between you and the lab hide it, as real objects would.
+    // Off unless chosen (it needs the headset's depth sensing, and is new); remembered on the headset.
+    let hands = null;
+    try { hands = localStorage.getItem(HANDS_KEY); } catch {}
+    this.handsInFront = hands === 'on';
     this.tableTried = false;
     this.wall = null; // the wall the board is on (for the note in Settings)
   }
@@ -40,6 +48,12 @@ class RealRoom {
     try { localStorage.setItem(KEY, this.on ? 'on' : 'off'); } catch {}
     if (this.on) this.tableTried = false; // try the table again
     else this.app.needsPlacement = true; // back in front of you, as before
+    this.app.refresh();
+  }
+
+  toggleHands() {
+    this.handsInFront = !this.handsInFront;
+    try { localStorage.setItem(HANDS_KEY, this.handsInFront ? 'on' : 'off'); } catch {}
     this.app.refresh();
   }
 
@@ -86,6 +100,7 @@ class RealRoom {
     lab.rotation.set(0, Math.atan2(-dir.x, -dir.z), 0);
     this.onTable = true;
     this.tableTried = true;
+    this.app.grounding?.landed(); // its shadow on the desk, and the arriving ring
     this.app.refresh();
   }
 

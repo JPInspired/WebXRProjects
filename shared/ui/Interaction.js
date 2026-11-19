@@ -439,6 +439,7 @@ export class Interaction {
       return;
     }
     this.labGrabber = c;
+    this.app.grounding?.lifted(); // picked up off its surface
     c.attach(this.app.lab);
   }
 
@@ -524,7 +525,11 @@ export class Interaction {
       this.app.renderer.domElement.style.cursor = b ? 'pointer' : hit?.object ? 'grab' : '';
     }
     this.handsFx?.hovers(hovers); // buttons being touched light up too
-    for (const p of this.app.panels) p.setHover(hovers.get(p) ?? null);
+    for (const p of this.app.panels) {
+      const id = hovers.get(p) ?? null;
+      if (id && id !== p.hoverId && this.app.presenting) sound.hover(); // a faint tick as a button lights up
+      p.setHover(id);
+    }
     this.showHover(hoverObject);
     // what's held glows a little too, so it's clear what you've got
     for (const g of this.active.values()) if (g.object.visible) reaching.add(g.object);

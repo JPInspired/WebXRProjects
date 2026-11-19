@@ -2,11 +2,19 @@
 // soft, warm and short. Browsers only allow audio after a tap/click, which always happens before anything here
 // can play.
 //
-//   UI        tap (any menu button: played for you by the shared input code), click (same, for older lessons)
+//   UI        tap (any menu button: played for you by the shared input code), click (same, for older lessons),
+//             hover (a button lit up by a pointer or hand, in the headset), open / close (a pop-up card)
+//   class     pause / resume, attention (Look Here), arrive (the lab appears or lands), land (on a surface)
 //   hands     pick (picked something up), put (put it down: played for you unless the lesson made its own sound)
 //   answers   correct / bond, wrong / refuse, done (a task finished: see LessonApp.celebrate)
 //   lab       snap, thud, beep, power, release(kJ)
 //   loops     loop('bubbles' | 'hum' | 'fizz') → { set(level 0..1), stop() } for sounds that last (fizzing, fans)
+// Each headset can switch sound off (⚙ Settings › Sound): sound.muted, remembered on the headset.
+
+const MUTE_KEY = 'webxr-classes:sound';
+let muted = false;
+try { muted = localStorage.getItem(MUTE_KEY) === 'off'; } catch { /* no storage: sound on */ }
+const LEVEL = 0.9;
 
 let ctx = null;
 let out = null;
@@ -22,7 +30,7 @@ function ac() {
     comp.attack.value = 0.004;
     comp.release.value = 0.2;
     out = ctx.createGain();
-    out.gain.value = 0.9;
+    out.gain.value = muted ? 0 : LEVEL;
     out.connect(comp).connect(ctx.destination);
   }
   if (ctx.state === 'suspended') ctx.resume();
@@ -102,6 +110,26 @@ const wrong = () => { tone(220, 0.16, { type: 'triangle', gain: 0.08, to: 180 })
 
 export const sound = {
   get stamp() { return stamp; },
+
+  /** Sound switched off on this headset (Settings › Sound). */
+  get muted() { return muted; },
+  set muted(m) {
+    muted = !!m;
+    try { localStorage.setItem(MUTE_KEY, muted ? 'off' : 'on'); } catch { /* not remembered */ }
+    if (out) out.gain.setTargetAtTime(muted ? 0 : LEVEL, ctx.currentTime, 0.05);
+  },
+
+  // UI (quiet: they happen often)
+  hover: play('hover', () => tone(1400, 0.025, { type: 'sine', gain: 0.012, attack: 0.002 }), 70),
+  open: play('open', () => { tone(520, 0.14, { gain: 0.035, to: 780 }); noise(0.1, 0.012, 3000, { type: 'highpass' }); }, 120),
+  close: play('close', () => { tone(700, 0.12, { gain: 0.03, to: 460 }); noise(0.08, 0.01, 2500, { type: 'highpass' }); }, 120),
+
+  // the class
+  pause: play('pause', () => { bell(784, 0.5, 0.05); bell(523, 0.7, 0.05, 0.14); }, 300),
+  resume: play('resume', () => { bell(523, 0.4, 0.05); bell(784, 0.6, 0.05, 0.12); }, 300),
+  attention: play('attention', () => { bell(880, 0.5, 0.055); bell(1175, 0.7, 0.05, 0.16); bell(880, 0.8, 0.035, 0.32); }, 400),
+  arrive: play('arrive', () => { noise(0.45, 0.03, 900, { type: 'bandpass', q: 0.8 }); tone(330, 0.5, { gain: 0.03, to: 495, attack: 0.08 }); }, 300),
+  land: play('land', () => { tone(180, 0.16, { gain: 0.08, to: 90 }); noise(0.07, 0.04, 900); }, 200),
 
   // UI
   tap: play('tap', tap, 60),
