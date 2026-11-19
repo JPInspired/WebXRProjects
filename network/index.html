@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Check This Network · WebXR Library</title>
+  <meta name="description" content="Check that a school network is ready for shared WebXR Library lessons, and prepare a report for the IT team.">
+  <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/icon-180.png">
+  <meta name="theme-color" content="#f6f5f1">
+  <script>
+    // the chosen theme (shared with the lessons page), before anything is drawn
+    try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f5f1; --bg-2: #ecebe5; --surface: #ffffff;
+      --ink: #15171c; --ink-2: #4a4f5c; --ink-3: #7a8090;
+      --line: rgba(21, 23, 28, 0.1); --line-2: rgba(21, 23, 28, 0.18);
+      --brand: #2f4bd8; --good: #047857; --warn: #b45309;
+      --shadow: 0 1px 2px rgba(20, 24, 40, 0.05), 0 8px 24px rgba(20, 24, 40, 0.06);
+      --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Noto Serif", Georgia, serif;
+      --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0e1015; --bg-2: #151821; --surface: #171a23;
+      --ink: #eef0f5; --ink-2: #b7bdcc; --ink-3: #8a91a3;
+      --line: rgba(255, 255, 255, 0.08); --line-2: rgba(255, 255, 255, 0.16);
+      --brand: #8ea2ff; --good: #34d399; --warn: #f5a524;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+    code { font: 600 0.92em ui-monospace, Menlo, Consolas, monospace; background: var(--bg-2); padding: 1px 6px; border-radius: 6px; }
+
+    .top { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--line); }
+    .top .wrap { display: flex; align-items: center; gap: 18px; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 600 21px/1 var(--serif); letter-spacing: -0.01em; }
+    .brand svg { width: 30px; height: 30px; }
+    .top nav { display: flex; gap: 22px; margin-left: auto; }
+    .top nav a { text-decoration: none; color: var(--ink-2); font-size: 15px; }
+    .top nav a:hover, .top nav a[aria-current] { color: var(--ink); }
+    .theme { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+    .theme svg { width: 18px; height: 18px; }
+    .theme .moon { display: none; }
+    :root[data-theme="dark"] .theme .sun { display: none; }
+    :root[data-theme="dark"] .theme .moon { display: block; }
+
+    .intro { padding: 56px 0 26px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+    .eyebrow::before { content: ""; width: 22px; height: 1px; background: currentColor; }
+    h1 { font: 500 clamp(38px, 5.4vw, 64px)/1.02 var(--serif); letter-spacing: -0.025em; margin: 16px 0 18px; }
+    h1 em { font-style: italic; color: var(--brand); }
+    .lede { font-size: 18px; color: var(--ink-2); max-width: 40em; margin: 0; }
+    h2 { font: 500 30px/1.1 var(--serif); letter-spacing: -0.015em; margin: 0 0 14px; }
+    section.part { padding: 34px 0; border-top: 1px solid var(--line); }
+    ol, ul { padding-left: 1.25em; margin: 0; }
+    li { margin: 6px 0; color: var(--ink-2); }
+    li b { color: var(--ink); }
+    .note { color: var(--ink-3); font-size: 14px; margin-top: 12px; }
+    .key { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+    .key div { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; font-size: 14px; color: var(--ink-2); }
+    .key b { display: block; font: 600 16px var(--sans); margin-bottom: 2px; }
+    .key .g b { color: var(--good); }
+    .key .o b { color: var(--warn); }
+
+    .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 6px 0 18px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; font: 600 14px var(--sans); text-decoration: none; border: 1px solid var(--line-2); color: var(--ink); background: var(--surface); cursor: pointer; }
+    .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .btn.armed { background: #b42318; color: #fff; border-color: #b42318; }
+    .status { font-size: 14px; color: var(--good); font-weight: 600; min-height: 1.2em; }
+    .progress { margin-left: auto; font-size: 14px; color: var(--ink-3); }
+
+    .lesson { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 18px 20px; margin-bottom: 14px; }
+    .lesson.done { border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+    .lesson header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; }
+    .lesson h3 { font: 500 23px/1.15 var(--serif); margin: 0; }
+    .badge { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--ink-3); }
+    .badge.heavy { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+    .lesson header a { margin-left: auto; font-size: 14px; font-weight: 600; color: var(--brand); text-decoration: none; }
+    .lesson header a::after { content: " →"; }
+    .try { margin: 8px 0 12px; color: var(--ink-2); font-size: 15px; }
+    .checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 16px; }
+    .checks label { display: flex; align-items: center; gap: 9px; font-size: 15px; cursor: pointer; padding: 4px 0; }
+    .checks input { width: 20px; height: 20px; accent-color: var(--good); margin: 0; flex: none; }
+    textarea { width: 100%; margin-top: 10px; min-height: 44px; resize: vertical; font: 15px/1.4 var(--sans); padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); }
+    textarea:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+    .results { display: grid; gap: 10px; }
+    .result { display: flex; gap: 14px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+    .result .icon { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 700 15px var(--sans); color: #fff; background: var(--ink-3); }
+    .result.ok .icon { background: var(--good); }
+    .result.warn .icon { background: var(--warn); }
+    .result.bad .icon { background: #b42318; }
+    .result.bad { border-color: color-mix(in srgb, #b42318 40%, transparent); }
+    .result.run .icon { animation: pulse 1s ease-in-out infinite alternate; }
+    @keyframes pulse { to { opacity: 0.35; } }
+    .result b { font-size: 16px; }
+    .result p { margin: 2px 0 0; color: var(--ink-2); font-size: 15px; }
+    .result .detail { font: 13px ui-monospace, Menlo, Consolas, monospace; color: var(--ink-3); word-break: break-word; }
+    .status.warn { color: var(--warn); }
+    .status.bad { color: #d64545; }
+    .join { display: flex; gap: 8px; }
+    .join input { font: 600 15px ui-monospace, Menlo, monospace; letter-spacing: 0.2em; text-transform: uppercase; width: 7.2em; text-align: center; padding: 9px 12px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); }
+    .btn:disabled { opacity: 0.55; cursor: default; }
+    b.code { font-family: ui-monospace, Menlo, monospace; letter-spacing: 0.15em; color: var(--brand); }
+    #report { font: 13px/1.45 ui-monospace, Menlo, Consolas, monospace; min-height: 200px; }
+    footer { margin-top: 40px; border-top: 1px solid var(--line); padding: 28px 0 44px; color: var(--ink-3); font-size: 13px; }
+    @media (max-width: 700px) {
+      .top nav { display: none; }
+      .theme { margin-left: auto; }
+      .progress { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="../" aria-label="WebXR Library: back to the lessons">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="10" width="28" height="15" rx="6" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="10.5" cy="17.5" r="3.2" fill="currentColor"/><circle cx="21.5" cy="17.5" r="3.2" fill="currentColor"/><path d="M13.5 25c1-2.3 4-2.3 5 0" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16 2 28 6.5 16 11 4 6.5z" fill="var(--brand)"/></svg>
+        WebXR Library
+      </a>
+      <nav aria-label="Site"><a href="../#lessons">Lessons</a><a href="../guide/">Teacher Guides</a><a href="../checklist/">Testing Checklist</a><a href="./" aria-current="page">Network Check</a></nav>
+      <button class="theme" id="theme" type="button" aria-label="Switch between light and dark">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="intro">
+      <span class="eyebrow">For Teachers and IT Teams</span>
+      <h1>Check This <em>Network</em></h1>
+      <p class="lede">Before a shared lesson, open this page on a headset connected to the school Wi-Fi that the class will use. It checks everything that shared sessions need, explains anything that needs attention and prepares a report for the IT team.</p>
+    </div>
+
+    <section class="part" aria-labelledby="one">
+      <h2 id="one">1. Check This Device</h2>
+      <p class="lede" style="font-size:16px">One headset is enough for this part. It takes under a minute.</p>
+      <div class="bar"><button class="btn primary" id="run">Check This Network</button><span class="status" id="run-status" role="status"></span></div>
+      <div class="results" id="results"></div>
+    </section>
+
+    <section class="part" aria-labelledby="two">
+      <h2 id="two">2. Check Two Headsets Together</h2>
+      <p class="lede" style="font-size:16px">This shows whether headsets can reach each other on this Wi-Fi, and how quickly. Open this page on a second headset on the same Wi-Fi. Start the test on one and join it on the other with the code.</p>
+      <div class="bar">
+        <button class="btn primary" id="pair-start">Start a Test</button>
+        <form class="join" id="pair-join"><input id="pair-code" maxlength="4" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Test code"><button class="btn">Join a Test</button></form>
+      </div>
+      <div class="results" id="pair"></div>
+    </section>
+
+    <section class="part" aria-labelledby="three">
+      <h2 id="three">3. Report for the IT Team</h2>
+      <p class="lede" style="font-size:16px">Every result, with the technical details the IT team needs. Copy it into an email or a support ticket.</p>
+      <div class="bar"><button class="btn primary" id="copy">Copy Report for IT</button><span class="status" id="copy-status" role="status"></span></div>
+      <textarea id="report" readonly rows="12" aria-label="Report for the IT team"></textarea>
+    </section>
+
+    <section class="part" aria-labelledby="four">
+      <h2 id="four">What Shared Sessions Need</h2>
+      <ul id="needs"></ul>
+      <p class="note">Lesson content travels directly between the headsets, inside the school network. The introduction servers only pass short connection notes, and the network check never sends the school’s address anywhere.</p>
+    </section>
+  </main>
+
+  <footer><div class="wrap">WebXR Library · <a href="../">Lessons</a> · <a href="../checklist/">Testing Checklist</a> · <a href="../guide/">Teacher Guides</a></div></footer>
+
+  <script type="module">
+    import { NET_CONFIG } from '../shared/net/config.js';
+    import { connect, networkKey } from '../shared/net/transport.js';
+    import { newSessionCode } from '../shared/net/code.js';
+
+    const CDN = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+    const params = new URLSearchParams(location.search);
+    const NET = params.get('net') || 'p2p'; // (?net=local: test with tabs on one computer)
+    const $ = (id) => document.getElementById(id);
+    const host = (u) => u.replace(/^[a-z]+:(\/\/)?/, '').replace(/\/.*$/, '');
+    const results = {}; // name → { state, title, text, detail }
+    let pairResult = null;
+
+    // ── what is needed (from the same settings the lessons use) ──
+    $('needs').innerHTML = [
+      `<li><b>This website</b> (<code>${location.host}</code>) and <b>the 3D library</b> (<code>cdn.jsdelivr.net</code>), over HTTPS.</li>`,
+      `<li><b>The introduction servers</b>: ${NET_CONFIG.relayUrls.map((u) => `<code>${host(u)}</code>`).join(', ')} (secure WebSockets, port 443). One working is enough.</li>`,
+      `<li><b>The network check (STUN)</b>: ${NET_CONFIG.stunServers.map((u) => `<code>${u.replace('stun:', '')}</code>`).join(', ')} (UDP). One working is enough.</li>`,
+      `<li><b>Headsets able to reach each other</b> on the Wi-Fi: “client isolation” (also called AP or guest isolation) must be off for the headsets’ network.</li>`,
+    ].join('');
+
+    // ── drawing results ──
+    const ICON = { ok: '✓', warn: '!', bad: '✕', run: '…' };
+    const row = (r) => `<div class="result ${r.state}"><span class="icon" aria-hidden="true">${ICON[r.state]}</span><div><b>${r.title}</b><p>${r.text}</p>${r.detail ? `<p class="detail">${r.detail}</p>` : ''}</div></div>`;
+    const draw = () => {
+      $('results').innerHTML = Object.values(results).map(row).join('');
+      $('pair').innerHTML = pairResult ? row(pairResult) : '';
+      $('report').value = report();
+    };
+    const set = (key, r) => { results[key] = r; draw(); };
+
+    // ── the checks ──
+    const timed = async (fn) => { const t = performance.now(); const v = await fn(); return [v, Math.round(performance.now() - t)]; };
+
+    async function checkCDN() {
+      try {
+        const [r, ms] = await timed(() => fetch(CDN, { cache: 'no-store' }));
+        if (!r.ok) throw new Error('status ' + r.status);
+        return { state: 'ok', title: 'Website and 3D Library', text: 'Both load.', detail: `cdn.jsdelivr.net answered in ${ms} ms` };
+      } catch (e) {
+        return { state: 'bad', title: 'Website and 3D Library', text: 'The 3D library does not load, so lessons cannot start. Ask IT to allow cdn.jsdelivr.net in the web filter.', detail: `cdn.jsdelivr.net: ${e.message}` };
+      }
+    }
+
+    /** One STUN server: does it tell this device its network's public address? (the address is not kept) */
+    function probeStun(url, timeoutMs = 4000) {
+      return new Promise((resolve) => {
+        const t0 = performance.now();
+        const pc = new RTCPeerConnection({ iceServers: [{ urls: url }] });
+        const end = (ms) => { clearTimeout(timer); try { pc.close(); } catch {} resolve(ms); };
+        const timer = setTimeout(() => end(null), timeoutMs);
+        pc.onicecandidate = (e) => {
+          if (!e.candidate) return end(null);
+          const type = e.candidate.type ?? e.candidate.candidate.split(' ')[7];
+          if (type === 'srflx') end(Math.round(performance.now() - t0));
+        };
+        pc.createDataChannel('probe');
+        pc.createOffer().then((o) => pc.setLocalDescription(o)).catch(() => end(null));
+      });
+    }
+
+    async function checkStun() {
+      if (typeof RTCPeerConnection === 'undefined') {
+        return { state: 'bad', title: 'Network Check (STUN)', text: 'This browser cannot make direct connections (WebRTC), so it cannot join shared sessions. Use the headset’s own browser.', detail: 'RTCPeerConnection missing' };
+      }
+      const each = await Promise.all(NET_CONFIG.stunServers.map(async (u) => [u.replace('stun:', ''), await probeStun(u)]));
+      const good = each.filter(([, ms]) => ms !== null);
+      const detail = each.map(([u, ms]) => `${u}: ${ms === null ? 'no answer' : ms + ' ms'}`).join(' · ');
+      if (!good.length) return { state: 'bad', title: 'Network Check (STUN)', text: 'Blocked. Headsets cannot tell which network they are on, so shared sessions cannot start. Ask IT to allow UDP to the STUN servers listed below (ports 19302 and 3478).', detail };
+      // the same check the lessons make (it also confirms a network was found)
+      const key = await networkKey();
+      if (!key) return { state: 'warn', title: 'Network Check (STUN)', text: 'Answers arrive, but not reliably. Shared sessions may take several tries to start.', detail };
+      return { state: good.length < each.length ? 'warn' : 'ok', title: 'Network Check (STUN)', text: good.length < each.length ? `Works (${good.length} of ${each.length} servers answer, and one is enough).` : 'Works.', detail };
+    }
+
+    function probeRelay(url, timeoutMs = 6000) {
+      return new Promise((resolve) => {
+        const t0 = performance.now();
+        let ws;
+        const end = (ms) => { clearTimeout(timer); try { ws.close(); } catch {} resolve(ms); };
+        const timer = setTimeout(() => end(null), timeoutMs);
+        try {
+          ws = new WebSocket(url);
+          ws.onopen = () => end(Math.round(performance.now() - t0));
+          ws.onerror = () => end(null);
+        } catch { end(null); }
+      });
+    }
+
+    async function checkRelays() {
+      const each = await Promise.all(NET_CONFIG.relayUrls.map(async (u) => [host(u), await probeRelay(u)]));
+      const good = each.filter(([, ms]) => ms !== null);
+      const detail = each.map(([u, ms]) => `${u}: ${ms === null ? 'no answer' : ms + ' ms'}`).join(' · ');
+      if (!good.length) return { state: 'bad', title: 'Introduction Servers', text: 'None can be reached, so headsets cannot find each other. Ask IT to allow the introduction servers listed below in the web filter (secure WebSockets, port 443).', detail };
+      const slow = Math.min(...good.map(([, ms]) => ms)) > 1500;
+      return { state: good.length < each.length || slow ? 'warn' : 'ok', title: 'Introduction Servers', text: good.length < each.length ? `${good.length} of ${each.length} can be reached. One is enough, but more makes joining more reliable.` : slow ? 'They can be reached, but slowly. Joining may take a little longer.' : 'All can be reached.', detail };
+    }
+
+    let running = false;
+    $('run').onclick = async () => {
+      if (running) return;
+      running = true;
+      $('run').disabled = true;
+      $('run-status').textContent = 'Checking…';
+      for (const k of Object.keys(results)) delete results[k];
+      set('cdn', { state: 'run', title: 'Website and 3D Library', text: 'Checking…' });
+      set('stun', { state: 'run', title: 'Network Check (STUN)', text: 'Checking…' });
+      set('relays', { state: 'run', title: 'Introduction Servers', text: 'Checking…' });
+      await Promise.all([
+        checkCDN().then((r) => set('cdn', r)),
+        checkStun().then((r) => set('stun', r)),
+        checkRelays().then((r) => set('relays', r)),
+      ]);
+      const bad = Object.values(results).filter((r) => r.state === 'bad').length;
+      const warn = Object.values(results).filter((r) => r.state === 'warn').length;
+      $('run-status').textContent = bad ? 'Something needs the IT team: see below.' : warn ? 'Ready, with a note below. Now try part 2.' : 'Ready for shared sessions. Now try part 2.';
+      $('run-status').className = 'status ' + (bad ? 'bad' : warn ? 'warn' : '');
+      $('run').disabled = false;
+      $('run').textContent = 'Check Again';
+      running = false;
+    };
+
+    // ── two headsets: find each other, then time 20 messages there and back ──
+    let pairT = null;
+    const median = (a) => { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+    async function pairTest(code, starter) {
+      pairT?.leave();
+      $('pair-start').disabled = true;
+      pairResult = { state: 'run', title: `Test ${code}`, text: starter ? `Waiting for the second headset. On it, enter the code <b class="code">${code}</b> and choose Join a Test.` : 'Looking for the first headset…' };
+      draw();
+      let t;
+      try {
+        t = pairT = await connect(NET, `netcheck-${code}`);
+      } catch (e) {
+        pairResult = { state: 'bad', title: `Test ${code}`, text: e.message };
+        $('pair-start').disabled = false;
+        return draw();
+      }
+      const ping = t.channel('ping');
+      const pong = t.channel('pong');
+      let found = false;
+      const giveUp = setTimeout(() => {
+        if (found) return;
+        pairResult = { state: 'bad', title: `Test ${code}`, text: 'The other headset was not found within a minute. Check that both use the same code and the same Wi-Fi, and that both pass part 1. If they do, the Wi-Fi is probably keeping devices apart (“client isolation”): ask IT to turn it off for the headsets’ network.', detail: 'no peer within 60 s' };
+        $('pair-start').disabled = false;
+        draw();
+      }, 60000);
+      t.onProblem((text) => {
+        pairResult = { state: 'bad', title: `Test ${code}`, text: 'The headsets found each other but could not connect. The Wi-Fi is keeping devices apart (“client isolation”): ask IT to turn it off for the headsets’ network.', detail: text };
+        draw();
+      });
+      pong.onMessage((d) => {
+        const r = d && pending.get(d.n);
+        if (r !== undefined) { times.push(performance.now() - r); pending.delete(d.n); }
+      });
+      ping.onMessage((d, id) => pong.send(d, id));
+      const pending = new Map();
+      const times = [];
+      t.onPeerJoin(async (id) => {
+        if (found) return;
+        found = true;
+        clearTimeout(giveUp);
+        pairResult = { state: 'run', title: `Test ${code}`, text: 'Connected. Timing messages between the headsets…' };
+        draw();
+        for (let n = 0; n < 20; n++) {
+          pending.set(n, performance.now());
+          ping.send({ n }, id);
+          await new Promise((r) => setTimeout(r, 200));
+        }
+        await new Promise((r) => setTimeout(r, 1500));
+        const lost = 20 - times.length;
+        const ms = times.length ? Math.round(median(times)) : null;
+        const grade = ms === null ? 'bad' : ms <= 60 && lost <= 1 ? 'ok' : ms <= 150 && lost <= 4 ? 'warn' : 'bad';
+        const words = { ok: 'Good: a shared lesson will feel immediate.', warn: 'Slow: shared lessons will work, with a small delay.', bad: 'Too slow for a smooth shared lesson. The Wi-Fi may be very busy, or the headsets far from the access point.' };
+        pairResult = { state: grade, title: `Test ${code}: Headsets Reach Each Other`, text: ms === null ? 'Connected, but no messages came back.' : words[grade], detail: ms === null ? 'all 20 messages lost' : `round trip ${ms} ms (median of ${times.length}), ${lost} of 20 lost` };
+        $('pair-start').disabled = false;
+        draw();
+      });
+    }
+    $('pair-start').onclick = () => pairTest(newSessionCode(), true);
+    $('pair-code').addEventListener('input', (e) => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
+    $('pair-join').onsubmit = (e) => {
+      e.preventDefault();
+      const code = $('pair-code').value;
+      if (code.length !== 4) { pairResult = { state: 'warn', title: 'Join a Test', text: 'Enter the four-character code shown on the other headset.' }; return draw(); }
+      pairTest(code, false);
+    };
+
+    // ── the report ──
+    const plain = (h) => h.replace(/<[^>]+>/g, '');
+    function report() {
+      const lines = [
+        'WebXR Library: Network Check',
+        `Date: ${new Date().toLocaleString('en-GB')}`,
+        `Page: ${location.href.split('?')[0]}`,
+        `Browser: ${navigator.userAgent}`,
+        '',
+      ];
+      const all = [...Object.values(results), ...(pairResult ? [pairResult] : [])];
+      if (!all.length) lines.push('No checks run yet.');
+      for (const r of all) lines.push(`[${{ ok: 'PASS', warn: 'NOTE', bad: 'FAIL', run: '…' }[r.state]}] ${plain(r.title)}: ${plain(r.text)}${r.detail ? `\n       ${plain(r.detail)}` : ''}`);
+      lines.push('', 'Shared sessions need:', ...[...document.querySelectorAll('#needs li')].map((li) => '- ' + li.textContent));
+      return lines.join('\n');
+    }
+    $('copy').onclick = async () => {
+      $('report').value = report();
+      try {
+        await navigator.clipboard.writeText($('report').value);
+        $('copy-status').textContent = 'Copied.';
+      } catch {
+        $('report').select();
+        $('copy-status').textContent = 'Select the text below and copy it.';
+      }
+    };
+    draw();
+
+    // light / dark (shared with the lessons page)
+    $('theme').addEventListener('click', () => {
+      const root = document.documentElement;
+      root.dataset.theme = root.dataset.theme !== 'dark' ? 'dark' : 'light';
+      try { localStorage.setItem('webxr-classes:theme', root.dataset.theme); } catch {}
+    });
+  </script>
+</body>
+</html>
