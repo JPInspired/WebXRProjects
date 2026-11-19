@@ -15,6 +15,10 @@
 //  • device-to-device traffic on the Wi-Fi ("client isolation" off for the headsets' network).
 
 export const NET_CONFIG = {
+  // If a headset loses touch with the class (it slept, the Wi-Fi dropped, the network changed), it
+  // reconnects by itself and keeps its work. false = the old behaviour: rejoin by reloading the page.
+  autoReconnect: true,
+
   // Only devices on the same network (same public address) can join each other's sessions.
   sameNetworkOnly: true,
   // How much of the public IPv4 address must match: 24 = the first three numbers (schools with several

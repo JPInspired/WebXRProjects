@@ -117,7 +117,15 @@ Only the person who started the session is ever admin. If their headset drops ou
 2. **Introductions** go through three fixed public Nostr relays (`relayUrls`). Only short, encrypted connection notes pass through them.
 3. **Lesson data** then flows directly between the devices, inside the school network.
 
-Measured in tests: joining takes about 2 seconds once the lesson has loaded; a teacher's change reaches students in under a second; someone leaving is noticed in under a second.
+**Reconnecting by itself** (`autoReconnect` in `shared/net/config.js`; `false` turns it off). Every device sends a small "still here" every 2 seconds, from a timer that keeps running when the page is not drawing. Someone not heard from for 7 seconds is marked **not responding** in the Players list. A device that has lost touch rejoins the same session on its own, with the same id, so its desk and work come straight back for everyone:
+
+- **It slept or the page was in the background** (no timer ticks for 5 seconds, or the page was hidden for 4): it checks whether anyone still answers and, if nobody does within 4.5 seconds, rejoins.
+- **The Wi-Fi came back** (the browser reports it is online again): it rejoins at once.
+- **Everyone went quiet at once** for 8 seconds: probably this device, so it rejoins (then waits longer each time, from 20 seconds up to 2 minutes, in case the others really are away).
+- **The start failed** (for example the network check timed out): it tries again by itself after 5, 10, 20 and then every 30 seconds, and the session panel says so.
+- The teacher's lesson also reopens its lobby, so students can keep joining with the code. Desks of people who do not come back within 20 seconds of a rejoin are removed.
+
+Measured in tests: a student whose connection dies is back in about 8 seconds, a teacher in about 16. Joining takes about 2 seconds once the lesson has loaded; a teacher's change reaches students in under a second; someone leaving is noticed in under a second.
 
 If something is wrong, the session panel says so in plain words: the network can't be checked (STUN blocked), devices found each other but can't connect (Wi-Fi "client isolation"), nobody found yet (wrong code or a different Wi-Fi), or the teacher isn't connected.
 

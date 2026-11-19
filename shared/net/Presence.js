@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { connect } from './transport.js';
+import { NET_CONFIG } from './config.js';
+import { openLobby } from './lobby.js';
 
 // Shared sessions: everyone keeps their own models, and sees everyone else working beside them.
 //
@@ -11,10 +13,16 @@ import { connect } from './transport.js';
 //  • Everything is sent relative to the sender's own lab, so it lines up whatever room they're in.
 //  • Same-room sessions (?room=same): every headset lines itself up with the room from its room scan
 //    (RoomAlign.js), so each desk appears where that person really is.
+//  • Reconnecting (NET_CONFIG.autoReconnect): if this headset loses touch (it slept, the Wi-Fi dropped,
+//    nobody has been heard from for a while) it leaves and joins again by itself, with the same id, so
+//    its desk and work come straight back for everyone. A start that fails is retried (5, 10, 20, 30 s…).
 
 const COLORS = [0x5b8cff, 0xff8a5c, 0x3ccf91, 0xffc94d, 0xb48cff, 0xff6b9a, 0x4cc9ff, 0xe0e070];
 const SEAT_GAP = 1.75; // metres between desks
 const POSE_HZ = 15;
+const BEAT_MS = 2000; // a small "still here" to everyone, even in a background tab
+const AWAY_MS = 7000; // nothing heard for this long: shown as "not responding"
+const CHECK_MS = 4500; // after waking up: if nobody answers within this long, reconnect
 
 export function sessionFromURL() {
   const p = new URLSearchParams(location.search);
@@ -58,20 +66,122 @@ export class Presence {
     this.stateClock = 0;
     this.lastState = '';
     this.sinceFull = 0;
-    connect(net, `${lessonId}-${code}`)
-      .then((t) => this.start(t))
+    this.net = net;
+    this.lessonId = lessonId;
+    this.roomId = `${lessonId}-${code}`;
+    this.auto = NET_CONFIG.autoReconnect !== false;
+    this.gen = 0; // which connection attempt is current
+    this.tries = 0; // failed starts in a row (for the wait before the next)
+    this.reconnects = 0;
+    this.open();
+    if (this.auto) {
+      addEventListener('online', () => this.reconnect('online'));
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) this.hiddenAt = performance.now();
+        else if (this.hiddenAt && performance.now() - this.hiddenAt > 4000) this.check('woke');
+      });
+      // once a second, whether or not the page is drawing (a background tab, or a headset that is off)
+      this.beat = setInterval(() => {
+        const now = performance.now();
+        if (this.lastTick && now - this.lastTick > 5000) this.check('paused'); // the device slept
+        this.lastTick = now;
+        if (this.status !== 'connected') return;
+        if (this.peers.size && now - (this.lastBeat ?? 0) >= BEAT_MS - 100) {
+          this.lastBeat = now;
+          this.beatCh?.send(1);
+        }
+        this.watch(now);
+      }, 1000);
+    }
+  }
+
+  /** Join the session (again). A failed start is retried by itself, waiting a little longer each time. */
+  open() {
+    const gen = ++this.gen;
+    connect(this.net, this.roomId)
+      .then((t) => {
+        if (gen !== this.gen) return t.leave(); // (superseded by a newer attempt)
+        this.tries = 0;
+        this.retryAt = null;
+        this.start(t);
+      })
       .catch((e) => {
+        if (gen !== this.gen) return;
         this.status = 'failed';
         this.error = e.message;
-        app.refresh();
+        if (this.auto) {
+          const wait = Math.min(30, 5 * 2 ** this.tries++);
+          this.retryAt = performance.now() + wait * 1000;
+          clearTimeout(this.retryTimer);
+          this.retryTimer = setTimeout(() => {
+            if (gen !== this.gen) return;
+            this.status = this.everConnected ? 'reconnecting' : 'connecting';
+            this.app.refresh();
+            this.open();
+          }, wait * 1000);
+        }
+        this.app.refresh();
       });
+  }
+
+  /** Leave and join again (keeps everyone's desks: they come back with the same ids). */
+  reconnect(reason) {
+    if (!this.auto || this.status === 'connecting' || this.status === 'reconnecting') return;
+    console.info('Shared session: reconnecting (' + reason + ')');
+    clearTimeout(this.retryTimer);
+    this.checkAt = null;
+    this.lastReconnect = performance.now();
+    this.reconnects++;
+    this.closeTransport();
+    this.status = 'reconnecting';
+    this.app.refresh();
+    this.open();
+  }
+
+  /** Something suggests the connection may be gone (woke up, long pause): reconnect unless someone answers soon. */
+  check(reason) {
+    if (!this.auto) return;
+    if (this.status === 'failed') return this.reconnect(reason); // (try now rather than waiting)
+    if (this.status !== 'connected') return;
+    if (!this.peers.size) return this.reconnect(reason); // nobody to hear from: nothing to lose
+    this.checkAt = performance.now();
+    this.checkReason = reason;
+    this.beatCh?.send(1);
+  }
+
+  closeTransport() {
+    const t = this.t;
+    const lobby = this.lobby;
+    this.t = null;
+    this.lobby = null;
+    try { t?.leave(); } catch {}
+    try { lobby?.leave(); } catch {}
+  }
+
+  /** Heard from someone: they are here. */
+  heard(id) {
+    const p = this.peers.get(id);
+    if (!p) return;
+    p.seen = performance.now();
+    if (p.away) {
+      p.away = false;
+      this.app.refresh();
+    }
   }
 
   start(t) {
     this.t = t;
     this.selfId = t.selfId;
     this.status = 'connected';
+    this.everConnected = true;
+    this.error = null;
     this.connectedAt = performance.now();
+    // the teacher's lesson tells students who type only the code (top of the lessons page) where to go
+    if (this.host) {
+      openLobby(this.code, { lesson: this.lessonId, sameRoom: this.sameRoom }, this.net)
+        .then((l) => (this.t === t ? (this.lobby = l) : l.leave()))
+        .catch((e) => console.warn('Lobby:', e.message));
+    }
     t.onProblem?.((text) => {
       if (this.peers.size) return; // already working with others: a hiccup with one more device
       this.problem = text;
@@ -100,9 +210,13 @@ export class Presence {
     this.roomCh.onMessage((d, id) => {
       if (id === this.hostId && !this.isHost) this.roomRef = d;
     });
+    this.beatCh = t.channel('beat');
+    this.beatCh.onMessage((d, id) => this.heard(id));
     t.onPeerJoin((id) => {
+      if (this.t !== t) return;
       this.problem = null;
       this.ensure(id);
+      this.heard(id);
       this.helloCh.send({ name: this.name, host: this.host }, id);
       if (this.isHost) setTimeout(() => {
         this.app.onPeerJoinedWorld?.(id);
@@ -111,15 +225,19 @@ export class Presence {
       this.sendState(true, id);
       this.app.refresh();
     });
-    t.onPeerLeave((id) => this.remove(id));
+    t.onPeerLeave((id) => {
+      if (this.t === t) this.remove(id); // (not when this headset is the one reconnecting)
+    });
     this.helloCh.onMessage((d, id) => {
       const p = this.ensure(id);
+      this.heard(id);
       p.host = !!d.host;
       p.name = String(d.name ?? 'Guest').slice(0, 24);
       this.app.refresh();
     });
     this.poseCh.onMessage((d, id) => {
       this.ensure(id).pose = d;
+      this.heard(id);
     });
     this.stateCh.onMessage((d, id) => {
       const p = this.ensure(id);
@@ -138,7 +256,7 @@ export class Presence {
     const hostId = this.hostId;
     return [
       { id: this.selfId, plain: this.name, name: `${this.name} (you)`, you: true, host: hostId === this.selfId, room: this.sameRoom ? this.roomStatus : null, color: hashColor(this.selfId ?? 'me') },
-      ...[...this.peers.values()].map((p) => ({ id: p.id, plain: p.name, name: p.name, you: false, host: hostId === p.id, room: this.sameRoom ? p.pose?.room ?? 'waiting' : null, color: p.color })),
+      ...[...this.peers.values()].map((p) => ({ id: p.id, plain: p.name, name: p.name, you: false, host: hostId === p.id, room: this.sameRoom ? p.pose?.room ?? 'waiting' : null, color: p.color, away: !!p.away })),
     ];
   }
 
@@ -176,7 +294,7 @@ export class Presence {
     const color = hashColor(id);
     const root = new THREE.Group(); // their desk, placed beside yours
     this.app.lab.add(root);
-    const p = { id, name: 'Guest', color, root, pose: null };
+    const p = { id, name: 'Guest', color, root, pose: null, seen: performance.now() };
     this.everJoined = true; // (so "waiting" can tell "nobody yet" from "everyone dropped out")
     p.replica = this.app.createReplica?.() ?? null;
     if (p.replica) root.add(p.replica.group);
@@ -298,6 +416,40 @@ export class Presence {
     }
   }
 
+  /** Who has gone quiet, and whether it is this headset that has lost touch. */
+  watch(now) {
+    let anyHere = false;
+    for (const p of this.peers.values()) {
+      // kept through a reconnect, but they never came back: they really have gone
+      if (p.seen < this.connectedAt && now - this.connectedAt > 20000) {
+        this.remove(p.id);
+        continue;
+      }
+      const away = now - p.seen > AWAY_MS;
+      if (away !== !!p.away) {
+        p.away = away;
+        this.app.refresh();
+      }
+      if (!away) anyHere = true;
+    }
+    // after waking up: nobody answered
+    if (this.checkAt && now - this.checkAt > CHECK_MS) {
+      const answered = [...this.peers.values()].some((p) => p.seen > this.checkAt);
+      const why = this.checkReason;
+      this.checkAt = null;
+      if (!answered) return this.reconnect(why);
+    }
+    // everyone went quiet at once: probably this headset. Try again, less often each time (20 s … 2 min).
+    if (this.peers.size && !anyHere) {
+      this.quietSince ??= now;
+      const gap = Math.min(120000, 20000 * 2 ** Math.min(3, this.reconnects));
+      if (now - this.quietSince > 8000 && now - (this.lastReconnect ?? 0) > gap) this.reconnect('silent');
+    } else {
+      this.quietSince = null;
+      if (anyHere) this.reconnects = 0;
+    }
+  }
+
   /** Where a colleague's head is, in world space (or null). */
   headOf(p) {
     if (!p.pose?.h) return null;
@@ -305,6 +457,10 @@ export class Presence {
   }
 
   leave() {
-    this.t?.leave();
+    this.gen++;
+    this.auto = false;
+    clearTimeout(this.retryTimer);
+    clearInterval(this.beat);
+    this.closeTransport();
   }
 }

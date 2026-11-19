@@ -105,10 +105,13 @@ async function p2p(roomId) {
   };
 }
 
+// (one id per page, like Trystero's, so reconnecting keeps who you are)
+const LOCAL_ID = Math.random().toString(36).slice(2, 10);
+
 /** Same-device transport for testing (several tabs/windows of one browser). */
 class LocalTransport {
   constructor(roomId) {
-    this.selfId = Math.random().toString(36).slice(2, 10);
+    this.selfId = LOCAL_ID;
     this.bc = new BroadcastChannel(`webxr-classes:${roomId}`);
     this.peers = new Map(); // id → last seen
     this.handlers = {};
@@ -126,6 +129,7 @@ class LocalTransport {
       if (m.kind === 'msg') this.handlers[m.channel]?.(m.data, m.from);
     };
     this.timer = setInterval(() => {
+      if (this.left) return;
       this.bc.postMessage({ from: this.selfId, kind: 'here' });
       for (const [id, t] of this.peers) if (Date.now() - t > 6000) this.drop(id);
     }, 1500);
@@ -143,13 +147,16 @@ class LocalTransport {
 
   channel(name) {
     return {
-      send: (data, peerId) => this.bc.postMessage({ from: this.selfId, to: peerId, kind: 'msg', channel: name, data }),
+      send: (data, peerId) => { if (!this.left) this.bc.postMessage({ from: this.selfId, to: peerId, kind: 'msg', channel: name, data }); },
       onMessage: (fn) => { this.handlers[name] = fn; },
     };
   }
 
   leave() {
+    if (this.left) return;
+    this.left = true;
     clearInterval(this.timer);
     this.bc.postMessage({ from: this.selfId, kind: 'bye' });
+    this.bc.close();
   }
 }

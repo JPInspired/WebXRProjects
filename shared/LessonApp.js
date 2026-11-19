@@ -6,7 +6,6 @@ import { THEME } from './ui/CanvasPanel.js';
 import { Presence, sessionFromURL } from './net/Presence.js';
 import { RoomScan, solveRoom, fingerprint } from './net/RoomAlign.js';
 import { newSessionCode } from './net/code.js';
-import { openLobby } from './net/lobby.js';
 import { initStartScreen } from './ui/StartScreen.js';
 import { PerfGuard } from './util/PerfGuard.js';
 import { sound } from './util/sound.js';
@@ -67,8 +66,6 @@ export class LessonApp {
     const session = sessionFromURL();
     if (session) {
       this.presence = new Presence(this, { lessonId: this.lessonId, ...session });
-      // the teacher's lesson tells students who type only the code (top of the lessons page) where to go
-      if (session.host) openLobby(session.code, { lesson: this.lessonId, sameRoom: session.sameRoom }, session.net).catch((e) => console.warn('Lobby:', e.message));
       this.sessionPanel = new CanvasPanel({ width: 0.5, height: session.sameRoom ? 0.19 : 0.14, name: 'session' });
       this.sessionPanel.mesh.position.set(-this.panelX, PANEL_Y + (session.sameRoom ? -0.475 : -0.45), PANEL_Z);
       this.sessionPanel.mesh.rotation.y = 0.42;
@@ -410,7 +407,11 @@ export class LessonApp {
   /** How the session is doing: a few words for the title line, and help text when something is wrong. */
   sessionStatus() {
     const pr = this.presence;
-    if (pr.status === 'failed') return { text: ' · could not connect', help: pr.error ?? 'Couldn’t start the shared session.', bad: true };
+    if (pr.status === 'failed') {
+      const secs = pr.retryAt ? Math.max(1, Math.ceil((pr.retryAt - performance.now()) / 1000)) : 0;
+      return { text: pr.retryAt ? ' · trying again…' : ' · could not connect', help: (pr.error ?? 'Couldn’t start the shared session.') + (pr.retryAt ? ` Trying again by itself (in about ${secs} s).` : ''), bad: true };
+    }
+    if (pr.status === 'reconnecting') return { text: ' · reconnecting…', help: 'Lost touch with the class for a moment. Reconnecting by itself: your work stays as it is.' };
     if (pr.status !== 'connected') return { text: ' · connecting…', help: null };
     if (pr.peers.size) return { text: '', help: this.adminHere ? null : 'Your teacher isn’t connected right now. Everything carries on as they left it.' };
     if (pr.everJoined) {
@@ -506,6 +507,7 @@ export class LessonApp {
     const notes = [];
     if (person.you) notes.push('you');
     if (person.host) notes.push('admin');
+    if (person.away) notes.push('not responding');
     if (this.presence.sameRoom) notes.push(this.roomNote(person.room));
     return notes.join(' · ');
   }
