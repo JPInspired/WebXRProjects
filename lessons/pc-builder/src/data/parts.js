@@ -147,4 +147,3 @@ export const PARTS = {
 
 export const partsIn = (cat) => Object.entries(PARTS).filter(([, p]) => p.cat === cat).map(([id]) => id);
 export const layoutOf = (boardId) => LAYOUT[PARTS[boardId].form];
-export const LAYOUTS = LAYOUT;

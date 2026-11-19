@@ -1,4 +1,4 @@
-import { TYPES, SOURCES, SOURCE_IDS, ABSORBERS, ABSORBER_IDS, LEVELS, QUESTIONS, DOSES, HALF_LIFE, PA, verdictText } from '../data/radiation.js';
+import { TYPES, SOURCES, SOURCE_IDS, ABSORBERS, ABSORBER_IDS, QUESTIONS, DOSES, HALF_LIFE, PA, verdictText } from '../data/radiation.js';
 import { drawDecay } from '../model/Board.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 

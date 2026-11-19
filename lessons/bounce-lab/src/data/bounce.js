@@ -40,9 +40,6 @@ export function restitution(ball, surf, v) {
   return e0 * SURFACES[surf].k;
 }
 
-/** The bounce you would get with no scatter and no air: rebound height ÷ drop height. */
-export const idealRatio = (ball, surf, h) => restitution(ball, surf, Math.sqrt(2 * G * h)) ** 2;
-
 export const LEVELS = [['core', 'Core'], ['advanced', 'Advanced']];
 
 // ───────────── starter: predict ─────────────

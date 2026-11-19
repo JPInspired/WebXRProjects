@@ -180,7 +180,7 @@ const CLASS = `
     </section>
 `;
 
-const meta = (g) => `<div class="meta"><span>${ICON.time}${g.mins} min</span><span>${ICON.age}${esc(g.ages)}</span><span>${ICON.mode}${esc(g.mode)}</span></div>`;
+const meta = (g) => `<div class="meta"><span>${ICON.mode}${esc(g.mode)}</span></div>`; // (no times or ages: not ours to claim before the lessons are approved)
 
 // one page per lesson, in the same order as the lessons page
 GUIDES.forEach((g, i) => {

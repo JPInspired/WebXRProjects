@@ -1,4 +1,4 @@
-import { LEVELS, LENGTHS, GIANT_LENGTHS, ANGLES, BOBS, AIR, PLANETS, WORLD, FACTORS, DISCUSS, QUESTIONS, SECONDS_L, periodSmall } from '../data/pendulum.js';
+import { LENGTHS, GIANT_LENGTHS, ANGLES, BOBS, AIR, PLANETS, WORLD, FACTORS, DISCUSS, QUESTIONS, SECONDS_L, periodSmall } from '../data/pendulum.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 
 // The side menus, kept short: the left menu has a tab per activity, and inside it a tab per step; the right

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { connect } from './transport.js';
 import { NET_CONFIG } from './config.js';
 import { openLobby } from './lobby.js';
+import { teacherKey, prove, check, pinned, pin, keysSupported, FP_RE } from './teacherKey.js';
 
 // Shared sessions: everyone keeps their own models, and sees everyone else working beside them.
 //
@@ -27,7 +28,8 @@ const CHECK_MS = 4500; // after waking up: if nobody answers within this long, r
 export function sessionFromURL() {
   const p = new URLSearchParams(location.search);
   const code = p.get('session');
-  return code ? { code: code.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8), net: p.get('net') || 'p2p', sameRoom: p.get('room') === 'same', host: p.get('host') === '1' } : null;
+  const teacher = p.get('teacher');
+  return code ? { code: code.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8), net: p.get('net') || 'p2p', sameRoom: p.get('room') === 'same', host: p.get('host') === '1', teacher: FP_RE.test(teacher ?? '') ? teacher : null } : null;
 }
 
 export function myName() {
@@ -50,11 +52,28 @@ function nearlySame(a, b) {
 const hashColor = (id) => COLORS[[...id].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7) % COLORS.length];
 const q3 = (v) => Math.round(v * 1000) / 1000;
 
+/** Numbers only, a sensible size: n finite numbers within ±1 km, or null. */
+const nums = (a, n) => (Array.isArray(a) && a.length === n && a.every((v) => Number.isFinite(v) && Math.abs(v) < 1000) ? a : null);
+/** Another headset's position message, checked (anything else in it is dropped). */
+function cleanPose(d) {
+  if (!d || typeof d !== 'object') return null;
+  return { h: nums(d.h, 3), lab: nums(d.lab, 4), room: typeof d.room === 'string' ? d.room.slice(0, 16) : null };
+}
+
 export class Presence {
-  constructor(app, { lessonId, code, net, sameRoom = false, host = false }) {
+  constructor(app, { lessonId, code, net, sameRoom = false, host = false, teacher = null }) {
     this.app = app;
     this.host = host; // started the session: runs the shared world (if the lesson has one)
     this.code = code;
+    // Who the real teacher is (shared/net/teacherKey.js): the teacher's headset signs its connection with a
+    // secret key; everyone else trusts one key's fingerprint (from the code or link, or the one most trust).
+    this.secure = keysSupported();
+    if (teacher) pin(code, teacher);
+    this.trusted = this.secure ? pinned(code) : null;
+    this.key = null;
+    this.keyReady = host && this.secure
+      ? teacherKey(code).then((k) => { this.key = k; if (k) this.trusted = k.fp; }).catch((e) => console.warn('Teacher key:', e.message))
+      : Promise.resolve();
     this.sameRoom = sameRoom;
     this.roomToWorld = null; // set once this headset has lined up with the room
     this.name = myName();
@@ -62,6 +81,7 @@ export class Presence {
     this.error = null; // why it couldn't start (plain language)
     this.problem = null; // something going wrong while connected (plain language)
     this.peers = new Map();
+    this.blocked = new Set(); // headsets the teacher removed: everything from them is ignored
     this.poseClock = 0;
     this.stateClock = 0;
     this.lastState = '';
@@ -177,8 +197,14 @@ export class Presence {
     this.error = null;
     this.connectedAt = performance.now();
     // the teacher's lesson tells students who type only the code (top of the lessons page) where to go
+    // the teacher's proof for this connection (sent with every hello)
+    this.proof = null;
+    this.proofReady = this.keyReady.then(async () => {
+      if (this.key && this.t === t) this.proof = await prove(this.key, this.code, t.selfId);
+    }).catch((e) => console.warn('Teacher proof:', e.message));
     if (this.host) {
-      openLobby(this.code, { lesson: this.lessonId, sameRoom: this.sameRoom }, this.net)
+      this.keyReady
+        .then(() => openLobby(this.code, { lesson: this.lessonId, sameRoom: this.sameRoom, teacher: this.key?.fp ?? null }, this.net))
         .then((l) => (this.t === t ? (this.lobby = l) : l.leave()))
         .catch((e) => console.warn('Lobby:', e.message));
     }
@@ -188,6 +214,12 @@ export class Presence {
       this.app.refresh();
     });
     setTimeout(() => this.app.refresh(), 20500); // "nobody found yet" help appears after 20 s
+    // (every channel below ignores headsets the teacher has removed)
+    const open = t.channel.bind(t);
+    t.channel = (name) => {
+      const c = open(name);
+      return { send: c.send, onMessage: (fn) => c.onMessage((d, id) => { if (!this.blocked.has(id)) fn(d, id); }) };
+    };
     this.helloCh = t.channel('hello');
     this.poseCh = t.channel('pose');
     this.stateCh = t.channel('state');
@@ -195,7 +227,9 @@ export class Presence {
     // everyone else asks the host to change things ('ask').
     this.worldCh = t.channel('world');
     this.askCh = t.channel('ask');
-    this.worldCh.onMessage((d, id) => this.app.onWorld?.(d, id));
+    this.worldCh.onMessage((d, id) => {
+      if (id === this.hostId) this.app.onWorld?.(d, id); // (only whoever runs the shared world)
+    });
     this.askCh.onMessage((d, id) => {
       if (this.isHost) this.app.onAsk?.(d, id);
     });
@@ -204,20 +238,20 @@ export class Presence {
     this.roomRef = null;
     this.adminCh = t.channel('admin');
     this.adminCh.onMessage((d, id) => {
-      if (id === this.hostId && !this.isHost) this.app.onAdmin?.(d);
+      if (id === this.hostId && this.peers.get(id)?.host && !this.isHost) this.app.onAdmin?.(d); // the real teacher only
     });
     this.roomCh = t.channel('room');
     this.roomCh.onMessage((d, id) => {
-      if (id === this.hostId && !this.isHost) this.roomRef = d;
+      if (id === this.hostId && this.peers.get(id)?.host && !this.isHost) this.roomRef = d;
     });
     this.beatCh = t.channel('beat');
     this.beatCh.onMessage((d, id) => this.heard(id));
     t.onPeerJoin((id) => {
-      if (this.t !== t) return;
+      if (this.t !== t || this.blocked.has(id)) return;
       this.problem = null;
       this.ensure(id);
       this.heard(id);
-      this.helloCh.send({ name: this.name, host: this.host }, id);
+      this.sayHello(id, t);
       if (this.isHost) setTimeout(() => {
         this.app.onPeerJoinedWorld?.(id);
         this.app.onPeerJoinedAdmin?.(id);
@@ -229,14 +263,29 @@ export class Presence {
       if (this.t === t) this.remove(id); // (not when this headset is the one reconnecting)
     });
     this.helloCh.onMessage((d, id) => {
+      if (!d || typeof d !== 'object') return;
       const p = this.ensure(id);
       this.heard(id);
-      p.host = !!d.host;
       p.name = String(d.name ?? 'Guest').slice(0, 24);
+      p.trust = typeof d.trust === 'string' && FP_RE.test(d.trust) ? d.trust : null;
+      p.claims = !!d.host; // (says it is a teacher: no vote in decideTeacher)
+      if (!this.secure) p.host = !!d.host; // (no cryptography here: as before)
+      else if (d.host) {
+        check(d.proof, this.code, id).then((fp) => {
+          p.fp = fp; // a proven teacher key (or null)
+          this.decideTeacher();
+          p.host = !!fp && fp === this.trusted;
+          this.app.refresh();
+        });
+      } else {
+        p.host = false;
+        this.decideTeacher();
+      }
       this.app.refresh();
     });
     this.poseCh.onMessage((d, id) => {
-      this.ensure(id).pose = d;
+      const pose = cleanPose(d);
+      if (pose) this.ensure(id).pose = pose; // (a broken or made-up message is ignored, not drawn)
       this.heard(id);
     });
     this.stateCh.onMessage((d, id) => {
@@ -354,10 +403,53 @@ export class Presence {
     return { h: pos.toArray().map(q3), lab, room: this.sameRoom ? this.roomStatus ?? 'waiting' : null };
   }
 
-  /** Who runs the shared world: whoever started the session, or (if they left) the first by id. */
+  /** Stop listening to these headsets (removed by the teacher) and take their desks away. */
+  block(ids) {
+    if (!Array.isArray(ids)) return;
+    for (const id of ids.slice(0, 60)) {
+      if (typeof id !== 'string' || id.length > 40 || id === this.selfId || this.blocked.has(id)) continue;
+      this.blocked.add(id);
+      this.remove(id);
+    }
+  }
+
+  /** Say who this headset is (and, for the teacher, prove it). */
+  sayHello(id, t = this.t) {
+    this.proofReady.then(() => {
+      if (this.t === t) this.helloCh.send({ name: this.name, host: this.host, proof: this.proof, trust: this.trusted }, id);
+    });
+  }
+
+  /**
+   * A student who was not told which teacher to trust (no code or link with it): after a moment, trust the
+   * teacher key that most headsets here trust or prove, and keep it for this session.
+   */
+  decideTeacher() {
+    if (!this.secure || this.trusted || this.deciding) return;
+    this.deciding = setTimeout(() => {
+      this.deciding = null;
+      if (this.trusted) return;
+      // Students' votes count (2 each); a teacher's own claim only breaks a tie (1), and a headset that
+      // claims to be a teacher has no vote, so a pretend teacher cannot outvote the class on its own.
+      const votes = new Map();
+      for (const p of this.peers.values()) {
+        if (p.claims) { if (p.fp) votes.set(p.fp, (votes.get(p.fp) ?? 0) + 1); }
+        else if (p.trust) votes.set(p.trust, (votes.get(p.trust) ?? 0) + 2);
+      }
+      let best = null;
+      for (const [fp, n] of votes) if (!best || n > best.n) best = { fp, n };
+      if (!best) return;
+      this.trusted = best.fp;
+      pin(this.code, best.fp);
+      for (const p of this.peers.values()) p.host = !!p.fp && p.fp === this.trusted;
+      this.app.refresh();
+    }, 1500);
+  }
+
+  /** Who runs the shared world: the (real) teacher, or (if they left) the first by id. */
   get hostId() {
     if (!this.selfId) return null;
-    const all = [{ id: this.selfId, host: this.host }, ...[...this.peers.values()].map((p) => ({ id: p.id, host: p.host }))];
+    const all = [{ id: this.selfId, host: this.host }, ...[...this.peers.values()].map((p) => ({ id: p.id, host: !!p.host }))];
     const flagged = all.filter((x) => x.host).map((x) => x.id).sort();
     return flagged[0] ?? all.map((x) => x.id).sort()[0];
   }
@@ -403,7 +495,12 @@ export class Presence {
       }
     }
     for (const p of this.peers.values()) {
-      p.replica?.update?.(dt);
+      try {
+        p.replica?.update?.(dt);
+      } catch (e) {
+        if (!p.badUpdate) console.warn('Could not show a colleague’s work', e);
+        p.badUpdate = true; // (one headset sending something odd must not stop the lesson for everyone)
+      }
       if (!p.pose) continue;
       // Same room and lined up: their desk goes where it really is.
       const real = this.aligned(p);

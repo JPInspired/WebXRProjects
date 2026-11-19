@@ -12,7 +12,10 @@ or organisation (e.g. a school's or company's) or another computer, and it keeps
   feel in every lesson, teacher guides, lesson cards with time and ages, Inspired-style wording) `v1.3` (subject
   rooms and joining a class with only its code, before automatic reconnection) and `v2.0` (everything to 19 November
   2026: automatic reconnection, the Network Check page, bare hands, the loading screen and the Class tools; also a
-  GitHub Release, downloadable as one zip from the Releases page). Each newer feature also has an off
+  GitHub Release, downloadable as one zip from the Releases page), `v2.1` (just before the polish pass), `v2.2` (the
+  polish pass: one house style for the panels, the lab's shadow and arrival in the real room, Hands in front, one
+  family of sounds) and `v2.3` (the clean-up and security review: unused code removed, the teacher's key so only the
+  real teacher runs a class, checked messages between headsets and the stronger Remove). Each newer feature also has an off
   switch: the rooms in `shared/fx/Classroom.js` (`ROOMS.enabled`), reconnection in `shared/net/config.js` (`autoReconnect`), bare-hand help in `shared/ui/Hands.js`
   (`HANDS.enabled`), the loading screen and fades in `shared/fx/Loading.js` (`LOADING.enabled`) the Class tools in
   `shared/ui/ClassTools.js` (`CLASS_TOOLS.enabled`), the visible room line-up and floor marks in `shared/net/RoomLineUp.js`
@@ -111,5 +114,7 @@ Keep the project self-contained and portable:
 
 - no hard-coded account names, personal addresses or absolute links to one GitHub account;
 - no secrets in the repository (it is served publicly);
+- never trust another headset's messages: check them (see "Security and safeguarding" in the README), and keep
+  teacher-only actions behind the teacher's key (`shared/net/teacherKey.js`);
 - every new model, texture or sound gets its source and licence recorded in a `CREDITS.md` beside it;
 - any new outside service is added to the table above.

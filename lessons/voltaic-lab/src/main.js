@@ -112,10 +112,6 @@ class App extends LessonApp {
 
   // ───────────── the experiment ─────────────
 
-  get cellNow() {
-    return this.bench.cell;
-  }
-
   selectCell(i) {
     const b = this.bench;
     if (b.series) b.series = false;

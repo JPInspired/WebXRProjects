@@ -1,4 +1,4 @@
-import { LEVELS, METALS, METAL_IDS, ELECTROLYTES, ELECTROLYTE_IDS, QUESTIONS, DISCUSS, BATTERIES, idealV } from '../data/voltaic.js';
+import { METALS, METAL_IDS, ELECTROLYTES, ELECTROLYTE_IDS, QUESTIONS, DISCUSS, BATTERIES, idealV } from '../data/voltaic.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 
 export const MODES = [['predict', 'Predict'], ['lab', 'Experiment'], ['batteries', 'Real batteries']];

@@ -1,4 +1,5 @@
 import { connect } from './transport.js';
+import { FP_RE } from './teacherKey.js';
 
 // Joining a class with only its code (from the top of the lessons page).
 //
@@ -21,7 +22,8 @@ export async function openLobby(code, info, net = 'p2p') {
 }
 
 /**
- * The student's side: find the lesson for a code. Resolves { lesson, sameRoom }, or rejects with a
+ * The student's side: find the lesson for a code. Resolves { lesson, sameRoom, teacher } (teacher: the
+ * fingerprint of the teacher's key, see teacherKey.js), or rejects with a
  * plain-language Error if nobody answers within timeoutMs.
  */
 export async function findClass(code, { net = 'p2p', timeoutMs = 20000 } = {}) {
@@ -37,8 +39,19 @@ export async function findClass(code, { net = 'p2p', timeoutMs = 20000 } = {}) {
       setTimeout(() => t.leave(), 300); // (a moment for the last message to be acknowledged)
       fn(value);
     };
-    ch.onMessage((m) => {
-      if (m && typeof m.lesson === 'string' && /^[a-z0-9-]+$/.test(m.lesson)) finish(resolve, { lesson: m.lesson, sameRoom: !!m.sameRoom });
+    // Collect answers for a moment: only the teacher should answer, but if two headsets claim this code (a
+    // student opening it with host=1), pass on no teacher at all, and the lesson finds the real one by
+    // asking the headsets already there (Presence.decideTeacher).
+    const answers = new Map(); // answering headset → its answer (each counted once)
+    let settle = null;
+    ch.onMessage((m, peerId) => {
+      if (!m || typeof m.lesson !== 'string' || !/^[a-z0-9-]+$/.test(m.lesson)) return;
+      answers.set(peerId, { lesson: m.lesson, sameRoom: !!m.sameRoom, teacher: FP_RE.test(m.teacher ?? '') ? m.teacher : null });
+      settle ??= setTimeout(() => {
+        const all = [...answers.values()];
+        const agree = all.every((a) => a.teacher === all[0].teacher);
+        finish(resolve, { ...all[0], teacher: agree ? all[0].teacher : null });
+      }, 1500);
     });
     t.onPeerJoin((peerId) => ch.send({ ask: true }, peerId));
     const ask = setInterval(() => ch.send({ ask: true }), 2000);

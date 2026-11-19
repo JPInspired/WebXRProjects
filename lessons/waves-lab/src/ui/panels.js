@@ -1,4 +1,4 @@
-import { ROPE, TANK, MAX, LEVELS, LINKS, SETUPS, PREDICTIONS, TASKS, QUESTIONS, ropeLambda, tankLambda, pct, word, lightName, pitch } from '../data/waves.js';
+import { ROPE, TANK, MAX, LINKS, SETUPS, PREDICTIONS, TASKS, QUESTIONS, ropeLambda, tankLambda, pct, word, lightName, pitch } from '../data/waves.js';
 import { lambdaWord } from '../model/Board.js';
 import { THEME, font, roundRect } from '../../../../shared/ui/CanvasPanel.js';
 

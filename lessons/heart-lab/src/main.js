@@ -1,9 +1,8 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
-import { makeLabel } from '../../../shared/ui/labels.js';
 import { sound } from '../../../shared/util/sound.js';
-import { PARTS, JOURNEY, PHASES, RATES, CONDITIONS, ANSWERS, T, partsFor } from './data/heart.js';
+import { PARTS, JOURNEY, PHASES, RATES, CONDITIONS, ANSWERS, T } from './data/heart.js';
 import { Heart } from './model/Heart.js';
 import { RealHeart, loadHeartModel } from './model/RealHeart.js';
 import { Blood } from './model/Blood.js';
@@ -299,10 +298,6 @@ class App extends LessonApp {
   }
 
   // ───────────── the class heart ─────────────
-
-  get controlsBigHeart() {
-    return !this.presence || this.isAdmin;
-  }
 
   turnBig(dir) {
     this.bigYaw = Math.round((this.bigYaw + (dir * Math.PI) / 4) * 1000) / 1000;

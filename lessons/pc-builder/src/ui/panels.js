@@ -1,4 +1,4 @@
-import { PARTS, CASES, CATEGORIES } from '../data/parts.js';
+import { PARTS, CASES } from '../data/parts.js';
 import { checklist, powerNeeded } from '../data/rules.js';
 import { QUESTIONS, TOUR } from './explain.js';
 import { THEME, font, roundRect } from '../../../../shared/ui/CanvasPanel.js';

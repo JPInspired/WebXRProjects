@@ -86,7 +86,7 @@ The switch: `LOADING.enabled` in `shared/fx/Loading.js` (or `?nofade` in a lesso
 - **The class board goes on a real wall.** When the board stands behind your bench (on your own, or in different rooms), it moves flat against the real wall in that direction, between 1 and 4.5 m away. Same-room sessions keep the board where the teacher put it, so everyone shares it.
 - **The toggle:** ⚙ Settings › This headset › **Real room: on / off**, remembered on each headset. `REAL_ROOM.enabled = false` turns it off everywhere. Hintze Hall and Reef Dive are left out.
 - **Resting on the surface** (`shared/fx/Grounding.js`): when the lab stands on a real surface (Place on surface, or a desk found by the real room) it casts a soft shadow onto it. When the lab appears, it grows into place over half a second, and when it lands a ring of light spreads across the surface, with a soft sound. It floats without a shadow when it is in front of you or in your hand. Part of Real room; `GROUNDING.enabled = false` turns it off everywhere.
-- **Hands in front** (Quest 3): ⚙ Settings › **Hands in front: on / off**, off unless chosen. When on, the headset's depth sensing is used, so your real hands (and anything real) in front of the lab hide the parts behind them, as real objects would. It takes effect the next time you enter mixed reality. This uses three.js 0.161 (the lessons' version since 20 November 2026; Hintze Hall and Reef Dive stay on 0.160).
+- **Hands in front** (Quest 3): ⚙ Settings › **Hands in front: on / off**, off unless chosen. When on, the headset's depth sensing is used, so your real hands (and anything real) in front of the lab hide the parts behind them, as real objects would. It takes effect the next time you enter mixed reality. This uses three.js 0.161 (the lessons' version since 19 November 2026; Hintze Hall and Reef Dive stay on 0.160).
 
 ## The house style (panels and sound)
 
@@ -617,6 +617,21 @@ A virtual-reality visit to the great central hall of the Natural History Museum,
 **Exhibits** (point at one, or at its ⓘ marker, for its story; the *Exhibits* buttons take you there): Hope the blue whale, the Charles Darwin statue, the giant sequoia slice, the painted ceiling, the building itself, the American mastodon, the giraffes, the Turbinaria coral, the Atlantic blue marlin and a meteorite. Facts come from the Museum’s own pages (see `lessons/hintze-hall/models/CREDITS.md`).
 
 **The model:** the 2-million-triangle scan with 8K textures is reduced to 1M triangles and keeps its full 8K textures, GPU-compressed as KTX2 (ETC1S, about 45 MB of GPU memory each), so it runs on a Quest 3 (about 40 MB download). It is drawn unlit because its lighting is baked into the textures. Walking and teleporting use the scan itself as floor and walls, via fast raycasts ([three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh), MIT, loaded from jsDelivr).
+
+## Security and safeguarding
+
+The site is static (no server of our own, no accounts, no passwords, no data stored anywhere but on each device), so most web risks do not apply. What is in place, as reviewed on 19 November 2026:
+
+- **Only the real teacher runs the class** (`shared/net/teacherKey.js`). The teacher's headset makes a secret key when it starts a session and signs its own connection with it; every other headset checks the signature. A student who opens the session with `host=1` in the address gets the Teacher menu on their own headset only: their Pause, Lock, Remove and other commands are ignored by everyone else. Students learn which teacher to trust from the code (the join boxes on the lessons page and on each lesson's start screen ask the teacher's lesson) or from the teacher's shared link (`&teacher=…`). Otherwise a headset trusts the teacher that the other students' headsets trust; a headset claiming to be a teacher gets no vote, so a pretend teacher cannot outvote the class.
+- **Only the same school network.** A session's name includes a fingerprint of the network's public address, so the code is useless from anywhere else. The public relays that introduce headsets see only encrypted introduction notes; lesson data goes directly between the headsets (encrypted by WebRTC).
+- **Messages from other headsets are checked** before use: names are cut to 24 characters, positions must be numbers in a sensible range, lesson names from the join box must be plain lesson folder names, and one headset sending something broken cannot stop the lesson for everyone.
+- **No page writes another device's words into the page as HTML**: names and messages are drawn onto panels or set as plain text.
+- **Nothing personal leaves the school network.** A name typed on the lessons page stays on the device and is shared only with the other headsets in the class.
+- **No secrets in the code.** The optional AI expert (Atomic Models) is off; if it is ever set up, its key belongs on that server, never here.
+
+- **Remove means removed** (Teacher menu › Players › Remove, pressed twice; \`shared/net/removed.js\`). The student's headset leaves the session, and for 12 hours it will not join that code again: the lesson opens on its own with a note, and the join box on the lessons page says the teacher removed it. Every other headset also stops listening to it (the teacher's list of removed headsets goes out with the class settings), so even a headset that refuses to leave disappears for the class.
+
+Limits worth knowing: with peer-to-peer sessions there is no central server, so no headset can switch another off. A student who clears the browser's stored data gets a new identity and could rejoin with the code; they would then show up again in the teacher's Players list. If that happens, ask for the headset back, or close the session and start a new one (a new code). On headsets without depth sensing (such as Quest 2), **Hands in front** hides itself after the first time it is tried.
 
 ## Smooth on a headset (frame rate)
 

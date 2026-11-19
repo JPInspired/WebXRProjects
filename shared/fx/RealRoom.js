@@ -16,6 +16,7 @@ export const REAL_ROOM = { enabled: true };
 const SKIP = ['hintze-hall', 'reef-dive'];
 const KEY = 'webxr-classes:realroom';
 const HANDS_KEY = 'webxr-classes:handsinfront';
+const NO_DEPTH_KEY = 'webxr-classes:nodepth'; // this headset has no depth sensing (e.g. Quest 2): hide the setting
 const UP = new THREE.Vector3(0, 1, 0);
 
 export function makeRealRoom(app) {
@@ -34,6 +35,9 @@ class RealRoom {
     let hands = null;
     try { hands = localStorage.getItem(HANDS_KEY); } catch {}
     this.handsInFront = hands === 'on';
+    let noDepth = null;
+    try { noDepth = localStorage.getItem(NO_DEPTH_KEY); } catch {}
+    this.noDepth = noDepth === '1';
     this.tableTried = false;
     this.wall = null; // the wall the board is on (for the note in Settings)
   }
@@ -48,6 +52,17 @@ class RealRoom {
     try { localStorage.setItem(KEY, this.on ? 'on' : 'off'); } catch {}
     if (this.on) this.tableTried = false; // try the table again
     else this.app.needsPlacement = true; // back in front of you, as before
+    this.app.refresh();
+  }
+
+  /** The headset was asked for depth sensing and could not give it: hide Hands in front from now on. */
+  markNoDepth() {
+    this.noDepth = true;
+    this.handsInFront = false;
+    try {
+      localStorage.setItem(NO_DEPTH_KEY, '1');
+      localStorage.setItem(HANDS_KEY, 'off');
+    } catch {}
     this.app.refresh();
   }
 

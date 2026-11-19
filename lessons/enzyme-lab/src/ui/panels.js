@@ -1,4 +1,4 @@
-import { TEMPS, LEVELS, STEPS, QUESTIONS, MARKS, RUN } from '../data/enzymes.js';
+import { TEMPS, STEPS, QUESTIONS, MARKS, RUN } from '../data/enzymes.js';
 import { drawGraph } from '../model/Board.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 

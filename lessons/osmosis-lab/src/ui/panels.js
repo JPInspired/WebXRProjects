@@ -1,4 +1,4 @@
-import { LEVELS, STEPS, QUESTIONS, EXIT, TERM_WORDS, trueTerm } from '../data/osmosis.js';
+import { STEPS, QUESTIONS, EXIT, TERM_WORDS, trueTerm } from '../data/osmosis.js';
 import { drawGraph } from '../model/Board.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 

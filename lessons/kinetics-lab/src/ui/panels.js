@@ -1,4 +1,4 @@
-import { FACTORS, FACTOR_IDS, LEVELS, QUESTIONS, EFFECTS, SUMMARY, REASONS, EQUATIONS, RUN } from '../data/kinetics.js';
+import { FACTORS, FACTOR_IDS, QUESTIONS, EFFECTS, SUMMARY, REASONS, EQUATIONS, RUN } from '../data/kinetics.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 
 export const MODES = [['predict', 'Predict'], ['lab', 'Experiment'], ['summary', 'Summary']];

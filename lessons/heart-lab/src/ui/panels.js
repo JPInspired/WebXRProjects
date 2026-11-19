@@ -1,4 +1,4 @@
-import { PARTS, LEVELS, JOURNEY, PHASES, RATES, CONDITIONS, QUESTIONS, EXERCISE_ADV } from '../data/heart.js';
+import { PARTS, JOURNEY, PHASES, RATES, CONDITIONS, QUESTIONS, EXERCISE_ADV } from '../data/heart.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 
 export const MODES = [['explore', 'Explore'], ['flow', 'Blood flow'], ['cycle', 'Cardiac cycle'], ['exercise', 'Exercise'], ['conditions', 'Conditions'], ['label', 'Label it']];

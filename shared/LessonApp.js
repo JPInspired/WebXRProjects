@@ -4,8 +4,10 @@ import { CanvasPanel } from './ui/CanvasPanel.js';
 import { Interaction } from './ui/Interaction.js';
 import { THEME, STYLE, panelFrame } from './ui/CanvasPanel.js';
 import { Presence, sessionFromURL } from './net/Presence.js';
+import { wasRemoved, markRemoved } from './net/removed.js';
 import { RoomScan, solveRoom, fingerprint } from './net/RoomAlign.js';
 import { newSessionCode } from './net/code.js';
+import { findClass } from './net/lobby.js';
 import { initStartScreen } from './ui/StartScreen.js';
 import { PerfGuard } from './util/PerfGuard.js';
 import { sound } from './util/sound.js';
@@ -69,7 +71,12 @@ export class LessonApp {
     navigator.serviceWorker?.register(new URL('../../sw.js', location.href)).catch(() => {});
     this.interaction = new Interaction(this);
     this.lessonId = (location.pathname.match(/lessons\/([^/]+)/) || [])[1] || 'lesson';
-    const session = sessionFromURL();
+    let session = sessionFromURL();
+    if (session && !session.host && wasRemoved(session.code)) {
+      // this headset was removed from this session by the teacher: work on your own instead
+      this.removedFrom = session.code;
+      session = null;
+    }
     if (session) {
       this.presence = new Presence(this, { lessonId: this.lessonId, ...session });
       // same room: lining up is shown, with floor marks as a fallback (shared/net/RoomLineUp.js)
@@ -102,6 +109,9 @@ export class LessonApp {
     this.perf = new PerfGuard(this); // frames-per-second counter (teacher, or ?fps) and the headset safety net
     this.clock = new THREE.Clock();
     this.renderer.setAnimationLoop((t, frame) => this.frame(frame));
+    if (this.removedFrom) {
+      this.explain({ title: 'Removed From the Session', text: `Your teacher removed this headset from session ${this.removedFrom}. You can still use the lesson on your own. Ask your teacher if you should rejoin.` });
+    }
   }
 
   // ───────────── setup ─────────────
@@ -261,7 +271,7 @@ export class LessonApp {
     if (this.hitTestSource) b.push({ id: 'place', label: s.placing ? 'Tap to drop here' : 'Place on surface', active: s.placing, disabled: s.locked, onClick: () => this.togglePlacing() });
     b.push({ id: 'seated', label: s.seated ? 'Seated: on' : 'Seated: off', active: s.seated, onClick: () => this.toggleSeated() });
     if (this.realRoom && (this.isAR || !this.presenting)) b.push({ id: 'realroom', label: this.realRoom.on ? 'Real room: on' : 'Real room: off', active: this.realRoom.on, onClick: () => this.realRoom.toggle() });
-    if (this.realRoom?.on && (this.isAR || !this.presenting)) {
+    if (this.realRoom?.on && !this.realRoom.noDepth && (this.isAR || !this.presenting)) {
       // real hands (and things) in front hide the lab behind them: Quest 3, from the next time you enter
       const h = this.realRoom.handsInFront;
       const later = this.presenting && h !== !!this.depthRequested ? ' (next time)' : '';
@@ -753,7 +763,7 @@ export class LessonApp {
 
   /** Everything the admin has set, sent to everyone now and then (and to anyone who joins). */
   broadcastAdmin(to) {
-    if (this.isAdmin) this.adminSend({ k: 'state', lock: this.admin.lock, effects: this.admin.effects, lesson: this.adminLessonState?.() ?? null, tools: this.classTools?.snapshot() ?? null, lineup: this.roomLineUp?.adminMode }, to);
+    if (this.isAdmin) this.adminSend({ k: 'state', lock: this.admin.lock, effects: this.admin.effects, lesson: this.adminLessonState?.() ?? null, tools: this.classTools?.snapshot() ?? null, lineup: this.roomLineUp?.adminMode, removed: this.admin.removed ?? [] }, to);
   }
 
   onPeerJoinedAdmin(id) {
@@ -786,6 +796,26 @@ export class LessonApp {
     }
     this.kickArmed = null;
     this.adminSend({ k: 'kick' }, id);
+    // everyone else stops listening to them too (the list goes out with the class settings)
+    this.admin.removed = [...(this.admin.removed ?? []), id].slice(-60);
+    this.presence.block([id]);
+    this.broadcastAdmin();
+    this.refresh();
+  }
+
+  /** The teacher removed this headset: leave, remember it for this code, and go back to the lessons. */
+  removedByTeacher() {
+    if (this.leavingRemoved) return;
+    this.leavingRemoved = true;
+    markRemoved(this.presence.code); // (and not straight back in with the code)
+    this.presence.leave();
+    this.explain({ title: 'You have left the session', text: 'Your teacher removed you from the shared session. Going back to the lessons…' });
+    const go = () => { location.href = this.lessonsURL(); };
+    setTimeout(() => {
+      const session = this.renderer.xr.getSession();
+      if (session) session.end().then(go, go);
+      else go();
+    }, 3500);
   }
 
   /** Messages from the admin (students only). */
@@ -801,16 +831,11 @@ export class LessonApp {
       if (d.effects) this.perf?.setMode(d.effects);
       this.classTools?.apply(d.tools);
       this.roomLineUp?.apply(d.lineup);
+      this.presence?.block(d.removed);
+      if (Array.isArray(d.removed) && d.removed.includes(this.presence?.selfId)) this.removedByTeacher(); // (in case the one-off message was missed)
       this.onAdminLesson?.(d.lesson);
     } else if (d.k === 'kick') {
-      this.presence.leave();
-      this.explain({ title: 'You have left the session', text: 'Your teacher removed you from the shared session. Going back to the lessons…' });
-      const go = () => { location.href = this.lessonsURL(); };
-      setTimeout(() => {
-        const session = this.renderer.xr.getSession();
-        if (session) session.end().then(go, go);
-        else go();
-      }, 3500);
+      this.removedByTeacher();
     } else if (d.k === 'refind' && this.roomLineUp) {
       this.roomLineUp.changed(); // line up again (floor marks: point at them again)
     } else if (d.k === 'refind' && this.roomScan) {
@@ -880,6 +905,8 @@ export class LessonApp {
     if (session) {
       url.searchParams.set('session', session.code);
       url.searchParams.delete('host'); // the shared link makes others join, not host
+      // …and tells them which teacher to trust (shared/net/teacherKey.js)
+      this.presence?.keyReady.then(() => { if (this.presence.key) url.searchParams.set('teacher', this.presence.key.fp); });
       box.innerHTML = `<p><strong>Shared session <span class="code">${session.code}</span></strong> · ${session.sameRoom ? 'same room' : 'different rooms'}<br>Students join at the top of the lessons page with this code, or with this link.${session.sameRoom ? ' Each headset lines itself up with the room automatically (it needs to have scanned the room once: Quest Settings › Physical space › Space Setup).' : ''}</p>
         <div class="buttons"><button class="secondary" id="copy-link">Copy link</button><button class="secondary" id="leave-session">Leave session</button></div>`;
       box.querySelector('#copy-link').onclick = (e) => {
@@ -903,13 +930,26 @@ export class LessonApp {
         sameRoom();
         location.href = url.toString();
       };
-      box.querySelector('#join-form').onsubmit = (e) => {
+      box.querySelector('#join-form').onsubmit = async (e) => {
         e.preventDefault();
-        const code = box.querySelector('#join-code').value.trim().toUpperCase();
+        const code = box.querySelector('#join-code').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
         if (!code) return;
-        url.searchParams.set('session', code);
-        sameRoom();
-        location.href = url.toString();
+        const btn = box.querySelector('#join-form button');
+        btn.disabled = true;
+        btn.textContent = 'Looking…';
+        // ask the teacher's lesson which lesson it is and which teacher to trust (shared/net/teacherKey.js),
+        // as the join box on the lessons page does; nobody answering: join with the code alone, as before
+        let to = url;
+        try {
+          const found = await findClass(code, { net: url.searchParams.get('net') || 'p2p', timeoutMs: 12000 });
+          to = new URL(`../${found.lesson}/`, location.href);
+          for (const k of ['net', 'name']) if (url.searchParams.get(k)) to.searchParams.set(k, url.searchParams.get(k));
+          if (found.sameRoom) to.searchParams.set('room', 'same');
+          if (found.teacher) to.searchParams.set('teacher', found.teacher);
+        } catch { /* not found in time */ }
+        to.searchParams.set('session', code);
+        if (to === url) sameRoom();
+        location.href = to.toString();
       };
     }
     overlay.appendChild(box);
@@ -980,6 +1020,8 @@ export class LessonApp {
     this.isAR = isAR;
     this.realRoom?.sessionStart();
     this.grounding?.sessionStart();
+    // asked for depth sensing (Hands in front) and the headset could not give it (e.g. Quest 2): hide the setting
+    if (isAR && this.depthRequested && Array.isArray(session.enabledFeatures) && !session.enabledFeatures.includes('depth-sensing')) this.realRoom?.markNoDepth();
     this.scene.background = isAR ? null : this.background;
     this.grid.visible = !isAR && !this.classroom;
     this.classroom?.setAR(isAR);

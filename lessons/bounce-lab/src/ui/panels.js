@@ -1,4 +1,4 @@
-import { BALLS, BALL_IDS, SURFACES, SURFACE_IDS, LEVELS, PREDICTIONS, QUESTIONS, G, G_MOON } from '../data/bounce.js';
+import { BALLS, BALL_IDS, SURFACES, SURFACE_IDS, PREDICTIONS, QUESTIONS, G, G_MOON } from '../data/bounce.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 
 export const MODES = [['predict', 'Predict'], ['drop', 'Drop + measure'], ['compare', 'Compare']];

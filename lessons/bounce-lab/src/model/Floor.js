@@ -337,13 +337,6 @@ export class Floor {
     return sim;
   }
 
-  clearMarks() {
-    this.dropLine.visible = false;
-    this.bounceLine.visible = false;
-    this.ghost.visible = false;
-    this.replay = null;
-  }
-
   /** Every frame: the balls in flight, the slow-motion replay. */
   update(dt, balls) {
     const v = new THREE.Vector3();

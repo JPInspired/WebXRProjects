@@ -1,4 +1,4 @@
-import { LEVELS, BALLS, LENGTHS, HANGING, QUESTIONS, DISCUSS, EXAMPLES, G } from '../data/circular.js';
+import { BALLS, LENGTHS, HANGING, QUESTIONS, DISCUSS, EXAMPLES, G } from '../data/circular.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 
 export const MODES = [['predict', 'Predict'], ['lab', 'Experiment'], ['world', 'Real world']];

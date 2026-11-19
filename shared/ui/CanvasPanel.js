@@ -399,13 +399,6 @@ class PanelDrawer {
     this.y += size * 1.4;
   }
 
-  divider() {
-    this.gap(10);
-    this.ctx.fillStyle = THEME.border;
-    this.ctx.fillRect(this.pad, this.y, this.contentWidth, 2);
-    this.gap(22);
-  }
-
   /** Text in a tinted rounded box. */
   box(str, { size = 28, color = THEME.text } = {}) {
     const { ctx } = this;

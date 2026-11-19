@@ -1,4 +1,4 @@
-import { LEVELS, STATIONS, HEIGHTS, DROP_OBJECTS, LENGTHS, BOBS, SPRINGS, SPRING_MASSES, ANGLES, TERMS, CHECKS, INSIGHTS, DISCUSS, QUESTIONS, G } from '../data/kinematics.js';
+import { STATIONS, HEIGHTS, DROP_OBJECTS, LENGTHS, BOBS, SPRINGS, SPRING_MASSES, ANGLES, TERMS, CHECKS, INSIGHTS, DISCUSS, QUESTIONS, G } from '../data/kinematics.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 
 export const MODES = [['predict', 'Predict'], ['lab', 'Experiment'], ['share', 'Share findings']];

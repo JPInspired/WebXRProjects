@@ -1,4 +1,4 @@
-import { SUBSTANCES, LETTERS, LEVELS, UI_CHART, css, LITMUS_WORDS, METHODS, QUESTIONS, SAFETY, describePH, hydrogen } from '../data/acid.js';
+import { SUBSTANCES, LETTERS, UI_CHART, css, LITMUS_WORDS, METHODS, QUESTIONS, SAFETY, describePH, hydrogen } from '../data/acid.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 
 export const MODES = [['scale', 'pH scale'], ['paper', 'Test papers'], ['meter', 'pH meter'], ['compare', 'Compare']];

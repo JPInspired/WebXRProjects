@@ -1,4 +1,4 @@
-import { LEVELS, CARDS, SYSTEMS, QUIZ, QUESTIONS, DISCUSS, NOTES_TASK } from '../data/organs.js';
+import { CARDS, SYSTEMS, QUIZ, QUESTIONS, DISCUSS, NOTES_TASK } from '../data/organs.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 
 export const MODES = [['notes', 'Sticky notes'], ['build', 'Build the body'], ['functions', 'Functions'], ['systems', 'Body systems'], ['quiz', 'Quiz']];

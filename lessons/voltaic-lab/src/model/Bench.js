@@ -376,14 +376,6 @@ export class Bench {
     else this.setBridge(cell, false);
   }
 
-  /** Fresh strips and solution (after running down). */
-  renew(cell) {
-    cell.wear = 0;
-    cell.cuFade = 0;
-    cell.curve = [];
-    this.refreshCell(cell);
-  }
-
   select(i) {
     this.selected = i;
     this.refreshAll();

@@ -596,9 +596,3 @@ export class Heart {
     pos.needsUpdate = true;
   }
 }
-
-/** The ECG / sounds / blood all agree on these. */
-export const valveState = (f) => ({
-  av: f < T.avClose || f > T.avOpen,
-  sl: f > T.slOpen && f < T.slClose,
-});

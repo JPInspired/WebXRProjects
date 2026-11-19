@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { PARTS, CASES, CATEGORIES, layoutOf, partsIn } from '../data/parts.js';
+import { PARTS, CASES, CATEGORIES, layoutOf } from '../data/parts.js';
 import { canInstall, emptyBuild } from '../data/rules.js';
 import { caseMesh, partMesh, ghostOf, radiatorMesh } from './parts3d.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
@@ -352,10 +352,6 @@ export class PCBuild {
     if (what === 'storage') obj = [...this.objects.entries()].find(([s]) => s.startsWith('m2') || s.startsWith('bay'))?.[1];
     if (!obj) return null;
     return this.app.lab.worldToLocal(new THREE.Box3().setFromObject(obj).getCenter(new THREE.Vector3()));
-  }
-
-  partsInTray(cat) {
-    return partsIn(cat);
   }
 
   animate(dt, powered) {

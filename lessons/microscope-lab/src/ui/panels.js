@@ -1,4 +1,4 @@
-import { SAMPLES, LEVELS, STEPS, QUESTIONS, PARTS, PART_IDS, MAGS, ABOUT_LABEL, labelsFor } from '../data/micro.js';
+import { SAMPLES, STEPS, QUESTIONS, PARTS, PART_IDS, MAGS, ABOUT_LABEL, labelsFor } from '../data/micro.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 
 export const MODES = [['parts', 'Microscope parts'], ['lab', 'Prepare + view'], ['quiz', 'Quiz']];

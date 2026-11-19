@@ -1,4 +1,4 @@
-import { METALS, MYSTERY_IDS, LEVELS, STEPS, QUESTIONS, SHELLS, equation } from '../data/lithium.js';
+import { METALS, MYSTERY_IDS, STEPS, QUESTIONS, SHELLS, equation } from '../data/lithium.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 
 export const MODES = [['predict', 'Predict'], ['lab', 'Experiment'], ['results', 'Class results']];
