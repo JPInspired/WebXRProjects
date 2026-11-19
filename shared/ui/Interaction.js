@@ -352,6 +352,12 @@ export class Interaction {
     });
 
     c.addEventListener('selectstart', () => {
+      // lining up from floor marks: the pinch / trigger marks the spot on the floor
+      if (this.app.roomLineUp?.wantsSelect) {
+        c.userData.lineupPress = true;
+        this.app.roomLineUp.select(c);
+        return;
+      }
       if (this.app.state.placing || this.blocked) return;
       const hit = this.pick(c);
       // the wrist menu's Move: pinch and hold on nothing to move the whole lab
@@ -371,7 +377,7 @@ export class Interaction {
         this.app.confirmPlacement();
         return;
       }
-      if (c.userData.movingLab || this.blocked) return;
+      if (c.userData.movingLab || c.userData.lineupPress || this.blocked) return;
       const dragged = c.userData.drag?.moving;
       c.userData.drag = null;
       if (c.userData.pending?.panel && !dragged) {
@@ -382,6 +388,10 @@ export class Interaction {
       }
     });
     c.addEventListener('selectend', () => {
+      if (c.userData.lineupPress) {
+        c.userData.lineupPress = false;
+        return;
+      }
       if (c.userData.movingLab) {
         c.userData.movingLab = false;
         this.releaseLab(c);

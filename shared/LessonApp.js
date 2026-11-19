@@ -13,6 +13,7 @@ import { Sparks } from './fx/Sparks.js';
 import { makeClassroom } from './fx/Classroom.js';
 import { makeLoading } from './fx/Loading.js';
 import { makeClassTools } from './ui/ClassTools.js';
+import { makeRoomLineUp } from './net/RoomLineUp.js';
 
 // Everything every WebXR lesson needs, so each lesson only adds its own content:
 //  • three.js scene, desktop camera + orbit controls, lights, floor grid
@@ -69,6 +70,8 @@ export class LessonApp {
     const session = sessionFromURL();
     if (session) {
       this.presence = new Presence(this, { lessonId: this.lessonId, ...session });
+      // same room: lining up is shown, with floor marks as a fallback (shared/net/RoomLineUp.js)
+      if (session.sameRoom) this.roomLineUp = makeRoomLineUp(this);
       this.sessionPanel = new CanvasPanel({ width: 0.5, height: session.sameRoom ? 0.19 : 0.14, name: 'session' });
       this.sessionPanel.mesh.position.set(-this.panelX, PANEL_Y + (session.sameRoom ? -0.475 : -0.45), PANEL_Z);
       this.sessionPanel.mesh.rotation.y = 0.42;
@@ -565,11 +568,13 @@ export class LessonApp {
    * uses the shared rule and sends its room "fingerprint"; everyone else matches it. Nothing to press.
    */
   updateRoomFrame() {
+    if (this.roomLineUp?.usesMarks) return; // lined up from floor marks instead (RoomLineUp.js)
     const pr = this.presence;
     const scan = this.roomScan;
     const admin = pr.isHost;
     const sol = scan.hasRoom ? solveRoom(scan, admin ? null : pr.roomRef) : null;
     const changed = pr.setRoomFrame(sol?.matrix ?? null, !scan.hasRoom || !sol ? 'no-scan' : sol.sure ? 'ok' : 'unsure');
+    this.roomLineUp?.setSize(sol?.size);
     if (admin && sol) {
       const ref = { size: sol.size, features: fingerprint(scan, sol.matrix) };
       const fresh = JSON.stringify(ref) !== JSON.stringify(this.roomRefOut);
@@ -677,8 +682,18 @@ export class LessonApp {
     ui.heading('Students', { size: 22 });
     ui.buttons([
       { id: 'lock-students', label: this.admin.lock ? 'Menus: locked' : 'Menus: unlocked', active: this.admin.lock, onClick: () => this.toggleStudentLock() },
-      ...(this.presence.sameRoom ? [{ id: 'refind', label: 'Re-find room (all)', onClick: () => this.adminSend({ k: 'refind' }) }] : []),
+      ...(this.presence.sameRoom ? [{ id: 'refind', label: 'Re-find room (all)', onClick: () => { this.adminSend({ k: 'refind' }); this.roomLineUp?.changed(); } }] : []),
     ], { height: 52, size: 21, gap: 8 });
+    if (this.roomLineUp) {
+      ui.heading('Room Line-Up', { size: 22 });
+      ui.buttons([
+        { id: 'lineup-auto', label: 'Automatic', active: this.roomLineUp.adminMode === 'auto', onClick: () => this.roomLineUp.setMode('auto') },
+        { id: 'lineup-marks', label: 'Floor Marks', active: this.roomLineUp.adminMode === 'marks', onClick: () => this.roomLineUp.setMode('marks') },
+      ], { height: 52, size: 21, gap: 8 });
+      ui.text(this.roomLineUp.adminMode === 'marks'
+        ? 'Every headset points at floor mark A, then B: two pieces of tape about two metres apart.'
+        : 'Each headset lines up from its room scan. Use floor marks if a headset has no scan or is unsure.', { size: 19, color: THEME.dim });
+    }
     const students = this.presence.people.filter((p) => !p.you);
     ui.heading('Effects (every device)', { size: 22 });
     ui.buttons([
@@ -715,7 +730,7 @@ export class LessonApp {
 
   /** Everything the admin has set, sent to everyone now and then (and to anyone who joins). */
   broadcastAdmin(to) {
-    if (this.isAdmin) this.adminSend({ k: 'state', lock: this.admin.lock, effects: this.admin.effects, lesson: this.adminLessonState?.() ?? null, tools: this.classTools?.snapshot() ?? null }, to);
+    if (this.isAdmin) this.adminSend({ k: 'state', lock: this.admin.lock, effects: this.admin.effects, lesson: this.adminLessonState?.() ?? null, tools: this.classTools?.snapshot() ?? null, lineup: this.roomLineUp?.adminMode }, to);
   }
 
   onPeerJoinedAdmin(id) {
@@ -762,6 +777,7 @@ export class LessonApp {
       }
       if (d.effects) this.perf?.setMode(d.effects);
       this.classTools?.apply(d.tools);
+      this.roomLineUp?.apply(d.lineup);
       this.onAdminLesson?.(d.lesson);
     } else if (d.k === 'kick') {
       this.presence.leave();
@@ -772,6 +788,8 @@ export class LessonApp {
         if (session) session.end().then(go, go);
         else go();
       }, 3500);
+    } else if (d.k === 'refind' && this.roomLineUp) {
+      this.roomLineUp.changed(); // line up again (floor marks: point at them again)
     } else if (d.k === 'refind' && this.roomScan) {
       this.roomScan.last = 0;
       this.presence.clearRoom('waiting');
@@ -969,6 +987,7 @@ export class LessonApp {
     this.onXREnd?.();
     // Each new headset session has a new coordinate system: the room frame is found again from the scan.
     this.presence?.clearRoom();
+    this.roomLineUp?.reset();
     this.roomScan = null;
     this.recenter();
     this.refresh();
@@ -1044,6 +1063,7 @@ export class LessonApp {
       }
       this.updateAdmin(dt);
       this.classTools?.update(dt);
+      this.roomLineUp?.update(dt);
     }
     this.hideMenus();
     this.layoutStacks();
