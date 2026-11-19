@@ -155,6 +155,31 @@ ${body}
 `;
 }
 
+// the same for every lesson that can be shared: how to run it with a class
+const CLASS = `
+    <section class="part cols" aria-label="Running it with a class">
+      <div>
+        <h2>Running It With a Class</h2>
+        <ol class="steps">
+          <li><b>Start the Session</b>Open the lesson, choose Start a Shared Session and tick We are in the same room. The lesson shows a four-character code.</li>
+          <li><b>Students Join With the Code</b>Students type the code and their name into Joining a Class? at the top of the lessons page. They are taken straight into this lesson, lined up with the room.</li>
+          <li><b>Lead From the Teacher Menu</b>The Lesson tab sets the activity for everyone, the Students tab shows progress and the Class tab holds the class tools.</li>
+        </ol>
+      </div>
+      <div>
+        <h2>Class Tools</h2>
+        <ul class="tips">
+          <li><b>Pause the Class</b> dims every student’s view and pauses their controls while you explain something. Resume the Class brings everything back.</li>
+          <li><b>Look Here</b> points every student towards you for eight seconds, with an arrow and a ring above your head.</li>
+          <li><b>Timer</b> counts down one, two, five or ten minutes near the top of everyone’s view, with a chime at the end.</li>
+          <li>A headset that sleeps or loses the Wi-Fi rejoins by itself and keeps its work. Students who join late receive the current settings, pause and timer at once.</li>
+          <li>Students can use their hands instead of controllers: pinch or close a hand to pick things up and touch a button to press it. Turning a palm towards the face shows two buttons for hiding the menus and moving the lab.</li>
+          <li>Before the first shared lesson in a new room, run the <a href="../../network/">Network Check</a> on the school Wi-Fi.</li>
+        </ul>
+      </div>
+    </section>
+`;
+
 const meta = (g) => `<div class="meta"><span>${ICON.time}${g.mins} min</span><span>${ICON.age}${esc(g.ages)}</span><span>${ICON.mode}${esc(g.mode)}</span></div>`;
 
 // one page per lesson, in the same order as the lessons page
@@ -198,7 +223,7 @@ ${g.steps.map(([n, t]) => `        <li><b>${esc(n)}</b>${esc(t)}</li>`).join('\n
       </ol>
       <p style="color:var(--ink-3);font-size:14px;margin:16px 0 0">In a shared session, the teacher chooses the activity and level for the whole class from the Teacher Menu.</p>
     </section>
-
+${/virtual reality/i.test(g.mode) ? '' : CLASS}
     <nav class="pager" aria-label="Other guides">
       ${prev ? `<a href="../${prev.id}/">Previous guide<b>${esc(prev.title)}</b></a>` : ''}
       ${next ? `<a class="next" href="../${next.id}/">Next guide<b>${esc(next.title)}</b></a>` : `<a class="next" href="../">All guides<b>Teacher Guides</b></a>`}
@@ -227,6 +252,24 @@ const index = `    <div style="padding:52px 0 30px">
       <h1>Teacher <em>Guides</em></h1>
       <p class="lede">A guide for every lesson in the library, setting out its learning aims, how each activity runs and practical tips for teaching it with a class.</p>
     </div>
+    <section class="part cols" aria-label="Before a shared lesson" style="padding-top:0">
+      <div>
+        <h2>Before a Shared Lesson</h2>
+        <ul class="tips">
+          <li>Run the <a href="../network/">Network Check</a> once on the school Wi-Fi, ideally with two headsets, and send the report to the IT team if anything needs attention.</li>
+          <li>Try the lesson on a headset with the <a href="../checklist/">Testing Checklist</a>.</li>
+          <li>Make sure each headset has completed Space Setup in the classroom, so every lab lines up with the room.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>During the Lesson</h2>
+        <ul class="tips">
+          <li>Students join with the four-character code at the top of the lessons page.</li>
+          <li>The Teacher Menu’s Class tab can pause the class, point every student towards you and run a timer.</li>
+          <li>A headset that drops out rejoins by itself, so there is no need to restart the session.</li>
+        </ul>
+      </div>
+    </section>
 ${groups}`;
 mkdirSync(join(ROOT, 'guide'), { recursive: true });
 writeFileSync(join(ROOT, 'guide', 'index.html'), page({ title: 'Teacher Guides · WebXR Library', description: 'Learning aims, lesson structure and teaching tips for every WebXR Library lesson.', up: '../', current: true, body: index }));
