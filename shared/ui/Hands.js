@@ -125,6 +125,7 @@ class Hands {
       }
       if (vr) this.drawHand(h);
       this.updateRing(h, head, dt);
+      if (this.ix.blocked) continue; // the teacher has paused the class
       this.updateFist(h);
       this.updatePoke(h);
       if (!wristShown && this.updateWristMenu(h, head)) wristShown = true;

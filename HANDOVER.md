@@ -11,7 +11,9 @@ or organisation (e.g. a school's or company's) or another computer, and it keeps
   polished, the shared lab kit, the frame-rate counter and safety net, the testing checklist) `v1.2` (the same
   feel in every lesson, teacher guides, lesson cards with time and ages, Inspired-style wording) and `v1.3` (subject
   rooms and joining a class with only its code, before automatic reconnection). Each newer feature also has an off
-  switch: the rooms in `shared/fx/Classroom.js` (`ROOMS.enabled`), reconnection in `shared/net/config.js` (`autoReconnect`). To see or go back
+  switch: the rooms in `shared/fx/Classroom.js` (`ROOMS.enabled`), reconnection in `shared/net/config.js` (`autoReconnect`), bare-hand help in `shared/ui/Hands.js`
+  (`HANDS.enabled`), the loading screen and fades in `shared/fx/Loading.js` (`LOADING.enabled`) and the Class tools in
+  `shared/ui/ClassTools.js` (`CLASS_TOOLS.enabled`). To see or go back
   to one: `git checkout v1.2` (or download it from the repository's Tags page on GitHub). To put the live website
   back to one: `git revert --no-edit <tag>..HEAD`, then push: this undoes everything since, keeping the history.
 - Website: https://jpinspired.github.io/WebXRProjects/ (deployed by GitHub Actions on every push to `main`).

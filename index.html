@@ -107,6 +107,8 @@
     :root[data-theme="dark"] .joinbar .status.bad { color: #ff8a80; }
     @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .joinbar .status.bad { color: #ff8a80; } }
     @media (max-width: 640px) { .joinbar form { margin-left: 0; width: 100%; } .joinbar #class-name { flex: 1; } .joinbar .btn { flex-basis: 100%; justify-content: center; } }
+    body { transition: opacity 0.22s ease; }
+    body.leaving { opacity: 0; }
     .hero { position: relative; overflow: hidden; }
     .hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 24px; min-height: min(78vh, 720px); padding-top: 40px; padding-bottom: 40px; }
     .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
@@ -637,6 +639,16 @@
       try { localStorage.setItem('webxr-classes:name', nameInput.value.trim()); } catch {}
     });
 
+    // ── opening a lesson: the page fades out for a moment first (the lesson fades in) ──
+    function leaveTo(href) {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return (location.href = href);
+      document.body.classList.add('leaving');
+      if (dialog.open) dialog.close();
+      setTimeout(() => (location.href = href), 220);
+    }
+    // (coming back with the browser's Back button: show the page again)
+    addEventListener('pageshow', () => document.body.classList.remove('leaving'));
+
     // ── joining a class with only its code: the teacher's lesson says which lesson it is (shared/net/lobby.js) ──
     {
       const form = document.getElementById('class-join');
@@ -671,7 +683,7 @@
           url.searchParams.set('session', code);
           if (found.sameRoom) url.searchParams.set('room', 'same');
           if (net !== 'p2p') url.searchParams.set('net', net);
-          location.href = url.toString();
+          leaveTo(url.toString());
         } catch (err) {
           say(err.message, true);
           busy = false;
@@ -793,7 +805,7 @@
       if (session) url.searchParams.set('session', session);
       if (session && document.getElementById('same-room').checked) url.searchParams.set('room', 'same');
       if (session && host) url.searchParams.set('host', '1'); // the starter runs any shared world
-      location.href = url.toString();
+      leaveTo(url.toString());
     };
     document.getElementById('solo').onclick = () => go(null);
     document.getElementById('create').onclick = () => go(newSessionCode(), true);

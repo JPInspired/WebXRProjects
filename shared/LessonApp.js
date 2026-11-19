@@ -11,6 +11,8 @@ import { PerfGuard } from './util/PerfGuard.js';
 import { sound } from './util/sound.js';
 import { Sparks } from './fx/Sparks.js';
 import { makeClassroom } from './fx/Classroom.js';
+import { makeLoading } from './fx/Loading.js';
+import { makeClassTools } from './ui/ClassTools.js';
 
 // Everything every WebXR lesson needs, so each lesson only adds its own content:
 //  • three.js scene, desktop camera + orbit controls, lights, floor grid
@@ -54,6 +56,7 @@ export class LessonApp {
     this.hitTestSource = null;
     this.needsPlacement = false;
     this.initThree(background);
+    this.loading = makeLoading(this); // progress bar, fade-ins and fade-outs (shared/fx/Loading.js)
     this.initLab();
   }
 
@@ -77,6 +80,7 @@ export class LessonApp {
     }
     this.initSessionUI(session);
     this.initXRButtons();
+    this.loading?.started();
     this.refresh();
     this.sparks = new Sparks(this.scene); // the finished-task sparks (celebrate)
     // the subject's classroom around the lesson (shared/fx/Classroom.js: one switch there turns them all off)
@@ -360,8 +364,9 @@ export class LessonApp {
     const url = this.lessonsURL();
     const go = () => { location.href = url; };
     const session = this.renderer.xr.getSession();
-    if (session) session.end().then(go, go); // leave the headset view first, then the page
-    else go();
+    const leave = () => (session ? session.end().then(go, go) : go()); // leave the headset view first, then the page
+    if (this.loading) this.loading.fadeOut(leave);
+    else leave();
   }
 
   /** The lessons page (keeps a shared session's name so people don't retype it). */
@@ -628,6 +633,7 @@ export class LessonApp {
     this.panels.push(this.adminPanel);
     this.matchPanelLook(this.adminPanel);
     this.adminClock = 0;
+    this.classTools = makeClassTools(this); // Teacher menu → Class: pause, look here, timer (shared/ui/ClassTools.js)
   }
 
   /**
@@ -635,12 +641,13 @@ export class LessonApp {
    *   Lesson   – the activity and level for everyone, the prediction on the board and revealing it, and any of
    *              the lesson's own teacher controls;
    *   Board    – where the class board is and whether it is showing;
-   *   Students – their progress, locking their menus, finding the room again, removing someone.
+   *   Students – their progress, locking their menus, finding the room again, removing someone;
+   *   Class    – pausing the class, Look Here and a timer (ClassTools.js).
    */
   drawAdmin(ui) {
     ui.header('Teacher', []);
     const tab = this.adminTab;
-    ui.tabs([['lesson', 'Lesson'], ['board', 'Board'], ['students', 'Students']].map(([id, label]) => ({ id: `admin-tab-${id}`, label, active: tab === id, onClick: () => { this.adminTab = id; this.refresh(); } })), { height: 54, size: 20 });
+    ui.tabs([['lesson', 'Lesson'], ['board', 'Board'], ['students', 'Students'], ...(this.classTools ? [['class', 'Class']] : [])].map(([id, label]) => ({ id: `admin-tab-${id}`, label, active: tab === id, onClick: () => { this.adminTab = id; this.refresh(); } })), { height: 54, size: 20 });
     const sections = this.adminLessonButtons?.() ?? [];
     const isBoard = (s) => /board/i.test(s.heading);
     const isProgress = (s) => /progress/i.test(s.heading);
@@ -649,6 +656,7 @@ export class LessonApp {
       if (section.text) ui.text(section.text, { size: 20, color: THEME.dim });
       if (section.buttons.length) ui.buttons(section.buttons, { cols: section.cols ?? 2, height: 52, size: 20, gap: 8 });
     };
+    if (tab === 'class' && this.classTools) return this.classTools.drawTab(ui);
     if (tab === 'lesson') {
       const y0 = ui.y;
       for (const s of sections.filter((x) => !isBoard(x) && !isProgress(x))) draw(s);
@@ -707,7 +715,7 @@ export class LessonApp {
 
   /** Everything the admin has set, sent to everyone now and then (and to anyone who joins). */
   broadcastAdmin(to) {
-    if (this.isAdmin) this.adminSend({ k: 'state', lock: this.admin.lock, effects: this.admin.effects, lesson: this.adminLessonState?.() ?? null }, to);
+    if (this.isAdmin) this.adminSend({ k: 'state', lock: this.admin.lock, effects: this.admin.effects, lesson: this.adminLessonState?.() ?? null, tools: this.classTools?.snapshot() ?? null }, to);
   }
 
   onPeerJoinedAdmin(id) {
@@ -753,6 +761,7 @@ export class LessonApp {
         this.refresh();
       }
       if (d.effects) this.perf?.setMode(d.effects);
+      this.classTools?.apply(d.tools);
       this.onAdminLesson?.(d.lesson);
     } else if (d.k === 'kick') {
       this.presence.leave();
@@ -929,6 +938,7 @@ export class LessonApp {
     this.needsPlacement = true;
     this.framesSinceStart = 0;
     this.perf?.start();
+    this.loading?.enterXR();
     this.onXRStart?.(session, isAR);
     // recentring (or lost tracking) moves the headset's coordinates: the room line-up must be redone
     this.renderer.xr.getReferenceSpace()?.addEventListener?.('reset', () => this.onTrackingReset());
@@ -1018,6 +1028,7 @@ export class LessonApp {
     this.interaction.update();
     this.sparks.update(dt);
     this.classroom?.update();
+    this.loading?.update(dt);
     this.update(dt, frame);
     if (this.presence) {
       this.presence.update(dt);
@@ -1032,6 +1043,7 @@ export class LessonApp {
         this.onRoomFrame?.();
       }
       this.updateAdmin(dt);
+      this.classTools?.update(dt);
     }
     this.hideMenus();
     this.layoutStacks();

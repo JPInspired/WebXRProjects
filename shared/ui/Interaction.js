@@ -234,9 +234,14 @@ export class Interaction {
 
   // ───────────── mouse / touch ─────────────
 
+  /** A student while the teacher has paused the class: nothing responds. */
+  get blocked() {
+    return !!this.app.classTools?.blocked;
+  }
+
   onPointerDown(ev) {
     const { app } = this;
-    if (app.renderer.xr.isPresenting) return;
+    if (app.renderer.xr.isPresenting || this.blocked) return;
     this.setPointer(ev);
     const hit = this.castFromScreen();
     this.mouse = { x: ev.clientX, y: ev.clientY, t: performance.now(), hit };
@@ -347,7 +352,7 @@ export class Interaction {
     });
 
     c.addEventListener('selectstart', () => {
-      if (this.app.state.placing) return;
+      if (this.app.state.placing || this.blocked) return;
       const hit = this.pick(c);
       // the wrist menu's Move: pinch and hold on nothing to move the whole lab
       if (this.handsFx?.moveNext && !hit?.panel && !hit?.object) {
@@ -366,7 +371,7 @@ export class Interaction {
         this.app.confirmPlacement();
         return;
       }
-      if (c.userData.movingLab) return;
+      if (c.userData.movingLab || this.blocked) return;
       const dragged = c.userData.drag?.moving;
       c.userData.drag = null;
       if (c.userData.pending?.panel && !dragged) {
@@ -399,7 +404,7 @@ export class Interaction {
 
     // Grip: grab a whole molecule if you're on one, otherwise move the whole lab.
     c.addEventListener('squeezestart', () => {
-      if (c.userData.mode !== 'tracked-pointer') return;
+      if (c.userData.mode !== 'tracked-pointer' || this.blocked) return;
       const hit = this.pick(c);
       if (hit?.object && this.startGrab(c, hit.object, 'group')) return;
       this.grabLab(c);

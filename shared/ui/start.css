@@ -54,6 +54,20 @@ canvas { display: block; touch-action: none; }
   -webkit-font-smoothing: antialiased;
 }
 body.in-xr #overlay { display: none; }
+@keyframes overlay-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+#overlay { animation: overlay-in 0.45s ease-out both; }
+
+/* "Preparing the Lesson": a thin bar under the start buttons (shared/fx/Loading.js) */
+.loadbar { margin: 12px 0 0; transition: opacity 0.6s ease 0.8s; }
+.loadbar .track { height: 4px; border-radius: 4px; background: var(--bg-2); overflow: hidden; }
+.loadbar .track span { display: block; height: 100%; width: 8%; border-radius: 4px; background: var(--brand); transition: width 0.4s ease; }
+.loadbar small { display: block; margin-top: 6px; font-size: 12.5px; color: var(--ink-3); }
+.loadbar.busy .track span { width: 32%; animation: loadbar-glide 1.3s ease-in-out infinite; }
+@keyframes loadbar-glide { from { transform: translateX(-100%); } to { transform: translateX(320%); } }
+.loadbar.done { opacity: 0; }
+.loadbar.done .track span { background: var(--good, #34d399); }
+#overlay.mini .loadbar { display: none; }
+@media (prefers-reduced-motion: reduce) { #overlay { animation: none; } .loadbar, .loadbar .track span { transition: none; } .loadbar.busy .track span { animation: none; width: 100%; opacity: 0.5; } }
 
 /* top row: back to the lessons, theme, fold away */
 .start-top { display: flex; align-items: center; gap: 6px; margin: 0 0 12px; }

@@ -67,6 +67,17 @@ Every lesson works with tracked hands as well as controllers (`shared/ui/Hands.j
 
 The switch: `HANDS.enabled` in `shared/ui/Hands.js` (or `?nohands` in a lesson's address) turns all of this off and leaves plain pinching.
 
+## Starting and leaving a lesson
+
+`shared/fx/Loading.js` makes every lesson start and end smoothly:
+
+- The start box eases in. Under its buttons, a thin bar says **Preparing the Lesson** while the lesson is built and its models and pictures load (it counts them when there are files to load, and glides when the models are built in code). It says **Ready** and fades away when everything is in place, and the 3D view behind it fades in at the same moment.
+- Entering the headset view, the lesson fades in from dark. If anything is still loading, a small ring turns until it is ready (at most 20 seconds).
+- Leaving for the lessons page, the lesson fades out first; opening a lesson from the lessons page fades that page out for a moment.
+- Hintze Hall and Reef Dive keep their own starts.
+
+The switch: `LOADING.enabled` in `shared/fx/Loading.js` (or `?nofade` in a lesson's address).
+
 ## Subject rooms
 
 Each lesson stands in a light, simple classroom for its subject (`shared/fx/Classroom.js`): a chemistry lab with a fume cupboard and a periodic table, a physics lab with a wooden floor and a solar system poster, a biology lab with plants and a fish tank, and a computer room with desks and monitors. Windows, a whiteboard with the subject's equations, posters, a clock and a door are painted onto the walls. The rooms show on a computer screen and in full virtual reality; in mixed reality the real classroom shows instead, so they hide. Hintze Hall and Reef Dive have places of their own and keep them.
@@ -120,6 +131,13 @@ Each person has **their own models**. Everyone else's work appears beside you at
 - **Students:** **Menus: locked** hides students' settings (moving the panels, placing, seated mode, water level, leaving with ← Lessons; only Voice stays). **Re-find room (all)** makes every headset read its room scan again. Each student is listed with their room status and a **Remove** button (press twice) that takes them out of the session.
 
 Only the person who started the session is ever admin. If their headset drops out (for example it goes to sleep), nobody else gets admin powers: everything carries on as they left it, students see “Your teacher isn’t connected right now”, and the admin gets everything back when they return (same page or link, which keeps `host=1`). The shared world (e.g. the reef) keeps running on another device meanwhile.
+
+**Class tools (Teacher menu → Class):** `shared/ui/ClassTools.js`.
+
+- **Pause the Class** dims every student's view, shows "The Class Is Paused · Please look towards your teacher" and pauses their controls until the teacher presses **Resume the Class**. The teacher's own view is not paused.
+- **Look Here** shows every student, for 8 seconds, an arrow at the edge of their view pointing towards the teacher and a ring above the teacher's head.
+- **Timer:** 1, 2, 5 or 10 minutes. The countdown floats near the top of everyone's view and chimes when time is up. **Stop the Timer** ends it everywhere.
+- They travel with the teacher's other settings, so anyone who joins late or reconnects gets them straight away. `CLASS_TOOLS.enabled = false` removes the tab.
 
 **Hiding the menus:** press **B** on the right controller to hide or show all the panels (anyone, any lesson).
 
