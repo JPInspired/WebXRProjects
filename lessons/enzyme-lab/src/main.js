@@ -7,6 +7,7 @@ import { sound } from '../../../shared/util/sound.js';
 import { TEMPS, MARKS, QUIZ, QUIZ_ADVANCED, ANSWERS } from './data/enzymes.js';
 import { Bench } from './model/Bench.js';
 import { Board } from './model/Board.js';
+import { Molecules } from './model/Molecules.js';
 import { drawControls, drawInfo, drawCard, MODES } from './ui/panels.js';
 
 // Enzyme Lab, rebuilt from the original lesson: cut the liver with the scalpel, put half of it in the flask
@@ -53,6 +54,7 @@ class App extends LessonApp {
     this.panels = [this.controlPanel, this.infoPanel, this.explainPanel];
 
     this.bench = new Bench(this);
+    this.molecules = new Molecules(this); // inside the flask: the molecules, magnified (model/Molecules.js)
 
     addContactShadows(this, this.bench.group, -0.3); // soft shadows under things on the bench (bench top at y = -0.3)
     this.board = new Board();
@@ -214,11 +216,20 @@ class App extends LessonApp {
   nextRun() {
     const s = this.state;
     this.bench.reset();
+    this.molecules.scatter(true);
     s.run = { reads: {}, tries: 0, rate: null };
     s.entry = '';
     this.jitter = 1 + 0.04 * gauss();
     sound.click();
     this.explain({ title: 'Fresh Flask', text: `New hydrogen peroxide and a refilled cylinder. ${this.bench.whole.visible ? 'Here is a new piece of liver to cut.' : 'Use the other half of the liver.'} Choose the temperature, then start.` });
+  }
+
+  /** Inside the flask: 'off', 'bubble' (a magnified bubble above the flask) or 'around' (all around you). */
+  setMolecules(mode) {
+    this.molecules.setMode(mode);
+    sound.click();
+    if (mode !== 'off') this.explain({ title: 'Inside the Flask', text: 'The molecules in the flask, magnified about ten million times. Change the temperature, put the liver in and watch what the enzyme does.' });
+    this.refresh();
   }
 
   // ───────────── ask the biologist ─────────────
@@ -377,6 +388,7 @@ class App extends LessonApp {
     const real = Math.min(1, (now - (this.lastNow ?? now)) / 1000);
     this.lastNow = now;
     this.bench.update(real);
+    this.molecules.update(real);
 
     // the stopwatch on the panel
     const sec = Math.floor(this.bench.t);

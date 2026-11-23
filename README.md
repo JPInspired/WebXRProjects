@@ -522,6 +522,8 @@ Rebuilt from the original EngageVR lesson, with the same set-up and steps: a pie
 
 **Readings:** the stopwatch starts when the stopper goes on and the run lasts 2 minutes. Every 30 s a red ring marks the water level on the cylinder (labelled 30 s, 60 s, 90 s, 120 s), and students read each ring on a keypad (within 1.5 cm³; a second miss records the true value). The 2-minute volume is their result for that temperature.
 
+**Inside the flask** (`src/model/Molecules.js`): the molecules in the flask, magnified about ten million times, following the experiment. Before the liver goes in there is only hydrogen peroxide. Once it is in, catalase appears: a peroxide molecule is drawn into its active site, held and broken apart, water drifts off and oxygen rises away (2 H₂O₂ → 2 H₂O + O₂), as often as the experiment's own model says for that temperature. Above about 45 °C the enzyme visibly unfolds (denatures) and the reaction stops. Two ways to look, to compare (one will be kept): **Bubble** (a glass bubble above the flask) and **All Around** (the molecules fill the space around you). Experiment › Inside the Flask.
+
 **The reaction:** catalase activity roughly doubles every 10 °C and falls away above about 45 °C as the enzyme denatures. Oxygen after 2 minutes: about 6 cm³ at 0 °C, 21 at 20 °C, 35 at 30 °C, 46 at 40 °C, 30 at 50 °C, 5 at 60 °C and almost none at 70–80 °C, with a few per cent of variation between runs.
 
 | Lesson plan | In the Enzyme Lab |

@@ -29,6 +29,10 @@ export function drawControls(ui, app) {
     const run = b.timing || b.t > 0;
     ui.text(run ? `Stopwatch: ${Math.floor(b.t / 60)}:${String(Math.floor(b.t % 60)).padStart(2, '0')} of 2:00` : 'The stopwatch starts when the stopper goes on.', { size: 22, weight: 700, color: b.timing ? WARN : run ? GOOD : THEME.dim });
     ui.buttons([{ id: 'next', label: 'Next Run: Fresh Flask', onClick: () => app.nextRun() }], { height: 52, size: 22 });
+    // inside the flask: the molecules, magnified (two ways to look, to compare)
+    ui.heading('Inside the Flask', { size: 24 });
+    const mol = app.molecules.mode;
+    ui.tabs([['off', 'Off'], ['bubble', 'Bubble'], ['around', 'All Around']].map(([id, label]) => ({ id: `mol-${id}`, label, active: mol === id, onClick: () => app.setMolecules(id) })), { height: 52, size: 21, gap: 8 });
   } else if (s.mode === 'results') {
     ui.text('The class graph is on the board. Where is the peak? Why does the oxygen fall away on both sides?', { size: 21, color: THEME.dim });
   } else {
