@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
+import { studioReflections } from '../../../shared/util/reflections.js';
 import { PAINTINGS, QUIZ } from './data/paintings.js';
 import { Gallery } from './model/Gallery.js';
 import { drawControls, drawInfo, drawCard, MODES } from './ui/panels.js';
@@ -40,6 +41,7 @@ class App extends LessonApp {
     this.explainPanel.mesh.rotation.x = 0.18;
     this.lab.add(this.explainPanel.mesh);
     this.panels = [this.controlPanel, this.infoPanel, this.explainPanel];
+    studioReflections(this); // gold frames and varnish catch the light
     this.gallery = new Gallery(this);
     this.gallery.show(this.state.painting);
     this.controlPanel.setBuilder((ui) => drawControls(ui, this));

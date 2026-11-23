@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PAINTINGS } from '../data/paintings.js';
+import { woodMaterial, goldMaterial, weave, frameGeometry, desk, easel } from './Props.js';
 
 // The easel on the desk, the painting on it (real size whenever it fits, otherwise scaled down to fit), its
 // hotspots, the "True Size" copy standing behind the desk, and the zoom for the guessing game.
@@ -10,36 +11,31 @@ const AT = new THREE.Vector3(0, TOP + 0.1, -0.05); // the bottom middle of the p
 const BIG_BACK = 1.9; // m behind the desk: the true-size painting
 const loader = new THREE.TextureLoader();
 
-const wood = new THREE.MeshStandardMaterial({ color: 0x7a5232, roughness: 0.7 });
-const frameMat = new THREE.MeshStandardMaterial({ color: 0xb8913f, metalness: 0.55, roughness: 0.35 });
-const backMat = new THREE.MeshStandardMaterial({ color: 0x6b5338, roughness: 0.9 }); // the board behind the canvas
-
 /** A painting in its gilt frame: a group whose painting mesh is w by h metres. */
 function framed() {
   const g = new THREE.Group();
-  const canvas = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85 }));
+  // the painted canvas: a varnished sheen, and the weave just felt under it
+  const bump = weave().clone();
+  bump.needsUpdate = true;
+  const canvas = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, bumpMap: bump, bumpScale: 0.35, envMapIntensity: 0.3 }));
   g.add(canvas);
-  const back = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), backMat);
+  // the back board, so it is solid from behind
+  const back = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), woodMaterial('back', 'x', 1));
   g.add(back);
-  const bars = [0, 1, 2, 3].map(() => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), frameMat);
-    g.add(m);
-    return m;
-  });
-  return { g, canvas, bars, back };
+  const frame = new THREE.Mesh(new THREE.BufferGeometry(), goldMaterial());
+  g.add(frame);
+  return { g, canvas, back, frame, bump };
 }
 
 function sizeFrame(f, w, h) {
   f.canvas.scale.set(w, h, 1);
-  f.back.scale.set(w, h, 0.02);
-  f.back.position.z = -0.011; // just behind the canvas, so it is solid from behind
-  const t = Math.max(0.025, Math.min(w, h) * 0.06); // frame width
-  const d = t * 0.6;
-  const [top, bottom, left, right] = f.bars;
-  top.scale.set(w + 2 * t, t, d); top.position.set(0, h / 2 + t / 2, 0);
-  bottom.scale.set(w + 2 * t, t, d); bottom.position.set(0, -h / 2 - t / 2, 0);
-  left.scale.set(t, h, d); left.position.set(-w / 2 - t / 2, 0, 0);
-  right.scale.set(t, h, d); right.position.set(w / 2 + t / 2, 0, 0);
+  f.bump.repeat.set(w / 0.005, h / 0.005); // a thread about every 1.25 mm
+  const t = THREE.MathUtils.clamp(Math.min(w, h) * 0.09, 0.035, 0.24); // the frame's width
+  f.back.scale.set(w + 1.9 * t, h + 1.9 * t, 0.012);
+  f.back.position.z = -0.12 * t - 0.006;
+  f.frame.geometry.dispose();
+  f.frame.geometry = frameGeometry(w, h, t);
+  f.t = t;
 }
 
 export class Gallery {
@@ -48,29 +44,11 @@ export class Gallery {
     this.group = new THREE.Group();
     app.lab.add(this.group);
     // a wooden desk under the easel (on a computer only: in the headset the student's own desk is there)
-    this.desk = new THREE.Group();
-    const deskTop = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.035, 0.75), wood);
-    deskTop.position.set(0, TOP - 0.0175, -0.15);
-    this.desk.add(deskTop);
-    for (const [x, z] of [[-0.6, -0.48], [0.6, -0.48], [-0.6, 0.18], [0.6, 0.18]]) {
-      const l = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.865, 0.045), wood);
-      l.position.set(x, TOP - 0.035 - 0.4325, z);
-      this.desk.add(l);
-    }
+    this.desk = desk(TOP, -0.15);
     this.group.add(this.desk);
-    // a small table easel: two front legs, a back leg and a ledge
-    const leg = (x, z, rx, rz) => {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.95, 0.03), wood);
-      m.position.set(x, TOP + 0.43, z);
-      m.rotation.set(rx, 0, rz);
-      this.group.add(m);
-    };
-    leg(-0.2, -0.15, -0.08, -0.1); // front legs: wider at the floor, leaning back
-    leg(0.2, -0.15, -0.08, 0.1);
-    leg(0, -0.33, 0.32, 0); // back leg: foot behind, top meeting the front legs
-    this.ledge = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.03, 0.08), wood);
-    this.ledge.position.set(0, AT.y - 0.03, AT.z + 0.02);
-    this.group.add(this.ledge);
+    // a studio table easel, the painting resting on its tray
+    this.easel = easel(TOP, AT.y, AT.z);
+    this.group.add(this.easel.group);
     // the painting on the easel
     this.small = framed();
     this.group.add(this.small.g);
@@ -125,6 +103,7 @@ export class Gallery {
     sizeFrame(this.small, s.w, s.h);
     this.small.g.position.set(AT.x, AT.y + s.h / 2, AT.z);
     this.small.g.rotation.x = -0.08; // leaning back a little on the easel
+    this.easel.clamp.position.y = AT.y + s.h + this.small.t * 0.6; // the top clamp holds the frame
     sizeFrame(this.big, p.w / 100, p.h / 100);
     // hotspots on the painting
     this.spots.forEach((r, i) => {
