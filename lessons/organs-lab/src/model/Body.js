@@ -30,6 +30,8 @@ const ON_ORGAN = 0.045; // or this close to an organ's surface
 const TORSO = { min: new THREE.Vector3(-0.3, 0.7, -0.25), max: new THREE.Vector3(0.3, 1.75, 0.3) };
 
 /** Opacity, switching the material to transparent (and back) only when it changes. */
+const GREY = new THREE.Color(0x6f6f73); // a failed organ (What if it was missing?)
+
 function setOpacity(mat, o) {
   const t = o < 1;
   if (mat.transparent !== t) {
@@ -753,6 +755,20 @@ export class Body {
       const glow = sys && lit ? 0.18 + 0.12 * Math.sin(t * 3) : 0;
       p.flash = Math.max(0, p.flash - dt * 1.5);
       p.mat.emissive.setRGB(glow + p.flash * 0.8, glow * 0.7, glow * 0.5);
+    }
+    // what if it was missing: the organ fades out, and each organ that depends on it turns grey as it fails
+    const miss = this.app.missingNow?.();
+    for (const p of this.pieces) {
+      p.base ??= p.mat.color.clone();
+      let fail = 0;
+      if (miss) {
+        if (miss.def.remove.includes(p.id)) { setOpacity(p.mat, 0.08); p.mat.color.copy(p.base); continue; }
+        for (const [at, ids] of miss.def.steps) if (ids.includes(p.id)) fail = Math.max(fail, THREE.MathUtils.clamp((miss.t - at) / 1.2, 0, 1));
+        // failing: a red pulse while it goes, then grey
+        const going = fail > 0 && fail < 1 ? 0.35 * Math.sin(fail * Math.PI) : 0;
+        p.mat.emissive.setRGB(going, 0, 0);
+      }
+      p.mat.color.copy(p.base).lerp(GREY, fail * 0.85);
     }
     setOpacity(this.boneMat, sys ? 0.45 : 1);
     if (!sys && this.ribs === 'solid') setOpacity(this.ribMat, 1);

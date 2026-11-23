@@ -3,7 +3,7 @@ import { LessonApp } from '../../../shared/LessonApp.js';
 import { addContactShadows } from '../../../shared/util/contactShadows.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
-import { CARDS, SYSTEMS, QUIZ, ANSWERS } from './data/organs.js';
+import { CARDS, SYSTEMS, QUIZ, ANSWERS, MISSING } from './data/organs.js';
 import { Body, loadBody } from './model/Body.js';
 import { Board } from './model/Board.js';
 import { MODES, drawControls, drawTeacher, drawInfo, drawCard } from './ui/panels.js';
@@ -246,6 +246,28 @@ class App extends LessonApp {
     if (s) this.explain({ kicker: 'BODY SYSTEMS', title: s.name, text: `${s.job} ${s.needs}` });
   }
 
+  /** What if it was missing? Take an organ out (or put it back: the same button again, or null). */
+  setMissing(id) {
+    this.state.missing = id && id !== this.state.missing && MISSING[id] ? id : null;
+    if (this.state.missing) this.state.system = null;
+    sound.click();
+    this.refresh();
+  }
+
+  /** The organ missing now (followed from the teacher in a class), with seconds since it was taken out. */
+  missingNow() {
+    const id = this.state.mode === 'systems' ? this.demo.miss : null;
+    if (!id || !MISSING[id]) { this.lastMiss = null; return null; }
+    const now = performance.now();
+    if (id !== this.lastMiss) { this.lastMiss = id; this.missT0 = now; this.missShown = -1; }
+    const t = (now - this.missT0) / 1000;
+    // the card on the right grows as each step happens
+    const def = MISSING[id];
+    const shown = def.steps.filter(([at]) => t >= at).length + (t >= def.steps[def.steps.length - 1][0] + 1.6 ? 1 : 0);
+    if (shown !== this.missShown) { this.missShown = shown; this.infoPanel.redraw(); if (shown > 0 && shown <= def.steps.length) sound.refuse(); }
+    return { id, def, t };
+  }
+
   // ───────────── quiz ─────────────
 
   quizAnswer(k) {
@@ -300,7 +322,7 @@ class App extends LessonApp {
 
   myDemo() {
     const s = this.state;
-    return { mode: s.mode, level: s.level, big: s.big, sys: s.system, rev: s.revealed, ans: s.answers };
+    return { mode: s.mode, level: s.level, big: s.big, sys: s.system, rev: s.revealed, ans: s.answers, miss: s.missing ?? null };
   }
 
   get demo() {

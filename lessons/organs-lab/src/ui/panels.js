@@ -1,4 +1,4 @@
-import { CARDS, SYSTEMS, QUIZ, QUESTIONS, DISCUSS, NOTES_TASK } from '../data/organs.js';
+import { CARDS, SYSTEMS, QUIZ, QUESTIONS, DISCUSS, NOTES_TASK, MISSING_IDS } from '../data/organs.js';
 import { THEME, font } from '../../../../shared/ui/CanvasPanel.js';
 
 export const MODES = [['notes', 'Sticky notes'], ['build', 'Build the body'], ['functions', 'Functions'], ['systems', 'Body systems'], ['quiz', 'Quiz']];
@@ -42,7 +42,11 @@ export function drawControls(ui, app) {
       ui.heading('Show a system', { size: 22 });
       ui.buttons([{ id: 'sys-all', label: 'All of Them', active: !s.system, onClick: () => app.setSystem(null) }], { height: 46, size: 19 });
       ui.buttons(SYSTEMS.map((x) => ({ id: `sys-${x.id}`, label: x.name.replace(' (excretory)', '').replace(' system', ''), active: s.system === x.id, onClick: () => app.setSystem(x.id) })), { cols: 2, height: 46, size: 18, gap: 8 });
-    } else ui.text('Your teacher picks the system. Its organs light up in your skeleton; the rest fade.', { size: 20, color: THEME.dim });
+      // take an organ out and watch what fails (the info panel tells the story)
+      ui.heading('What if it was missing?', { size: 22 });
+      ui.buttons(MISSING_IDS.map(([id, label]) => ({ id: `miss-${id}`, label, active: s.missing === id, onClick: () => app.setMissing(id) })), { cols: 2, height: 46, size: 18, gap: 8 });
+      if (s.missing) ui.buttons([{ id: 'miss-back', label: 'Put It Back', onClick: () => app.setMissing(null) }], { height: 46, size: 19 });
+    } else ui.text('Your teacher picks the system, or takes an organ out to show what would happen. Watch your skeleton.', { size: 20, color: THEME.dim });
   } else if (s.mode === 'quiz') {
     const done = s.quiz.filter((a) => a != null).length;
     ui.text(`${done} of ${QUIZ.length} answered`, { size: 24, weight: 700 });
@@ -126,6 +130,16 @@ function drawFunctions(ui, app) {
 }
 
 function drawSystems(ui, app) {
+  const miss = app.missingNow();
+  if (miss) {
+    // what if it was missing: each step as it happens, then the verdict
+    const { def, t } = miss;
+    ui.title(`What If There Was No ${def.name.replace('the ', '').replace(/^./, (c) => c.toUpperCase())}?`, { size: 28 });
+    ui.text(`Take out ${def.name} and watch your skeleton: the organs that depend on it fail, one after another.`, { size: 19, color: THEME.dim });
+    for (const [at, , when, text] of def.steps) if (t >= at) ui.box(`${when}: ${text}`, { size: 19 });
+    if (t >= def.steps[def.steps.length - 1][0] + 1.6) ui.text(def.verdict, { size: 20, weight: 700, color: '#ffd166' });
+    return;
+  }
   const sys = SYSTEMS.find((x) => x.id === app.demo.sys);
   if (sys) {
     ui.title(sys.name, { size: 30 });

@@ -83,6 +83,74 @@ export const SYSTEMS = [
   },
 ];
 
+/**
+ * What if it was missing? (Body systems): take an organ out and the organs that depend on it fail one after
+ * another. steps: [seconds into the animation, organs that fail, how quickly it would really happen, what happens].
+ */
+export const MISSING = {
+  heart: {
+    name: 'the heart', remove: ['heart'],
+    steps: [
+      [0.8, ['lungRight', 'lungLeft'], 'Seconds', 'Blood stops moving. The lungs still take in air, but no blood carries the oxygen away.'],
+      [2.0, ['brain'], 'A few minutes', 'The brain gets no oxygen or glucose and stops working.'],
+      [3.4, ['liver', 'kidneyRight', 'kidneyLeft', 'stomach', 'smallIntestine', 'largeIntestine', 'bladder'], 'Minutes', 'Every other organ runs out of oxygen too.'],
+    ],
+    verdict: 'Nobody can live without a heart: it is the only pump. In hospital, a machine can do its job for a short time.',
+  },
+  lungs: {
+    name: 'the lungs', remove: ['lungRight', 'lungLeft'],
+    steps: [
+      [0.8, ['heart'], 'Seconds', 'The heart still pumps, but the blood picks up no oxygen.'],
+      [2.0, ['brain'], 'A few minutes', 'Without oxygen, the brain stops working.'],
+      [3.4, ['liver', 'kidneyRight', 'kidneyLeft', 'stomach', 'smallIntestine', 'largeIntestine', 'bladder'], 'Minutes', 'Then every other organ.'],
+    ],
+    verdict: 'Nobody can live without lungs. But a person can live with just one: it does the work of both.',
+  },
+  brain: {
+    name: 'the brain', remove: ['brain'],
+    steps: [
+      [0.8, ['lungRight', 'lungLeft'], 'Seconds', 'Breathing stops: the brain sends the signals that move the diaphragm.'],
+      [2.0, ['heart'], 'Minutes', 'The heart has its own beat, but it soon fails without oxygen.'],
+      [3.4, ['liver', 'kidneyRight', 'kidneyLeft', 'stomach', 'smallIntestine', 'largeIntestine', 'bladder'], 'Minutes', 'Everything else follows.'],
+    ],
+    verdict: 'The brain controls breathing, the heart rate and everything we do: nobody can live without it.',
+  },
+  liver: {
+    name: 'the liver', remove: ['liver'],
+    steps: [
+      [0.8, ['stomach', 'smallIntestine', 'largeIntestine'], 'Hours', 'Fats are not digested (no bile), and the nutrients from the gut are not processed or stored.'],
+      [2.0, ['brain'], 'A day or two', 'Poisons build up in the blood and affect the brain.'],
+      [3.4, ['kidneyRight', 'kidneyLeft', 'heart', 'lungRight', 'lungLeft', 'bladder'], 'Days', 'The other organs fail one after another.'],
+    ],
+    verdict: 'Nobody can live without a liver for more than a day or two. But it can grow back: a person can give part of theirs to someone else.',
+  },
+  kidneys: {
+    name: 'the kidneys', remove: ['kidneyRight', 'kidneyLeft'],
+    steps: [
+      [0.8, ['bladder'], 'Hours', 'No urine is made, so the bladder stays empty.'],
+      [2.0, ['heart'], 'Days', 'Waste, salt and water build up in the blood, and the heartbeat becomes irregular.'],
+      [3.4, ['brain', 'lungRight', 'lungLeft'], 'Days', 'Fluid collects in the lungs, and the waste affects the brain.'],
+    ],
+    verdict: 'Without both kidneys, a person needs a dialysis machine to clean their blood. But one kidney is enough for a healthy life.',
+  },
+  stomach: {
+    name: 'the stomach', remove: ['stomach'],
+    steps: [
+      [0.8, ['smallIntestine'], 'Every meal', 'Food arrives in the small intestine without being stored or churned, so it has to do more of the work.'],
+    ],
+    verdict: 'People can live without a stomach (it is sometimes removed in surgery): they eat small meals often, and the small intestine does the digesting.',
+  },
+  smallIntestine: {
+    name: 'the small intestine', remove: ['smallIntestine'],
+    steps: [
+      [0.8, ['largeIntestine'], 'Hours', 'Food passes on without being digested or absorbed.'],
+      [2.0, ['liver', 'heart', 'brain', 'kidneyRight', 'kidneyLeft', 'lungRight', 'lungLeft', 'stomach', 'bladder'], 'Weeks', 'No nutrients reach the blood, so every organ slowly starves.'],
+    ],
+    verdict: 'Almost all nutrients are absorbed here. People who lose most of it are fed through a drip into a vein.',
+  },
+};
+export const MISSING_IDS = [['heart', 'Heart'], ['lungs', 'Lungs'], ['brain', 'Brain'], ['liver', 'Liver'], ['kidneys', 'Kidneys'], ['stomach', 'Stomach'], ['smallIntestine', 'Small Intestine']];
+
 export const DISCUSS = [
   'If the heart stopped, which other organs would stop working, and how quickly?',
   'Follow a sandwich from the mouth to the large intestine: which organs does it pass through, and what happens in each?',
