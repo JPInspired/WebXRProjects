@@ -23,9 +23,10 @@ Mixed reality lessons built with [WebXR](https://immersiveweb.dev/) and [three.j
 | **Osmosis Lab** | Biology | [`lessons/osmosis-lab/`](lessons/osmosis-lab/) |
 | **Identifying Organs** | Biology | [`lessons/organs-lab/`](lessons/organs-lab/) |
 | **Reef Dive** | Biology (IB) | [`lessons/reef-dive/`](lessons/reef-dive/) |
+| **Art Gallery** | Art | [`lessons/art-gallery/`](lessons/art-gallery/) |
 | **Hintze Hall** | Museum visit (VR) | [`lessons/hintze-hall/`](lessons/hintze-hall/) |
 
-**The lessons page** (`index.html`, titled *WebXR Library*) groups the lessons into subject sections (Chemistry, Physics, Biology, Computer Science, Museum visits), with a row of subject buttons that show one section at a time. To add a lesson, copy a `<button class="card">` block inside the right `<section>`; to add a subject, copy a whole `<section>` and give it a new `data-subject` (its button and counts appear by themselves; its colour is one line in the page’s styles).
+**The lessons page** (`index.html`, titled *WebXR Library*) groups the lessons into subject sections (Chemistry, Physics, Biology, Computer Science, Art, Museum visits), with a row of subject buttons that show one section at a time. To add a lesson, copy a `<button class="card">` block inside the right `<section>`; to add a subject, copy a whole `<section>` and give it a new `data-subject` (its button and counts appear by themselves; its colour is one line in the page’s styles).
 
 **Getting around:** every lesson has a **← Lessons** button in its control panel (press it twice, so nobody leaves by accident) and an *All lessons* link on its start screen. Panels that hold more than fits get a scrollbar: use its ▲ ▼ buttons, the thumbstick while pointing at the panel, or pinch / pull the trigger on the panel and drag (mouse wheel or drag on a computer).
 

@@ -3,7 +3,7 @@
 // Writing style: British spelling, Title Case headings, calm and confident, no contractions or exclamation marks.
 
 export const SUBJECTS = {
-  chemistry: 'Chemistry', physics: 'Physics', biology: 'Biology', computing: 'Computer Science', museum: 'Museum Visits',
+  chemistry: 'Chemistry', physics: 'Physics', biology: 'Biology', computing: 'Computer Science', art: 'Art', museum: 'Museum Visits',
 };
 
 export const GUIDES = [
@@ -139,6 +139,13 @@ export const GUIDES = [
     aims: ['Identify the main components of a computer and their roles', 'Check that components are compatible', 'Describe how power and data move between components'],
     steps: [['Case', 'Students choose a case to build in.'], ['Parts', 'Components are installed one at a time, and incompatible parts are refused with an explanation.'], ['Test', 'The computer is powered on, and a guided tour follows the power, data and heat.']],
     tips: ['Encourage students to read the explanation whenever a part is refused.', 'Ask what would happen if a single component were removed.', 'The laptop case is a useful comparison once a desktop has been built.'],
+  },
+  {
+    id: 'art-gallery', title: 'Art Gallery', subject: 'art', mins: 40, ages: 'Ages 7–18 · KS2–KS5', mode: 'Mixed reality · seated',
+    intro: 'Twelve famous paintings arrive on an easel at each desk, at their real size wherever they fit.',
+    aims: ['Recognise twelve famous paintings and their artists', 'Describe details of technique and meaning in a painting', 'Place works of art in their historical context', 'Compare the scale of paintings with their reproductions'],
+    steps: [['Gallery', 'Students choose a painting, look closer at its glowing details and read its story and its place on the timeline.'], ['True Size', 'Large paintings, such as The Night Watch, can be seen at their real size behind the desk.'], ['Guess the Painting', 'A small detail slowly zooms out; the sooner a student recognises the painting, the more points they score.']],
+    tips: ['Use Show Everyone to bring the whole class to one painting and discuss it together.', 'Ask students which painting surprised them most at its real size.', 'The Birth of Venus shows a nude figure, as is common in classical art: prepare younger classes, or skip it.'],
   },
   {
     id: 'hintze-hall', title: 'Hintze Hall', subject: 'museum', mins: 25, ages: 'All ages', mode: 'Virtual reality · on your own',

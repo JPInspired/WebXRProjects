@@ -16,6 +16,7 @@
   --chemistry: #b45309;
   --physics: #be185d;
   --biology: #047857;
+  --art: #a21caf;
   --computing: #1d4ed8;
   --museum: #7c3aed;
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Noto Serif", Georgia, serif;
@@ -37,6 +38,7 @@
   --chemistry: #f5a524;
   --physics: #f472b6;
   --biology: #34d399;
+  --art: #e879f9;
   --computing: #7aa2ff;
   --museum: #c4a1ff;
 }
@@ -95,6 +97,7 @@ body.in-xr #overlay { display: none; }
 #overlay .eyebrow[data-subject="biology"] { --accent: var(--biology); }
 #overlay .eyebrow[data-subject="computing"] { --accent: var(--computing); }
 #overlay .eyebrow[data-subject="museum"] { --accent: var(--museum); }
+#overlay .eyebrow[data-subject="art"] { --accent: var(--art); }
 
 #overlay h1 { margin: 0 0 8px; font: 500 30px/1.1 var(--serif); letter-spacing: -0.01em; color: var(--ink); }
 #overlay p { margin: 0 0 14px; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); }

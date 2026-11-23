@@ -21,9 +21,11 @@ const SUBJECT = {
   'waves-lab': 'physics', 'bounce-lab': 'physics', 'radiation-lab': 'physics', 'circular-lab': 'physics', 'kinematics-lab': 'physics', 'pendulum-lab': 'physics',
   'cell-explorer': 'biology', 'heart-lab': 'biology', 'enzyme-lab': 'biology', 'microscope-lab': 'biology', 'osmosis-lab': 'biology', 'organs-lab': 'biology',
   'pc-builder': 'computing',
+  'art-gallery': 'art',
 };
 
 const THEMES = {
+  art: { wall: '#ece4d8', trim: '#8a5a3c', floor: 'wood', floorA: '#a9805a', floorB: '#9c754f', ceiling: '#f5f2ec', wood: '#8a6a4a', top: '#3b3530', accent: '#a21caf', board: ['colour · line · shape', 'light and shadow', 'foreground · background'] },
   chemistry: { wall: '#dfe7e4', trim: '#5d8a86', floor: 'vinyl', floorA: '#b9c1c4', floorB: '#b2babe', ceiling: '#f2f2ef', wood: '#7f8c8d', top: '#2f3640', accent: '#2d8a83', board: ['2H₂ + O₂ → 2H₂O', 'pH 7 = neutral', 'acid + alkali → salt + water'] },
   physics: { wall: '#e9e3d7', trim: '#5a6a8c', floor: 'wood', floorA: '#b98f62', floorB: '#a87f55', ceiling: '#f4f2ec', wood: '#9a7a55', top: '#3a3f4a', accent: '#3f5fa8', board: ['v = f λ', 'F = m a', 'E = ½ m v²'] },
   biology: { wall: '#e0e9d9', trim: '#5f8a55', floor: 'vinyl', floorA: '#c9c6b8', floorB: '#c2bfb1', ceiling: '#f3f4ee', wood: '#8a9a6e', top: '#34413a', accent: '#4f8a3f', board: ['6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂', 'cell → tissue → organ → system'] },
@@ -498,7 +500,7 @@ export class Classroom {
       m.rotation.y = rotY;
       this.group.add(m);
     };
-    const poster = { chemistry: ['periodic', 'hazards'], physics: ['spectrum', 'planets'], biology: ['cell', 'dna'], computing: ['circuit', 'binary'] }[subject];
+    const poster = { chemistry: ['periodic', 'hazards'], physics: ['spectrum', 'planets'], biology: ['cell', 'dna'], computing: ['circuit', 'binary'], art: ['spectrum', 'noticeboard'] }[subject];
     wall(L, [['whiteboard', L / 2 - 1.6, 0.95, 3.2, 1.2], [poster[0], 0.9, 1.15, 1.5, 0.95], ['clock', L / 2 - 0.2, 2.4, 0.4, 0.4], [poster[1], L - 2.4, 1.15, 1.5, 0.95]], new THREE.Vector3(0, H / 2, Z0), 0);
     wall(D, [['window', 1.4, 1.0, 1.7, 1.75], ['window', 4.15, 1.0, 1.7, 1.75], ['window', 6.9, 1.0, 1.7, 1.75]], new THREE.Vector3(X0, H / 2, (Z0 + Z1) / 2), Math.PI / 2);
     wall(D, [['noticeboard', 5.6, 1.2, 2.2, 1.1]], new THREE.Vector3(X1, H / 2, (Z0 + Z1) / 2), -Math.PI / 2);

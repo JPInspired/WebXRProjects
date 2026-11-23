@@ -48,6 +48,7 @@
       --biology: #047857;
       --computing: #1d4ed8;
       --museum: #7c3aed;
+      --art: #a21caf;
       --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Noto Serif", Georgia, serif;
       --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
@@ -70,6 +71,7 @@
       --biology: #34d399;
       --computing: #7aa2ff;
       --museum: #c4a1ff;
+      --art: #e879f9;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -175,6 +177,7 @@
     section[data-subject="biology"] { --accent: var(--biology); }
     section[data-subject="computing"] { --accent: var(--computing); }
     section[data-subject="museum"] { --accent: var(--museum); }
+    section[data-subject="art"] { --accent: var(--art); }
     .subject > header { display: flex; align-items: baseline; gap: 14px; padding-bottom: 14px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
     .subject > header h3 { font: 500 28px/1.1 var(--serif); margin: 0; letter-spacing: -0.01em; }
     .subject > header h3::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin-right: 12px; vertical-align: 4px; }
@@ -292,7 +295,7 @@
         <div>
           <span class="eyebrow">Immersive Learning for the Modern Classroom</span>
           <h1>Lessons You Can <em>Step Into</em></h1>
-          <p class="lede">Twenty hands-on lessons in science, computing and museum visits, designed to bring difficult ideas within reach. Students hold a beating heart, assemble a computer and stand beneath a blue whale, directly in the headset’s browser, whether learning independently or as a whole class.</p>
+          <p class="lede">Twenty-one hands-on lessons in science, computing, art and museum visits, designed to bring difficult ideas within reach. Students hold a beating heart, assemble a computer and stand beneath a blue whale, directly in the headset’s browser, whether learning independently or as a whole class.</p>
           <div class="cta">
             <a class="btn primary" href="#lessons">Explore the Lessons</a>
             <a class="btn" href="#how">How It Works</a>
@@ -545,6 +548,21 @@
                 <h4>PC Builder Lab</h4>
                 <p>A computer built from real, life-size components. Students check that every part is compatible, power the machine on and follow the power and data to understand how the components work together.</p>
                 <span class="do"><b>Students</b> assemble, check and power on</span>
+                <span class="open">Open Lesson</span>
+              </span>
+            </button>
+          </div>
+        </section>
+        <section class="subject" data-subject="art" id="art">
+          <header><h3>Art</h3><p>Famous paintings, up close and at their real size.</p></header>
+          <div class="grid">
+            <button class="card" data-lesson="art-gallery" data-keywords="art gallery painting paintings artist mona lisa starry night van gogh monet vermeer rembrandt hokusai history">
+              <span class="media"><img src="assets/lessons/art-gallery.webp" data-loop="assets/lessons/art-gallery-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Art</span><span class="tag">Mixed reality</span><span class="tag">Seated</span></span>
+                <h4>Art Gallery</h4>
+                <p>Twelve famous paintings arrive on an easel at each desk, at their real size wherever they fit. Students look closer at glowing details, place each work on a timeline of world events and play Guess the Painting.</p>
+                <span class="do"><b>Students</b> look closely, compare and guess</span>
                 <span class="open">Open Lesson</span>
               </span>
             </button>

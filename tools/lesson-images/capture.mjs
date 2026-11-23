@@ -32,6 +32,7 @@ const SETUP = {
   'reef-dive': { js: ``, cam: null, keepBg: true },
   'pc-builder': { js: ``, cam: [0.4, 1.32, 0.78], tgt: [0, 1.04, 0] },
   'hintze-hall': { js: ``, cam: null, keepBg: true },
+  'art-gallery': { js: `app.choose('starry');`, cam: [0.32, 1.42, 1.05], tgt: [0, 1.22, -0.1], keepBg: true },
 };
 const LESSONS = list && list !== 'all' ? list.split(',') : Object.keys(SETUP);
 
