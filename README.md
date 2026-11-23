@@ -579,6 +579,8 @@ Rebuilt from the original EngageVR lesson, with the same bench and steps: a pota
 
 **Ask the biologist:** 8 pre-written answers (what osmosis is, why water moves, partially permeable membranes, turgor and wilting, plasmolysis, water potential, saline drips, real-life uses). An AI biologist can be connected later with `biologistEndpoint` in `lessons/osmosis-lab/config.js`.
 
+
+**Inside the potato** (`src/model/Membrane.js`, under every activity: **See the Membrane**): a patch of the potato's surface, magnified, with a cell membrane down the middle. Water molecules cross through its pores both ways; salt and the cell's sugars are too big. More water crosses from the side that has more of it, so in pure water the net flow is into the potato and in strong salt it is out, balancing near 0.32 mol/dm³, where the class graph crosses zero. The card counts water in and out each second. The teacher can show everyone their bubble (Teacher menu › Osmosis).
 ## Identifying Organs
 
 Rebuilt from the original EngageVR lesson, where students filled skeletons with organs: here **every student has their own life-size skeleton** standing on the floor beside their desk, with its organs laid out on the desk (at 60% size so they fit; each grows to life size when picked up). The skeleton and the 17 organs are **real anatomy** from the BodyParts3D database (CC BY-SA 2.1 Japan, credited in `lessons/organs-lab/CREDITS.md`), about 970 KB in all, so every organ is in its true place. How the model was made, and how to rebuild it: `tools/organs-model/README.md`. The skull cap lifts off for the brain, and the ribcage can be solid, see-through or hidden.

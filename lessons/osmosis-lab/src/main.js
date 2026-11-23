@@ -6,6 +6,7 @@ import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
 import { CONCENTRATIONS, SOAK_HOURS, PREDICTIONS, EXIT, ANSWERS } from './data/osmosis.js';
 import { Bench } from './model/Bench.js';
+import { Membrane } from './model/Membrane.js';
 import { Board } from './model/Board.js';
 import { MODES } from './ui/panels.js';
 import { drawControls, drawInfo, drawCard } from './ui/panels.js';
@@ -54,6 +55,7 @@ class App extends LessonApp {
     this.panels = [this.controlPanel, this.infoPanel, this.explainPanel];
 
     this.bench = new Bench(this);
+    this.membrane = new Membrane(this); // osmosis, magnified (model/Membrane.js)
 
     addContactShadows(this, this.bench.group, -0.3); // soft shadows under things on the bench (bench top at y = -0.3)
     this.board = new Board();
@@ -333,11 +335,35 @@ class App extends LessonApp {
     }
     const peers = [...(this.presence?.peers.values() ?? [])].filter((p) => p.replica?.n != null);
     sections.push({ heading: 'Class progress', text: `Pieces finished: ${peers.length ? peers.map((p) => `${p.name} ${p.replica.n}`).join(' · ') : 'nobody yet'}.`, buttons: [] });
+    // show everyone my osmosis bubble
+    sections.push({
+      heading: 'Osmosis',
+      text: this.showMembrane ? 'Everyone is watching your potato’s membrane. Change the solution to show them what happens.' : 'Open everyone’s osmosis bubble on your solution, to show the whole class at once.',
+      buttons: [{ id: 'admin-showmem', label: this.showMembrane ? 'Showing Everyone (Tap to Stop)' : 'Show Everyone My Potato', active: !!this.showMembrane, onClick: () => this.toggleShowMembrane() }],
+    });
     return sections;
   }
 
   adminLessonState() {
-    return { demo: this.myDemo(), board: this.boardLocal ?? [0, 0, 0] };
+    const membrane = this.showMembrane ? { c: this.membrane.c } : null;
+    return { demo: this.myDemo(), board: this.boardLocal ?? [0, 0, 0], membrane };
+  }
+
+  /** Osmosis, magnified: show or hide my bubble. */
+  toggleMembrane() {
+    this.membrane.setOn(!this.membrane.on);
+    sound.click();
+    if (this.membrane.on) this.explain({ title: 'The Potato’s Membrane', text: 'The edge of a potato cell, magnified. Water crosses the membrane both ways; salt cannot. Pick a solution on the card and watch which way more water goes.' });
+    this.refresh();
+  }
+
+  /** Teacher: show everyone my osmosis bubble (or stop). */
+  toggleShowMembrane() {
+    this.showMembrane = !this.showMembrane;
+    if (this.showMembrane && !this.membrane.on) this.membrane.setOn(true);
+    sound.click();
+    this.broadcastAdmin();
+    this.refresh();
   }
 
   onAdminLesson(l) {
@@ -354,6 +380,21 @@ class App extends LessonApp {
       changed = true;
     }
     if (l.board && JSON.stringify(l.board) !== JSON.stringify(this.boardLocal ?? [0, 0, 0])) this.boardLocal = l.board;
+    // the teacher is showing everyone their potato's membrane
+    const mem = l.membrane;
+    if (mem && CONCENTRATIONS.includes(mem.c)) {
+      if (!this.teacherMembrane) {
+        this.membraneBefore = this.membrane.on;
+        this.membrane.setOn(true);
+        this.explain({ title: 'Your Teacher’s Potato', text: 'Your teacher is showing everyone the membrane of their potato. Watch what happens as they change the solution.' });
+        changed = true;
+      }
+      this.teacherMembrane = { c: mem.c };
+    } else if (this.teacherMembrane) {
+      this.teacherMembrane = null;
+      if (!this.membraneBefore) this.membrane.setOn(false);
+      changed = true;
+    }
     if (changed) this.refresh();
   }
 
@@ -398,6 +439,7 @@ class App extends LessonApp {
     const real = Math.min(1, (now - (this.lastNow ?? now)) / 1000);
     this.lastNow = now;
     this.bench.update(real);
+    this.membrane.update(real);
 
     this.liveClock = (this.liveClock ?? 0) + dt;
     if (this.liveClock > 0.2) {

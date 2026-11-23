@@ -44,6 +44,10 @@ export function drawControls(ui, app) {
     ui.text('The class graph is on the board. Where does it cross zero? What is special about that concentration?', { size: 21, color: THEME.dim });
   }
 
+  // osmosis, magnified (model/Membrane.js)
+  ui.heading('Inside the potato', { size: 22 });
+  ui.buttons([{ id: 'membrane', label: app.membrane.on ? 'Membrane: Shown (Tap to Hide)' : 'See the Membrane', active: app.membrane.on, onClick: () => app.toggleMembrane() }], { height: 52, size: 21 });
+
 }
 
 // ───────────────────────── Right ─────────────────────────
