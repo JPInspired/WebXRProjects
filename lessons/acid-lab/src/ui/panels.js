@@ -47,6 +47,10 @@ export function drawControls(ui, app) {
     ui.text('See how close each method got to the real pH, then decide: which would you trust, and when?', { size: 21, color: THEME.dim });
   }
 
+  // inside a solution: its ions as dots, magnified (model/Ions.js)
+  ui.heading('Inside a solution', { size: 22 });
+  ui.buttons([{ id: 'ions', label: app.ions.on ? 'Ions: Shown (Tap to Hide)' : 'See the Ions', active: app.ions.on, onClick: () => app.toggleIons() }], { height: 52, size: 21 });
+
   if (app.soloTeacher) drawTeacher(ui, app);
 }
 

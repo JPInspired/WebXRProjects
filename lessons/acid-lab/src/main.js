@@ -7,6 +7,7 @@ import { sound } from '../../../shared/util/sound.js';
 import { SUBSTANCES, LETTERS, PAPERS, unknownsFor, litmusShows, describePH, hydrogen, ANSWERS, SAFETY } from './data/acid.js';
 import { Bench } from './model/Bench.js';
 import { Sorter } from './model/Sorter.js';
+import { Ions } from './model/Ions.js';
 import { Board } from './model/Board.js';
 import { drawControls, drawTeacher, drawInfo, drawCard, MODES } from './ui/panels.js';
 
@@ -57,6 +58,7 @@ class App extends LessonApp {
 
     addContactShadows(this, this.bench.group, -0.3); // soft shadows under things on the bench (bench top at y = -0.3)
     this.sorter = new Sorter(this);
+    this.ions = new Ions(this); // inside a solution: its ions as dots (model/Ions.js)
     this.board = new Board();
     this.boardStage = new THREE.Group();
     this.boardStage.add(this.board.group);
@@ -400,6 +402,12 @@ class App extends LessonApp {
         ],
       });
     }
+    // show everyone my 'inside a solution' dial
+    sections.push({
+      heading: 'Inside a solution',
+      text: this.showIons ? 'Everyone is watching the ions in your solution. Change the pH or add a drop to show them what happens.' : 'Open everyone’s ion bubble on your pH dial, to show the whole class at once.',
+      buttons: [{ id: 'admin-showions', label: this.showIons ? 'Showing Everyone (Tap to Stop)' : 'Show Everyone My Solution', active: !!this.showIons, onClick: () => this.toggleShowIons() }],
+    });
     const who = [...(this.presence?.peers.values() ?? [])].filter((p) => p.replica?.n != null).map((p) => `${p.name} ${p.replica.n}/18`);
     sections.push({
       heading: 'Class progress',
@@ -410,7 +418,25 @@ class App extends LessonApp {
   }
 
   adminLessonState() {
-    return { demo: this.myDemo(), board: this.boardLocal ?? [0, 0, 0] };
+    const ions = this.showIons ? { ph: this.ions.ph, drop: this.ions.drop ?? null, n: this.ions.dropN ?? 0 } : null;
+    return { demo: this.myDemo(), board: this.boardLocal ?? [0, 0, 0], ions };
+  }
+
+  /** Inside a solution: show or hide my ion bubble. */
+  toggleIons() {
+    this.ions.setOn(!this.ions.on);
+    sound.click();
+    if (this.ions.on) this.explain({ title: 'Inside a Solution', text: 'A tiny bubble of solution, magnified: red dots are hydrogen ions, blue dots are hydroxide ions. Change the pH, or add a drop of acid or alkali, and count them.' });
+    this.refresh();
+  }
+
+  /** Teacher: show everyone my ion bubble (or stop). */
+  toggleShowIons() {
+    this.showIons = !this.showIons;
+    if (this.showIons && !this.ions.on) this.ions.setOn(true);
+    sound.click();
+    this.broadcastAdmin();
+    this.refresh();
   }
 
   /** Students: follow the teacher's activity, level and set of solutions; the board shows the teacher's work. */
@@ -432,6 +458,21 @@ class App extends LessonApp {
       changed = true;
     }
     if (l.board && JSON.stringify(l.board) !== JSON.stringify(this.boardLocal ?? [0, 0, 0])) this.boardLocal = l.board;
+    // the teacher is showing everyone the ions in their solution
+    const io = l.ions;
+    if (io && Number.isFinite(io.ph) && io.ph >= 0 && io.ph <= 14) {
+      if (!this.teacherIons) {
+        this.ionsBefore = this.ions.on;
+        this.ions.setOn(true);
+        this.explain({ title: 'Your Teacher’s Solution', text: 'Your teacher is showing everyone the ions in their solution. Watch what happens as they change it.' });
+        changed = true;
+      }
+      this.teacherIons = { ph: io.ph, drop: io.drop === 'acid' || io.drop === 'alkali' ? io.drop : null };
+    } else if (this.teacherIons) {
+      this.teacherIons = null;
+      if (!this.ionsBefore) this.ions.setOn(false);
+      changed = true;
+    }
     if (changed) this.refresh();
   }
 
@@ -473,6 +514,7 @@ class App extends LessonApp {
 
   update(dt) {
     this.bench.update(dt);
+    this.ions.update(dt);
 
     // the class board
     const d = this.demo;
