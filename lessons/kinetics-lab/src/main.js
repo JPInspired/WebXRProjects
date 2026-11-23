@@ -6,6 +6,7 @@ import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
 import { FACTORS, FACTOR_IDS, PREDICTIONS, ANSWERS, RUN } from './data/kinetics.js';
 import { Bench } from './model/Bench.js';
+import { Collisions } from './model/Collisions.js';
 import { Board } from './model/Board.js';
 import { drawControls, drawTeacher, drawInfo, drawCard, MODES } from './ui/panels.js';
 
@@ -50,7 +51,8 @@ class App extends LessonApp {
     this.explainPanel.mesh.rotation.x = 0.2;
     this.lab.add(this.explainPanel.mesh);
     this.panels = [this.controlPanel, this.infoPanel, this.explainPanel];
-    this.bench = new Bench(this);
+    this.bench = new Bench(this);
+    this.collisions = new Collisions(this); // collision theory, magnified (model/Collisions.js)
     addContactShadows(this, this.bench.group, -0.3); // soft shadows under things on the bench (bench top at y = -0.3)
     this.bench.setFactor(this.state.factor);
     this.board = new Board();
@@ -312,11 +314,36 @@ class App extends LessonApp {
     }
     const peers = [...(this.presence?.peers.values() ?? [])].filter((p) => p.replica?.n != null);
     sections.push({ heading: 'Class progress', text: `Runs done: ${peers.length ? peers.map((p) => `${p.name} ${p.replica.n}`).join(' · ') : 'nobody yet'}.`, buttons: [] });
+    // show everyone my collisions bubble
+    sections.push({
+      heading: 'Collisions',
+      text: this.showCollisions ? 'Everyone is watching your reaction, magnified. Change the setting to show them what happens.' : 'Open everyone’s collisions bubble on your setting, to show the whole class at once.',
+      buttons: [{ id: 'admin-showcol', label: this.showCollisions ? 'Showing Everyone (Tap to Stop)' : 'Show Everyone My Reaction', active: !!this.showCollisions, onClick: () => this.toggleShowCollisions() }],
+    });
     return sections;
   }
 
   adminLessonState() {
-    return { demo: this.myDemo(), board: this.boardLocal ?? [0, 0, 0] };
+    const src = this.collisions.source;
+    const collisions = this.showCollisions ? { factor: src.factor, opt: src.opt } : null;
+    return { demo: this.myDemo(), board: this.boardLocal ?? [0, 0, 0], collisions };
+  }
+
+  /** Collisions: show or hide my bubble. */
+  toggleCollisions() {
+    this.collisions.setOn(!this.collisions.on);
+    sound.click();
+    if (this.collisions.on) this.explain({ title: 'Collisions', text: 'The reaction, magnified: particles hit the solid, and only hits with enough energy react (they flash, and gas bubbles up). Try each setting and watch the counts.' });
+    this.refresh();
+  }
+
+  /** Teacher: show everyone my collisions bubble (or stop). */
+  toggleShowCollisions() {
+    this.showCollisions = !this.showCollisions;
+    if (this.showCollisions && !this.collisions.on) this.collisions.setOn(true);
+    sound.click();
+    this.broadcastAdmin();
+    this.refresh();
   }
 
   onAdminLesson(l) {
@@ -337,6 +364,21 @@ class App extends LessonApp {
       changed = true;
     }
     if (l.board && JSON.stringify(l.board) !== JSON.stringify(this.boardLocal ?? [0, 0, 0])) this.boardLocal = l.board;
+    // the teacher is showing everyone their collisions bubble
+    const co = l.collisions;
+    if (co && FACTORS[co.factor] && FACTORS[co.factor].options.some(([id]) => id === co.opt)) {
+      if (!this.teacherCollisions) {
+        this.collisionsBefore = this.collisions.on;
+        this.collisions.setOn(true);
+        this.explain({ title: 'Your Teacher’s Reaction', text: 'Your teacher is showing everyone their reaction, magnified. Watch what happens as they change it.' });
+        changed = true;
+      }
+      this.teacherCollisions = { factor: co.factor, opt: co.opt };
+    } else if (this.teacherCollisions) {
+      this.teacherCollisions = null;
+      if (!this.collisionsBefore) this.collisions.setOn(false);
+      changed = true;
+    }
     if (changed) this.refresh();
   }
 
@@ -379,6 +421,7 @@ class App extends LessonApp {
     const real = Math.min(0.25, (now - (this.lastNow ?? now)) / 1000);
     this.lastNow = now;
     this.bench.update(real);
+    this.collisions.update(real);
     // the live graph of the gas syringe on the info panel
     this.liveClock = (this.liveClock ?? 0) + dt;
     if (this.bench.gas && this.liveClock > 0.5) {

@@ -43,6 +43,10 @@ export function drawControls(ui, app) {
     ui.text('Fill in the summary table on the right: how did each factor change the rate, and why?', { size: 21, color: THEME.dim });
   }
 
+  // collision theory, magnified (model/Collisions.js)
+  ui.heading('Inside the reaction', { size: 22 });
+  ui.buttons([{ id: 'collisions', label: app.collisions.on ? 'Collisions: Shown (Tap to Hide)' : 'See the Collisions', active: app.collisions.on, onClick: () => app.toggleCollisions() }], { height: 52, size: 21 });
+
   if (app.soloTeacher) drawTeacher(ui, app);
 }
 

@@ -316,6 +316,8 @@ Rebuilt from the original EngageVR lesson (flasks of acid at 20–40 °C, magnes
 | Concentration, temperature, surface area, catalysts | **Experiment:** the four factors, each with its own set-up; results tables (and gas curves) on the info panel; the class chart for the teacher's factor on the board. |
 | (plenary) Summary table of each factor; real-world uses | **Summary:** for each factor, whether the rate goes up or down and the collision-theory reason, checked; discussion prompts on industry, food and medicine. |
 
+**Inside the reaction** (`src/model/Collisions.js`, under every activity: **See the Collisions**): collision theory, magnified. Particles of acid (or hydrogen peroxide, for the catalyst) hit the solid; only hits with enough energy react (they flash yellow and a gas bubble rises), and the card counts hits and successful hits each second. It follows the factor being investigated: hotter makes the particles faster and more hits succeed (roughly double every 10 °C); powder exposes more surface than chips or a lump; more concentrated acid means more particles; a catalyst lets far more of the same hits react (manganese oxide more than copper oxide). The teacher can show everyone their bubble (Teacher menu › Collisions).
+
 **Advanced:** the equation for each reaction, rates (1 ÷ time, or cm³ per second), and reading the steepness of the gas curves.
 
 **Ask the chemist:** 8 pre-written answers (rate, collision theory, activation energy, catalysts, ways of measuring, fair tests, industry, medicine and food).
