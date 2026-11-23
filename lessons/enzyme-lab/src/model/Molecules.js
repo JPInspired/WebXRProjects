@@ -192,7 +192,8 @@ export class Molecules {
 
   update(dt) {
     if (this.mode === 'off') return;
-    const b = this.bench;
+    // whose flask: your own, or the teacher's while they are showing everyone (Teacher menu)
+    const b = this.app.teacherFlask ?? this.bench;
     const T = b.T;
     const enzymeIn = !!b.inFlask;
     const used = b.x ?? 0; // share of the peroxide used up
@@ -293,9 +294,9 @@ export class Molecules {
   }
 
   drawCaption(ui) {
-    const s = this.lastState ?? { enzymeIn: false, d: 0, T: this.bench?.T ?? 20, left: N };
+    const s = this.lastState ?? { enzymeIn: false, d: 0, T: (this.app.teacherFlask ?? this.bench)?.T ?? 20, left: N };
     ui.y = 22;
-    ui.text('INSIDE THE FLASK · ×10 MILLION', { size: 22, weight: 700, color: THEME.accent });
+    ui.text(this.app.teacherFlask ? 'YOUR TEACHER’S FLASK · ×10 MILLION' : 'INSIDE THE FLASK · ×10 MILLION', { size: 22, weight: 700, color: THEME.accent });
     let line, col = THEME.text;
     if (!s.enzymeIn) line = 'Only hydrogen peroxide: no enzyme yet, so almost nothing happens. Put the liver in.';
     else if (s.d > 0.5) { line = `At ${s.T} °C catalase has lost its shape (denatured). The peroxide no longer fits the active site, so nothing happens.`; col = '#ffb4a8'; }

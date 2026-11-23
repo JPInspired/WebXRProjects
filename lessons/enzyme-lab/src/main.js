@@ -322,13 +322,34 @@ class App extends LessonApp {
         ],
       });
     }
+    // Show everyone inside my flask: every student's bubble shows the teacher's flask (temperature, liver, progress)
+    sections.push({
+      heading: 'Inside my flask',
+      text: this.showAll ? 'Everyone is watching the molecules in your flask. Change the temperature or put the liver in to show them what happens.' : 'Open everyone’s molecule bubble on your flask, to show the whole class at once.',
+      buttons: [{ id: 'admin-showall', label: this.showAll ? 'Showing Everyone (Tap to Stop)' : 'Show Everyone Inside My Flask', active: !!this.showAll, onClick: () => this.toggleShowAll() }],
+    });
     const peers = [...(this.presence?.peers.values() ?? [])].filter((p) => p.replica?.qn != null);
     sections.push({ heading: 'Class progress', text: `Temperatures done: ${peers.length ? peers.map((p) => `${p.name} ${Object.keys(p.replica.r ?? {}).length}`).join(' · ') : 'nobody yet'}.`, buttons: [] });
     return sections;
   }
 
   adminLessonState() {
-    return { demo: this.myDemo(), board: this.boardLocal ?? [0, 0, 0] };
+    const b = this.bench;
+    // (the teacher's flask, while showing everyone: rounded so it is only re-sent when it really changes)
+    const flask = this.showAll ? { T: b.T, in: !!b.inFlask, x: Math.round((b.x ?? 0) * 50) / 50 } : null;
+    return { demo: this.myDemo(), board: this.boardLocal ?? [0, 0, 0], flask };
+  }
+
+  /** Teacher: show everyone the molecules in my flask (or stop). */
+  toggleShowAll() {
+    this.showAll = !this.showAll;
+    if (this.showAll) {
+      this.molShownBefore = this.molecules.mode;
+      this.molecules.setMode('bubble');
+    } else if (this.molShownBefore === 'off') this.molecules.setMode('off');
+    sound.click();
+    this.broadcastAdmin();
+    this.refresh();
   }
 
   onAdminLesson(l) {
@@ -345,6 +366,22 @@ class App extends LessonApp {
       changed = true;
     }
     if (l.board && JSON.stringify(l.board) !== JSON.stringify(this.boardLocal ?? [0, 0, 0])) this.boardLocal = l.board;
+    // the teacher is showing everyone the molecules in their flask
+    const f = l.flask;
+    const ok = f && Number.isFinite(f.T) && f.T >= 0 && f.T <= 80 && Number.isFinite(f.x) && f.x >= 0 && f.x <= 1;
+    if (ok) {
+      if (!this.teacherFlask) {
+        this.molShownBefore = this.molecules.mode;
+        this.molecules.setMode('bubble');
+        this.explain({ title: 'Your Teacher’s Flask', text: 'Your teacher is showing everyone the molecules in their flask. Watch what happens as they change it.' });
+        changed = true;
+      }
+      this.teacherFlask = { T: f.T, inFlask: !!f.in, x: f.x };
+    } else if (this.teacherFlask) {
+      this.teacherFlask = null;
+      if (this.molShownBefore === 'off') this.molecules.setMode('off');
+      changed = true;
+    }
     if (changed) this.refresh();
   }
 
