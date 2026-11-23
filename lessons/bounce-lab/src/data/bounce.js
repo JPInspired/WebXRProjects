@@ -50,7 +50,7 @@ export const PREDICTIONS = [
     q: 'A tennis ball is dropped from the same height onto concrete, carpet and grass. Which bounces highest?',
     options: ['Concrete', 'Carpet', 'Grass', 'All the same'],
     answer: 0,
-    why: 'Concrete. It is so hard that only the ball squashes, and the ball springs back. Carpet and grass squash too, and they don’t spring back fully: energy is lost in them as heat.',
+    why: 'Concrete. It is so hard that only the ball squashes, and the ball springs back. Carpet and grass squash too, and they do not spring back fully: energy is lost in them as heat.',
   },
   {
     name: 'Height',
@@ -69,7 +69,7 @@ export const PREDICTIONS = [
   {
     name: 'The Moon',
     q: 'A golf ball dropped from 1 m on Earth bounces back to about 66 cm. On the Moon, from 1 m onto hard rock, it will bounce back to about…',
-    options: ['6 times higher', 'the same height, but slowly', '6 times lower', 'it won’t bounce'],
+    options: ['6 times higher', 'the same height, but slowly', '6 times lower', 'it will not bounce'],
     answer: 1,
     why: 'About the same height, in slow motion. Gravity pulls it down six times more weakly, so it falls and rises slowly, but the bounce still keeps the same share of its energy. The share depends on the ball and the surface, not on gravity.',
   },
@@ -89,12 +89,12 @@ export const QUESTIONS = [
 ];
 
 export const ANSWERS = {
-  why: 'As the ball hits the ground it squashes, and its movement energy is stored as elastic energy, like a spring being pressed. The ball then springs back into shape and pushes off the ground. A ball that stays squashed, like plasticine, can’t push back.',
+  why: 'As the ball hits the ground it squashes, and its movement energy is stored as elastic energy, like a spring being pressed. The ball then springs back into shape and pushes off the ground. A ball that stays squashed, like plasticine, cannot push back.',
   energy: 'Before the drop the ball has gravitational potential energy. As it falls this becomes kinetic energy. In the bounce, some is stored elastically and given back, and the rest is transferred to heat (in the ball and the surface) and sound. The bounce height shows how much was given back.',
   momentum: 'Momentum = mass × velocity. A ball hitting the ground at 5 m/s and leaving at 4 m/s has lost some momentum. Because it also changes direction, the ground has to push on it hard: the change in momentum is mass × (5 + 4). The softer the surface, the longer that push lasts and the gentler it is.',
-  never: 'Because energy can’t be created. The ball starts with a set amount of energy from its height, and every bounce loses some to heat and sound. To bounce higher it would need extra energy from somewhere, like a push from your hand.',
+  never: 'Because energy cannot be created. The ball starts with a set amount of energy from its height, and every bounce loses some to heat and sound. To bounce higher it would need extra energy from somewhere, like a push from your hand.',
   air: 'A ping-pong ball is very light for its size, so air resistance matters. It speeds up less as it falls and slows down faster as it rises, so from higher drops it reaches a smaller share of the height. On the Moon there is no air, so it behaves like the others.',
   repeat: 'No two drops are exactly the same: the ball can land slightly spinning, or on a slightly different spot. Repeating each drop three or more times and taking the mean evens out these small random differences and shows the real result.',
-  anomaly: 'A result that doesn’t fit the pattern of the others, usually because something went wrong in that drop: the ball hit the edge of the mat, or bounced off sideways. Look for it, find the reason if you can, and leave it out of your mean.',
+  anomaly: 'A result that does not fit the pattern of the others, usually because something went wrong in that drop: the ball hit the edge of the mat, or bounced off sideways. Look for it, find the reason if you can, and leave it out of your mean.',
   real: 'Sports set rules for how much balls and pitches bounce. Running tracks, crash mats, playground surfaces and the soles of trainers are designed to absorb or return energy, and car crumple zones and helmets are designed to make a hit last longer so that the force is smaller.',
 };

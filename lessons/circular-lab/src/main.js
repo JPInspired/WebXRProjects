@@ -36,7 +36,7 @@ class App extends LessonApp {
       done: [], // real-world examples tried: 'ball' | 'satellite' | 'car'
       phys: { qid: null, answer: null },
       explain: {
-        title: 'Welcome to the Circular Motion lab',
+        title: 'Welcome to the Circular Motion Lab',
         text: 'A ball on a string, spun round above your head by a fixed pull. First, a prediction: read the question on the class board and pick your answer on the right.',
       },
     };
@@ -153,13 +153,13 @@ class App extends LessonApp {
     }
     const res = k.result();
     if (!res || res.n < 3) {
-      this.explain({ kicker: 'STOPWATCH', title: 'Count more turns', text: 'Start the stopwatch, tap “Count a turn” each time the ball passes you, and stop it after 10 turns or more.' });
+      this.explain({ kicker: 'STOPWATCH', title: 'Count More Turns', text: 'Start the stopwatch, tap “Count a turn” each time the ball passes you, and stop it after 10 turns or more.' });
       return;
     }
     this.state.runs.push(res);
     const ideal = idealRps(res.m, res.L, res.M);
     const gateBit = res.gate ? ` The light gate read ${res.gate.toFixed(2)}: your timing was ${Math.abs(res.f - res.gate) / res.gate < 0.05 ? 'very close' : `${Math.round((Math.abs(res.f - res.gate) / res.gate) * 100)}% out`}.` : '';
-    const steadyBit = res.steady < 0.7 ? ' The clip wasn’t in place for much of it, so this result is less reliable.' : '';
+    const steadyBit = res.steady < 0.7 ? ' The clip was not in place for much of it, so this result is less reliable.' : '';
     this.explain({ kicker: 'RESULT', title: `${res.f.toFixed(2)} turns per second`, text: `${res.n} turns in ${res.t.toFixed(2)} s with the ${res.m} g ball on ${res.L.toFixed(1)} m.${gateBit}${steadyBit}${this.state.level === 'advanced' ? ` Theory says ${ideal.toFixed(2)}.` : ''}` });
     sound.bond();
   }
@@ -187,18 +187,18 @@ class App extends LessonApp {
       return;
     }
     if (!k.cutString()) {
-      this.explain({ kicker: 'NOT YET', title: 'Spin it first', text: 'Get the ball going round (press Faster, or swirl it), then cut the string.' });
+      this.explain({ kicker: 'NOT YET', title: 'Spin It First', text: 'Get the ball going round (press Faster, or swirl it), then cut the string.' });
       return;
     }
     this.markDone('ball');
-    this.explain({ kicker: 'SNIP!', title: 'Straight on, along the tangent', text: 'With no string pulling it towards the centre, nothing turns it any more: it carries straight on in the direction it was moving (the dashed line), falling as it goes. It doesn’t fly straight outwards.' });
+    this.explain({ kicker: 'SNIP', title: 'Straight On, Along the Tangent', text: 'With no string pulling it towards the centre, nothing turns it any more: it carries straight on in the direction it was moving (the dashed line), falling as it goes. It does not fly straight outwards.' });
   }
 
   gravityOff() {
     if (!this.plenary.satellite.release()) return;
     fxBoom();
     this.markDone('satellite');
-    this.explain({ kicker: 'NO GRAVITY', title: 'The satellite flies off', text: 'Gravity was the only force pulling it towards Earth. Without it, the satellite carries straight on along the tangent, like the ball when the string is cut.' });
+    this.explain({ kicker: 'NO GRAVITY', title: 'The Satellite Flies Off', text: 'Gravity was the only force pulling it towards Earth. Without it, the satellite carries straight on along the tangent, like the ball when the string is cut.' });
   }
 
   iceRoad() {
@@ -206,7 +206,7 @@ class App extends LessonApp {
     this.plenary.ice.visible = true;
     fxBoom();
     this.markDone('car');
-    this.explain({ kicker: 'ICE!', title: 'The car slides straight on', text: 'On ice the tyres can’t grip, so there is almost no friction pushing the car towards the centre of the bend. It carries straight on, along the tangent. That’s why we slow down for bends in icy weather.' });
+    this.explain({ kicker: 'ICE', title: 'The Car Slides Straight On', text: 'On ice the tyres cannot grip, so there is almost no friction pushing the car towards the centre of the bend. It carries straight on, along the tangent. That is why we slow down for bends in icy weather.' });
   }
 
   // ───────────── predictions ─────────────
@@ -256,7 +256,7 @@ class App extends LessonApp {
   onRevealed(ch) {
     const mine = this.myVote(ch);
     sound[mine === ch.answer ? 'bond' : 'beep']();
-    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right!' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
+    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
   }
 
   // ───────────── ask the physicist ─────────────
@@ -348,8 +348,8 @@ class App extends LessonApp {
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }

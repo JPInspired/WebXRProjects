@@ -132,7 +132,7 @@ class App extends LessonApp {
 
   openAsk() {
     if (this.popupOpen === 'Ask the physicist') return this.closePopup();
-    this.openPopup('Ask the physicist', (ui) => drawAsk(ui, this), { height: 0.72 });
+    this.openPopup('Ask the Physicist', (ui) => drawAsk(ui, this), { height: 0.72 });
   }
 
   openDiscuss() {
@@ -147,7 +147,7 @@ class App extends LessonApp {
     this.rig.resetWatch();
     this.applyMode();
     sound.click();
-    if (id === 'giant') this.explain({ kicker: 'GIANT PENDULUM', title: 'Hanging from the ceiling', text: this.presenting ? 'Look behind your bench: a 2 m pendulum hangs from the ceiling. Grab its bob, pull it out and let go, or use “Let go”. Does the pattern still hold?' : 'Behind your bench, a 2 m pendulum hangs from the ceiling. Does the pattern still hold for long pendulums?' });
+    if (id === 'giant') this.explain({ kicker: 'GIANT PENDULUM', title: 'Hanging from the Ceiling', text: this.presenting ? 'Look behind your bench: a 2 m pendulum hangs from the ceiling. Grab its bob, pull it out and let go, or use “Let go”. Does the pattern still hold?' : 'Behind your bench, a 2 m pendulum hangs from the ceiling. Does the pattern still hold for long pendulums?' });
   }
 
   setLength(L) {
@@ -195,7 +195,7 @@ class App extends LessonApp {
     if (what === 'start') return;
     const w = r.watch;
     if (w.n < 3) {
-      this.explain({ kicker: 'STOPWATCH', title: 'Count more swings', text: 'Start the stopwatch as you let go, tap “Count a swing” each time it comes back to where you let go, and stop after 10.' });
+      this.explain({ kicker: 'STOPWATCH', title: 'Count More Swings', text: 'Start the stopwatch as you let go, tap “Count a swing” each time it comes back to where you let go, and stop after 10.' });
       return;
     }
     const p = r.active;
@@ -349,7 +349,7 @@ class App extends LessonApp {
   onRevealed(ch) {
     const mine = this.myVote(ch);
     sound[mine === ch.answer ? 'bond' : 'beep']();
-    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right!' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
+    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
   }
 
   // ───────────── ask the physicist ─────────────
@@ -462,8 +462,8 @@ class App extends LessonApp {
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }

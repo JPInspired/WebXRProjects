@@ -25,7 +25,7 @@ export function drawControls(ui, app) {
       const ch = app.challenge();
       ui.text('Read the question out and let everyone pick, then reveal the answer.', { size: 21, color: THEME.dim });
       ui.buttons(app.predictions().map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, height: 50, size: 20, gap: 8 });
-      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the answer' : 'Reveal the answer', active: ch.revealed, onClick: () => app.reveal() }], { height: 58, size: 24 });
+      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the Answer' : 'Reveal the Answer', active: ch.revealed, onClick: () => app.reveal() }], { height: 58, size: 24 });
       const t = app.tally(ch);
       ui.text(`${t.votes} answer${t.votes === 1 ? '' : 's'} in so far.`, { size: 22, weight: 700 });
     } else ui.text('Read the question on the class board and pick your answer on the right. Your teacher will reveal it.', { size: 22, color: THEME.dim });
@@ -33,22 +33,22 @@ export function drawControls(ui, app) {
     const c = b.cell;
     ui.heading(adv ? 'Cells (two beakers each)' : 'Cells', { size: 22 });
     ui.buttons(b.cells.map((x) => ({ id: `cell-${x.i}`, label: `Cell ${x.i + 1}`, active: !b.series && b.selected === x.i, onClick: () => app.selectCell(x.i) })), { height: 44, size: 18, gap: 6 });
-    ui.buttons([{ id: 'series', label: b.series ? 'Linked in series ✓' : 'Link the cells in series', active: b.series, onClick: () => app.toggleSeries() }], { height: 44, size: 18 });
+    ui.buttons([{ id: 'series', label: b.series ? 'Linked in Series ✓' : 'Link the Cells in Series', active: b.series, onClick: () => app.toggleSeries() }], { height: 44, size: 18 });
     ui.heading(`Cell ${c.i + 1}: ${adv ? 'left beaker (black lead)' : 'left strip (black lead)'}`, { size: 19 });
     ui.buttons(METAL_IDS.map((id) => ({ id: `l-${id}`, label: METALS[id].sym, active: c.left === id, onClick: () => app.quickStrip('left', id) })), { height: 40, size: 18, gap: 5 });
     ui.heading(adv ? 'Right beaker (red lead)' : 'Right strip (red lead)', { size: 19 });
     ui.buttons(METAL_IDS.map((id) => ({ id: `r-${id}`, label: METALS[id].sym, active: c.right === id, onClick: () => app.quickStrip('right', id) })), { height: 40, size: 18, gap: 5 });
     if (adv) {
-      ui.buttons([{ id: 'bridge', label: c.bridge ? 'Salt bridge in ✓ (take it out)' : 'Put the salt bridge in', active: c.bridge, onClick: () => app.quickBridge() }], { height: 44, size: 18 });
+      ui.buttons([{ id: 'bridge', label: c.bridge ? 'Salt Bridge In ✓ (Take It Out)' : 'Put the Salt Bridge In', active: c.bridge, onClick: () => app.quickBridge() }], { height: 44, size: 18 });
     } else {
       ui.heading('Electrolyte', { size: 19 });
       ui.buttons(ELECTROLYTE_IDS.map((id) => ({ id: `e-${id}`, label: ELECTROLYTES[id].short, active: c.electrolyte === id, onClick: () => app.quickElectrolyte(id) })), { cols: 3, height: 40, size: 15, gap: 5 });
     }
-    ui.buttons([{ id: 'empty', label: 'Empty this cell', onClick: () => app.emptyCell() }], { height: 40, size: 17 });
+    ui.buttons([{ id: 'empty', label: 'Empty This Cell', onClick: () => app.emptyCell() }], { height: 40, size: 17 });
     ui.heading('Extras', { size: 19 });
     ui.buttons([
-      { id: 'particles', label: s.particles ? 'Particles: shown' : 'Zoom into the particles', active: s.particles, onClick: () => app.toggleParticles() },
-      { id: 'rundown', label: s.run ? 'Running…' : 'Run it down (24 h)', active: !!s.run, disabled: !!s.run, onClick: () => app.runDown() },
+      { id: 'particles', label: s.particles ? 'Particles: Shown' : 'Zoom into the Particles', active: s.particles, onClick: () => app.toggleParticles() },
+      { id: 'rundown', label: s.run ? 'Running…' : 'Run It Down (24 h)', active: !!s.run, disabled: !!s.run, onClick: () => app.runDown() },
     ], { height: 46, size: 17, gap: 6 });
     if (adv) ui.buttons([{ id: 'mode-meter', label: b.mode === 'V' ? 'Meter: volts (switch to mA)' : 'Meter: milliamps (switch to V)', onClick: () => app.toggleMeterMode() }], { height: 42, size: 17 });
   } else {
@@ -67,7 +67,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the chemist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.chem.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 16, gap: 8 });
     if (s.chem.answer) ui.box(s.chem.answer, { size: 20 });
   })], { height: 56, size: 20 });
@@ -103,7 +103,7 @@ function drawLab(ui, app) {
     ui.text(b.mode === 'V' ? `${r.V.toFixed(2)} V` : `${(r.I * 1000).toFixed(r.I * 1000 < 10 ? 2 : 1)} mA`, { size: 60, weight: 800, color: r.V < 0 ? BAD : THEME.accent });
     if (r.V < -0.02) ui.text('A minus sign: the black lead is on the positive strip. The more reactive metal is the negative one.', { size: 18, color: WARN });
   } else ui.text(r.why, { size: 20, weight: 700, color: WARN });
-  ui.buttons([{ id: 'record', label: 'Record this reading', disabled: !r.ok, onClick: () => app.record() }], { height: 52, size: 21 });
+  ui.buttons([{ id: 'record', label: 'Record This Reading', disabled: !r.ok, onClick: () => app.record() }], { height: 52, size: 21 });
 
   if (s.curve?.length > 1) drawCurve(ui, s.curve);
 
@@ -166,7 +166,7 @@ function drawTable(ui, app) {
 
 function drawBatteries(ui, app) {
   const s = app.state;
-  ui.title('Real batteries', { size: 30 });
+  ui.title('Real Batteries', { size: 30 });
   const b = BATTERIES.find((x) => x.id === s.battery);
   if (b) {
     ui.text(`${b.name}: ${b.volts}`, { size: 21, weight: 700 });

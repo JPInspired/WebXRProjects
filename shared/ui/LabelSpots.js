@@ -70,7 +70,7 @@ export class LabelSpots {
 
   /**
    * Lay out one spot per part: in two columns either side of the model (each part on the side it is on), at the
-   * height of its point, spread so they don't overlap.
+   * height of its point, spread so they do not overlap.
    */
   build(parts, box) {
     this.clear();
@@ -162,7 +162,7 @@ export class LabelSpots {
     return best?.s.id ?? null;
   }
 
-  /** Where a label for this part sits once it's right (parent space). */
+  /** Where a label for this part sits once it is right (parent space). */
   place(id) {
     return this.spots.find((s) => s.id === id)?.g.position.clone() ?? null;
   }

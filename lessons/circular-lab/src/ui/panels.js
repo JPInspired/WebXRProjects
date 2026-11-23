@@ -25,7 +25,7 @@ export function drawControls(ui, app) {
       const ch = app.challenge();
       ui.text('Read the question out and let everyone pick, then reveal the answer.', { size: 21, color: THEME.dim });
       ui.buttons(app.predictions().map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, height: 50, size: 20, gap: 8 });
-      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the answer' : 'Reveal the answer', active: ch.revealed, onClick: () => app.reveal() }], { height: 58, size: 24 });
+      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the Answer' : 'Reveal the Answer', active: ch.revealed, onClick: () => app.reveal() }], { height: 58, size: 24 });
       const t = app.tally(ch);
       ui.text(`${t.votes} answer${t.votes === 1 ? '' : 's'} in so far.`, { size: 22, weight: 700 });
     } else ui.text('Read the question on the class board and pick your answer on the right. Your teacher will reveal it.', { size: 22, color: THEME.dim });
@@ -46,17 +46,17 @@ export function drawControls(ui, app) {
       ui.buttons(HANGING.map((M) => ({ id: `hang-${M}`, label: `${M} g`, active: k.M === M, onClick: () => app.chooseHanging(M) })), { height: 44, size: 18, gap: 6 });
     }
     ui.buttons([
-      { id: 'gate', label: k.gate.on ? 'Light gate: on' : 'Light gate: off', active: k.gate.on, onClick: () => app.toggleGate() },
-      { id: 'arrows', label: k.arrows ? 'Arrows: on' : 'Arrows: off', active: k.arrows, onClick: () => app.toggleArrows() },
+      { id: 'gate', label: k.gate.on ? 'Light Gate: On' : 'Light Gate: Off', active: k.gate.on, onClick: () => app.toggleGate() },
+      { id: 'arrows', label: k.arrows ? 'Arrows: On' : 'Arrows: Off', active: k.arrows, onClick: () => app.toggleArrows() },
     ], { height: 46, size: 19, gap: 8 });
   } else {
     ui.heading('Take the force away', { size: 22 });
-    ui.buttons([{ id: 'cut', label: k.cut ? 'Tie on a new string' : 'Cut the string', active: !!k.cut, onClick: () => app.cutOrRetie() }], { height: 52, size: 21 });
+    ui.buttons([{ id: 'cut', label: k.cut ? 'Tie on a New String' : 'Cut the String', active: !!k.cut, onClick: () => app.cutOrRetie() }], { height: 52, size: 21 });
     ui.buttons([
-      { id: 'gravity', label: 'Switch off gravity', onClick: () => app.gravityOff() },
-      { id: 'ice', label: 'Ice on the road', onClick: () => app.iceRoad() },
+      { id: 'gravity', label: 'Switch Off Gravity', onClick: () => app.gravityOff() },
+      { id: 'ice', label: 'Ice on the Road', onClick: () => app.iceRoad() },
     ], { height: 50, size: 19, gap: 8 });
-    ui.buttons([{ id: 'arrows', label: app.plenary.arrows ? 'Arrows: on' : 'Arrows: off', active: app.plenary.arrows, onClick: () => app.toggleArrows() }], { height: 46, size: 19 });
+    ui.buttons([{ id: 'arrows', label: app.plenary.arrows ? 'Arrows: On' : 'Arrows: Off', active: app.plenary.arrows, onClick: () => app.toggleArrows() }], { height: 46, size: 19 });
     if (!k.cut && Math.abs(k.omega) < 2) ui.text('Get the ball spinning first (Faster, or swirl it), then cut the string.', { size: 19, color: WARN });
   }
 
@@ -72,7 +72,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the physicist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.phys.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 16, gap: 8 });
     if (s.phys.answer) ui.box(s.phys.answer, { size: 20 });
   })], { height: 56, size: 20 });
@@ -103,11 +103,11 @@ function drawLab(ui, app) {
   const adv = s.level === 'advanced';
   const spinning = Math.abs(k.omega) > 1;
   const z = k.zone;
-  ui.title('Measure it', { size: 30 });
+  ui.title('Measure It', { size: 30 });
   ui.text(!spinning ? 'Get it spinning: swirl the tube (or drag round in circles), or press Faster.' : z === 'steady' ? '● Clip in place: steady. Time it now.' : z === 'fast' ? '● Too fast: the clip is pulled up against the tube.' : '● Too slow: the clip has dropped away from the tube.', { size: 20, weight: 700, color: !spinning ? THEME.dim : z === 'steady' ? GOOD : z === 'fast' ? WARN : '#7cc4ff' });
   ui.text(`${k.m} g ball · ${k.L.toFixed(1)} m string · pull ${k.F.toFixed(2)} N (${k.M} g hanging)`, { size: 18, color: THEME.dim });
   ui.buttons([
-    { id: 'watch', label: k.watch.running ? 'Stop the stopwatch' : 'Start the stopwatch', active: k.watch.running, onClick: () => app.pressStartStop() },
+    { id: 'watch', label: k.watch.running ? 'Stop the Stopwatch' : 'Start the Stopwatch', active: k.watch.running, onClick: () => app.pressStartStop() },
     { id: 'count', label: `Count a turn (${k.watch.n})`, disabled: !k.watch.running, onClick: () => app.pressCount() },
   ], { height: 54, size: 19, gap: 8 });
   ui.text(`Stopwatch ${k.watch.t.toFixed(2)} s · tap “Count a turn” each time the ball passes you. Time at least 10 turns.`, { size: 17, color: THEME.dim });
@@ -141,12 +141,12 @@ function drawTable(ui, app, adv) {
     });
     ui.y += 28;
   }
-  if (runs.some((r) => r.steady < 0.7)) ui.text('Yellow: the clip wasn’t in place for much of that timing, so the radius wasn’t what you set.', { size: 16, color: WARN });
+  if (runs.some((r) => r.steady < 0.7)) ui.text('Yellow: the clip was not in place for much of that timing, so the radius was not what you set.', { size: 16, color: WARN });
   if (adv) ui.text('If F = mω²r, the last two columns should match: the hanging weight’s pull is the centripetal force. (ω = 2π × turns per second.)', { size: 16, color: THEME.dim });
 }
 
 function drawWorld(ui, app) {
-  ui.title('In the real world', { size: 30 });
+  ui.title('In the Real World', { size: 30 });
   for (const e of EXAMPLES) {
     ui.text(`${e.name}: ${e.force.toLowerCase()}`, { size: 20, weight: 700, color: app.state.done.includes(e.id) ? GOOD : THEME.text });
     ui.text(e.what, { size: 17, color: THEME.dim });

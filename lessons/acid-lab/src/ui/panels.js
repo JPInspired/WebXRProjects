@@ -23,12 +23,12 @@ export function drawControls(ui, app) {
     const q = app.sorter;
     const n = q.placed.length;
     ui.text(`${n} of ${q.total} placed${q.wrong ? ` · ${q.wrong} wrong tr${q.wrong === 1 ? 'y' : 'ies'}` : ''}`, { size: 28, weight: 700, color: n === q.total ? GOOD : THEME.text });
-    ui.buttons([{ id: 'sort-restart', label: 'Start again', onClick: () => app.restartSort() }], { height: 52, size: 23 });
+    ui.buttons([{ id: 'sort-restart', label: 'Start Again', onClick: () => app.restartSort() }], { height: 52, size: 23 });
     ui.text(`Drag each bottle to where you think it belongs on the pH scale. ${app.presenting ? 'Pinch' : 'Click'} a bottle to find out about it.`, { size: 21, color: THEME.dim });
   } else if (s.mode === 'paper' || s.mode === 'meter') {
     if (!s.goggles) {
       ui.box(`Safety first. ${SAFETY}`, { size: 21, color: WARN });
-      ui.buttons([{ id: 'goggles', label: 'Put my goggles on', onClick: () => app.putGogglesOn() }], { height: 60, size: 25 });
+      ui.buttons([{ id: 'goggles', label: 'Put My Goggles On', onClick: () => app.putGogglesOn() }], { height: 60, size: 25 });
     } else if (s.mode === 'paper') {
       ui.text('1. Take a strip from a dispenser and dip it in a solution.\n2. It lands on the tile: look at its colour.\n3. Record what you see on the right.\nUse a fresh strip every time.', { size: 21, color: THEME.dim });
     } else {
@@ -36,14 +36,14 @@ export function drawControls(ui, app) {
       ui.kv('Probe', m.probe === 'clean' ? 'clean' : 'needs rinsing', { size: 24, color: m.probe === 'clean' ? GOOD : WARN });
       if (s.level === 'advanced') {
         ui.kv('Calibration', m.calibrated ? 'done' : 'needed', { size: 24, color: m.calibrated ? GOOD : BAD });
-        ui.buttons([{ id: 'calibrate', label: m.calibrated ? 'Calibrated at pH 7.00' : 'Calibrate (probe in the buffer)', active: m.calibrated, disabled: m.calibrated || m.in !== 'buffer' || m.stable < 1, onClick: () => app.calibrate() }], { height: 52, size: 22 });
+        ui.buttons([{ id: 'calibrate', label: m.calibrated ? 'Calibrated at pH 7.00' : 'Calibrate (Probe in the Buffer)', active: m.calibrated, disabled: m.calibrated || m.in !== 'buffer' || m.stable < 1, onClick: () => app.calibrate() }], { height: 52, size: 22 });
       }
       ui.text(`${s.level === 'advanced' ? '1. Calibrate: stand the probe in the pH 7.00 buffer, wait, press Calibrate.\n2' : '1'}. Dip the probe in a solution (let go: it stands in the beaker).\n• Wait for STABLE, then record.\n• Rinse in distilled water before the next one.`, { size: 21, color: THEME.dim });
     }
   } else {
     const done = app.progress();
     ui.text(`${done} of 18 results recorded`, { size: 26, weight: 700 });
-    ui.buttons([{ id: 'check', label: s.checked ? 'Hide the answers' : 'Check my results', active: s.checked, onClick: () => app.toggleCheck() }], { height: 58, size: 25 });
+    ui.buttons([{ id: 'check', label: s.checked ? 'Hide the Answers' : 'Check My Results', active: s.checked, onClick: () => app.toggleCheck() }], { height: 58, size: 25 });
     ui.text('See how close each method got to the real pH, then decide: which would you trust, and when?', { size: 21, color: THEME.dim });
   }
 
@@ -55,7 +55,7 @@ export function drawTeacher(ui, app) {
   const s = app.state;
   const armed = app.newArmed && performance.now() - app.newArmed < 3000;
   ui.heading('Unknown solutions', { size: 22 });
-  ui.buttons([{ id: 'new', label: armed ? 'Sure? Clears results' : 'New solutions', active: armed, onClick: () => app.newSolutions() }], { height: 52, size: 20 });
+  ui.buttons([{ id: 'new', label: armed ? 'Sure? Clears Results' : 'New Solutions', active: armed, onClick: () => app.newSolutions() }], { height: 52, size: 20 });
   void s;
 }
 
@@ -74,7 +74,7 @@ export function drawInfo(ui, app) {
       } else ui.text('Where does it go on the scale?', { size: 22, color: THEME.dim });
       ui.text(sub.fact, { size: 22 });
     } else {
-      ui.title('The pH scale', { size: 36 });
+      ui.title('The pH Scale', { size: 36 });
       ui.text('pH measures how acidic or alkaline a solution is. Below 7 is acidic, 7 is neutral, above 7 is alkaline (basic). The further from 7, the stronger.', { size: 22 });
       if (adv) ui.text('pH = −log₁₀[H⁺]. Each step of 1 on the scale is ten times more (or fewer) hydrogen ions: pH 2 is 100,000 times more acidic than pH 7.', { size: 21, color: WARN });
     }
@@ -103,7 +103,7 @@ export function drawInfo(ui, app) {
       : m.in === 'rinse' ? 'Rinsing: the probe is clean again.'
         : m.in === 'buffer' ? (m.stable >= 1 ? 'In the buffer: stable.' : 'In the buffer: wait for STABLE…')
           : !inSample ? 'Dip the probe in a solution.'
-            : m.contaminated ? 'The probe wasn’t rinsed: this reading may be wrong!'
+            : m.contaminated ? 'The probe was not rinsed: this reading may be wrong.'
               : m.stable >= 1 ? 'The reading is stable.' : 'Wait for the reading to settle…';
     ui.text(status, { size: 23, color: m.contaminated && inSample ? BAD : m.stable >= 1 ? GOOD : WARN });
     ui.buttons([{ id: 'rec-meter', label: inSample ? `Record the reading for ${m.in}` : 'Record the reading', disabled: !inSample, onClick: () => app.recordMeter() }], { height: 58, size: 24 });
@@ -118,7 +118,7 @@ export function drawInfo(ui, app) {
       ui.kv('Litmus: right about', `${sum.litmusRight} of ${sum.litmusDone}`, { size: 22 });
       ui.kv('Indicator: average error', sum.uiDone ? `${sum.uiErr.toFixed(1)} pH` : '–', { size: 22, color: WARN });
       ui.kv('Meter: average error', sum.meterDone ? `${sum.meterErr.toFixed(2)} pH` : '–', { size: 22, color: GOOD });
-      if (sum.weak) ui.text(`Litmus showed “neutral” for ${sum.weak}, but the meter shows it isn’t exactly neutral: litmus can’t detect weak acids and alkalis.`, { size: 20, color: WARN });
+      if (sum.weak) ui.text(`Litmus showed “neutral” for ${sum.weak}, but the meter shows it is not exactly neutral: litmus cannot detect weak acids and alkalis.`, { size: 20, color: WARN });
       if (sum.sloppy) ui.text('A meter reading was well out. Did you wait for STABLE, and rinse the probe first?', { size: 20, color: BAD });
     }
     ui.heading('The three methods', { size: 26 });
@@ -132,7 +132,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the chemist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 19, gap: 8 });
     if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
   })], { height: 56, size: 20 });

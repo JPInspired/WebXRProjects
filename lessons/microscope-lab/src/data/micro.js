@@ -65,7 +65,7 @@ export const QUIZ = [
   { q: 'What is the coverslip for?', options: ['It keeps the sample flat, stops it drying out and protects the lens', 'It magnifies the sample', 'It adds colour', 'Nothing'], answer: 0, why: 'The thin coverslip holds the sample flat and thin, stops it drying out and keeps stain off the lens.' },
   { q: 'Which knob should you use at high power (×40)?', options: ['The coarse focus knob', 'The fine focus knob', 'Both, as fast as possible', 'Neither'], answer: 1, why: 'Only the fine focus: at high power the lens is very close to the slide, and the coarse knob could crash it into the slide.' },
   { q: 'The eyepiece is ×10 and the objective is ×40. What is the total magnification?', options: ['×50', '×4', '×400', '×4000'], answer: 2, why: 'Total magnification = eyepiece × objective = 10 × 40 = ×400.' },
-  { q: 'Which of these do plant cells have but animal cells don’t?', options: ['A nucleus', 'Cytoplasm', 'A cell membrane', 'A cell wall'], answer: 3, why: 'Plant cells have a cell wall (and often chloroplasts and a large vacuole). Both have a nucleus, cytoplasm and a membrane.' },
+  { q: 'Which of these do plant cells have but animal cells do not?', options: ['A nucleus', 'Cytoplasm', 'A cell membrane', 'A cell wall'], answer: 3, why: 'Plant cells have a cell wall (and often chloroplasts and a large vacuole). Both have a nucleus, cytoplasm and a membrane.' },
 ];
 export const QUIZ_ADVANCED = [
   { q: 'Why do red blood cells have no nucleus?', options: ['They are dead', 'To leave more room for haemoglobin to carry oxygen', 'They lost it in the stain', 'So they can divide faster'], answer: 1, why: 'Without a nucleus there is more space for haemoglobin, so each red blood cell can carry more oxygen.' },
@@ -92,6 +92,6 @@ export const ANSWERS = {
   low: 'At low power you see the biggest area, so the specimen is easy to find and the image is bright and easy to focus. Then you switch to a higher power and only need the fine focus.',
   stain: 'Most parts of a cell are clear and colourless. A stain sticks to some parts more than others: iodine colours the nucleus and walls of plant cells, methylene blue the nucleus of animal cells.',
   cover: 'Lower it at an angle with a mounted needle so that it pushes the air out: air bubbles look like thick black circles and hide the cells. The coverslip keeps the sample flat and thin, stops it drying out and keeps stain off the lens.',
-  plant: 'Both have a nucleus, cytoplasm, a cell membrane, mitochondria and ribosomes. Plant cells also have a cell wall, a large permanent vacuole and (in green parts) chloroplasts, which is why onion and pondweed cells look like neat bricks and cheek cells don’t.',
+  plant: 'Both have a nucleus, cytoplasm, a cell membrane, mitochondria and ribosomes. Plant cells also have a cell wall, a large permanent vacuole and (in green parts) chloroplasts, which is why onion and pondweed cells look like neat bricks and cheek cells do not.',
   real: 'Hospitals examine blood and tissue samples to diagnose diseases such as cancer and malaria. Microscopes are used in forensic science, checking water and food for bacteria, developing medicines, and studying new materials.',
 };

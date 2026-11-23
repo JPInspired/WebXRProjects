@@ -39,7 +39,8 @@ const P_LA = [[0, 6], [0.05, 6], [0.12, 11], [0.19, 7], [0.45, 12], [0.56, 13], 
 
 class App extends LessonApp {
   constructor() {
-    super({ labPos: new THREE.Vector3(0, 1.2, 0), camPos: new THREE.Vector3(0, 1.5, 1.5) });
+    // on a computer, seen from a little above, so the desk heart and the class heart behind it never overlap
+    super({ labPos: new THREE.Vector3(0, 1.2, 0), camPos: new THREE.Vector3(0, 2.0, 1.4), camTarget: new THREE.Vector3(0, 1.15, -0.5) });
     this.state = {
       ...this.state,
       mode: 'explore',
@@ -119,7 +120,7 @@ class App extends LessonApp {
 
   /**
    * Swap in the anatomical heart (a real human heart, models/heart.glb) once it has loaded. Until then, or if it
-   * can't be loaded (e.g. a school filter blocks it), the heart built in code is shown, and everything still works.
+   * cannot be loaded (e.g. a school filter blocks it), the heart built in code is shown, and everything still works.
    */
   async loadRealHeart() {
     let model;
@@ -215,18 +216,18 @@ class App extends LessonApp {
     if (mode === 'label') {
       this.heart.model.rotation.set(0, 0, 0);
       this.quiz.start(this.heart, s.level);
-      s.explain = { title: 'Label the heart', text: `Drag each of the ${this.quiz.total} names onto its spot: follow each spot's line to its part. (You can also drop a name straight onto the part.) Open the heart up to see the parts inside. Then explain to a partner what each one does.` };
+      s.explain = { title: 'Label the Heart', text: `Drag each of the ${this.quiz.total} names onto its spot: follow each spot's line to its part. (You can also drop a name straight onto the part.) Open the heart up to see the parts inside. Then explain to a partner what each one does.` };
     } else if (mode === 'flow') {
       this.journeyTo(0, true);
     } else if (mode === 'cycle') {
-      s.explain = { title: 'The cardiac cycle', text: 'One heartbeat, over and over. Watch which chambers squeeze and which valves open and shut. Press a stage to freeze it, or slow it down. The ECG shows the electrical signals that start each beat.' };
+      s.explain = { title: 'The Cardiac Cycle', text: 'One heartbeat, over and over. Watch which chambers squeeze and which valves open and shut. Press a stage to freeze it, or slow it down. The ECG shows the electrical signals that start each beat.' };
     } else if (mode === 'exercise') {
       s.explain = { title: 'Exercise', text: 'Choose how hard you are exercising and watch the heart speed up. More blood each minute means more oxygen and glucose for your muscles.' };
     } else if (mode === 'conditions') {
       const c = CONDITIONS[s.cond];
       s.explain = { title: c.title, text: c.text };
     } else {
-      s.explain = { title: 'Explore the heart', text: 'Tap any part to find out what it does. Turn on Names to see them all, and open the heart up to see the chambers, valves and septum inside.' };
+      s.explain = { title: 'Explore the Heart', text: 'Tap any part to find out what it does. Turn on Names to see them all, and open the heart up to see the chambers, valves and septum inside.' };
     }
     this.refresh();
   }
@@ -444,8 +445,8 @@ class App extends LessonApp {
         heading: 'Class heart',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'big-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBig(null) },
-          { id: 'big-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBig('here') },
+          { id: 'big-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBig(null) },
+          { id: 'big-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBig('here') },
         ],
       });
     }
@@ -492,7 +493,7 @@ class App extends LessonApp {
     return { q: [this.quiz.right, this.quiz.total, this.quiz.wrong], m: this.state.mode };
   }
 
-  /** Others' hearts aren't drawn on my desk (the class heart is shared); I just keep their scores. */
+  /** Others' hearts are not drawn on my desk (the class heart is shared); I just keep their scores. */
   createReplica() {
     const r = {
       group: new THREE.Group(),

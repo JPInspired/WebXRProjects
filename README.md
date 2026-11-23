@@ -106,10 +106,12 @@ They are built to stay light on a headset: the walls, floor and ceiling are pict
 
 ## Shared sessions (work alongside colleagues)
 
+**Same room is no longer offered to teachers** (since 23 November 2026). Lining every headset up with the real room needs each one to have done Space Setup in that room first, which is too much to ask in a school. Every class session now works the simple way: each student's bench in front of them, classmates' benches beside it. The same-room code below still works for a lesson address with `&room=same`.
+
 Every lesson can be opened **solo** or in a **shared session**:
 
-1. On the lessons page, enter your name, pick a lesson and choose **Start a shared session**. You get a 4-letter code, e.g. `K7QM`, shown in the lesson and on a small panel under the controls in the headset.
-2. Students type the code into **Joining a Class?** at the very top of the lessons page (with their name) and press **Join the Class**: the page asks the teacher's open lesson which lesson it is and whether the class is in the same room, then opens it for them. They can also pick the same lesson and choose **Join with code**, or open the link from **Copy link**.
+1. On the lessons page, enter your name, pick a lesson and choose **Start a Class Session** (or press it on the lesson's own start screen). You get a 4-character code, shown large on the start screen with who has joined, e.g. `K7QM`, and on a small panel under the controls in the headset.
+2. Students type the code into **Joining a Class?** at the very top of the lessons page (with their name) and press **Join the Class**: the page asks the teacher's open lesson which lesson it is and whether the class is in the same room, then opens it for them. They can also open a lesson and choose **Join a Class**, or open the teacher's link from **Copy the Link for Students**.
 
    How the code finds the lesson (`shared/net/lobby.js`): the teacher's lesson (the one that started the session) also waits in a small lobby named after the code, on the same network-only connection as the lessons. A student's page joins that lobby, receives the lesson's name, and leaves. So the teacher's lesson must be open for students to join this way; if nobody answers within 20 seconds the page says so.
 

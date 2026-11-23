@@ -26,7 +26,7 @@ export function drawControls(ui, app) {
       const ch = app.challenge();
       ui.text('Read the question out and let everyone pick, then reveal the answer.', { size: 21, color: THEME.dim });
       ui.buttons(app.predictions().map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, height: 50, size: 20, gap: 8 });
-      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the answer' : 'Reveal the answer', active: ch.revealed, onClick: () => app.reveal() }], { height: 58, size: 24 });
+      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the Answer' : 'Reveal the Answer', active: ch.revealed, onClick: () => app.reveal() }], { height: 58, size: 24 });
       const t = app.tally(ch);
       ui.text(`${t.votes} answer${t.votes === 1 ? '' : 's'} in so far.`, { size: 22, weight: 700 });
     } else ui.text('Read the question on the class board and pick your answer on the right. Your teacher will reveal it.', { size: 22, color: THEME.dim });
@@ -40,7 +40,7 @@ export function drawControls(ui, app) {
       ui.heading('Drop', { size: 20 });
       const objs = Object.entries(DROP_OBJECTS).filter(([, o]) => adv || !o.advanced);
       ui.buttons(objs.map(([id, o]) => ({ id: `o-${id}`, label: o.name, active: st.obj === id, onClick: () => app.setting('obj', id) })), { cols: 2, height: 42, size: 17, gap: 6 });
-      ui.buttons([{ id: 'go', label: st.running ? 'Falling…' : 'Drop it', disabled: st.running, onClick: () => app.run() }, { id: 'life', label: s.life ? 'Life-size: on' : 'Watch it life-size', active: s.life, onClick: () => app.toggleLife() }], { height: 50, size: 19, gap: 8 });
+      ui.buttons([{ id: 'go', label: st.running ? 'Falling…' : 'Drop It', disabled: st.running, onClick: () => app.run() }, { id: 'life', label: s.life ? 'Life-Size: On' : 'Watch It Life-Size', active: s.life, onClick: () => app.toggleLife() }], { height: 50, size: 19, gap: 8 });
     } else if (b.station === 'pendulum') {
       ui.heading('Length', { size: 20 });
       ui.buttons(LENGTHS.map((L) => ({ id: `L-${L}`, label: `${L.toFixed(1)} m`, active: st.L === L, onClick: () => app.setting('L', L) })), { height: 42, size: 17, gap: 5 });
@@ -54,16 +54,16 @@ export function drawControls(ui, app) {
       ui.buttons(Object.entries(SPRINGS).map(([id, sp]) => ({ id: `sp-${id}`, label: sp.mystery ? 'Mystery' : `${sp.name.split(' ')[0]} (${sp.k} N/m)`, active: st.id === id, onClick: () => app.setting('id', id) })), { cols: 2, height: 42, size: 16, gap: 6 });
       ui.heading('Mass', { size: 20 });
       ui.buttons(SPRING_MASSES.map((m) => ({ id: `sm-${m}`, label: `${m} g`, active: st.m === m, onClick: () => app.setting('m', m) })), { height: 42, size: 17, gap: 5 });
-      ui.buttons([{ id: 'go', label: st.running ? 'Bouncing…' : 'Pull down 4 cm, let go', disabled: st.running, onClick: () => app.run() }, { id: 'stop', label: 'Stop', onClick: () => app.stopRun() }], { height: 50, size: 18, gap: 8 });
+      ui.buttons([{ id: 'go', label: st.running ? 'Bouncing…' : 'Pull Down 4 cm, Let Go', disabled: st.running, onClick: () => app.run() }, { id: 'stop', label: 'Stop', onClick: () => app.stopRun() }], { height: 50, size: 18, gap: 8 });
     } else {
       ui.heading('Ramp angle', { size: 20 });
       ui.buttons(ANGLES.map((d) => ({ id: `a-${d}`, label: `${d}°`, active: st.deg === d, onClick: () => app.setting('deg', d) })), { height: 42, size: 17, gap: 5 });
-      ui.buttons([{ id: 'go', label: st.running ? 'Rolling…' : 'Let it roll', disabled: st.running, onClick: () => app.run() }], { height: 50, size: 20 });
+      ui.buttons([{ id: 'go', label: st.running ? 'Rolling…' : 'Let It Roll', disabled: st.running, onClick: () => app.run() }], { height: 50, size: 20 });
     }
     ui.heading('Chart shows', { size: 20 });
     ui.buttons([['s', 'Displacement'], ['v', 'Velocity'], ['a', 'Acceleration']].map(([id, label]) => ({ id: `q-${id}`, label, active: s.qty === id, onClick: () => app.setQty(id) })), { height: 44, size: 17, gap: 6 });
   } else {
-    ui.text('In your group: which variable changed the motion, and which didn’t? Pick your key insight on the right; the class board counts them.', { size: 20, color: THEME.dim });
+    ui.text('In your group: which variable changed the motion, and which did not? Pick your key insight on the right; the class board counts them.', { size: 20, color: THEME.dim });
   }
 
 }
@@ -78,7 +78,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the physicist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.phys.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 16, gap: 8 });
     if (s.phys.answer) ui.box(s.phys.answer, { size: 20 });
   })], { height: 56, size: 20 });
@@ -174,7 +174,7 @@ function drawSheet(ui, app) {
 
 function drawShare(ui, app) {
   const s = app.state;
-  ui.title('Your key insight', { size: 30 });
+  ui.title('Your Key Insight', { size: 30 });
   for (const ins of INSIGHTS) ui.buttons([{ id: `ins-${ins.id}`, label: ins.text, active: s.insight === ins.id, onClick: () => app.chooseInsight(ins.id) }], { height: 52, size: 15, gap: 6 });
   ui.heading('Discuss', { size: 22 });
   for (const q of DISCUSS) ui.text(`• ${q}`, { size: 18 });

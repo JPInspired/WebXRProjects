@@ -114,7 +114,7 @@ class App extends LessonApp {
     this.builder.rules = { tray: true, bin: true };
     this.builder.clear();
     this.builder.analyze();
-    this.state.explain = { title: 'Empty workbench', text: 'Take atoms from the tray and bring them together to build a molecule. Try two H and one O!' };
+    this.state.explain = { title: 'Empty Workbench', text: 'Take atoms from the tray and bring them together to build a molecule. Try two H and one O.' };
   }
 
   /** Is the hands-on molecule workbench on show (Molecules tab, or Reactions tab)? */

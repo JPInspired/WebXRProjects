@@ -29,7 +29,7 @@ export function drawControls(ui, app) {
     })), { height: 62, size: 27 });
   }
 
-  ui.buttons([{ id: 'next-parts', label: 'Next: parts  ›', onClick: () => setMenuTab(app, 'pc', 'parts') }], { height: 50, size: 20 });
+  ui.buttons([{ id: 'next-parts', label: 'Next: Parts  ›', onClick: () => setMenuTab(app, 'pc', 'parts') }], { height: 50, size: 20 });
   } else if (tab === 'parts') {
   ui.buttons(TRAY_CATS.map(([cat, label]) => ({
     id: `tray-${cat}`, label: `${hasPart(b, cat) ? '✓ ' : ''}${label}`, active: s.trayCat === cat, onClick: () => app.set({ trayCat: cat }),
@@ -38,15 +38,15 @@ export function drawControls(ui, app) {
     ? 'Pinch or grab a part on the tray and bring it to the case. When the preview turns green, let go. Pull a part out to remove it.'
     : 'Drag a part from the tray into the case. When the preview turns green, let go. Drag a part out to remove it.', { size: 22, color: THEME.dim });
 
-  ui.buttons([{ id: 'next-test', label: 'Next: test it  ›', onClick: () => setMenuTab(app, 'pc', 'test') }], { height: 50, size: 20 });
+  ui.buttons([{ id: 'next-test', label: 'Next: Test It  ›', onClick: () => setMenuTab(app, 'pc', 'test') }], { height: 50, size: 20 });
   } else {
   const on = s.power !== 'off';
   ui.buttons([
-    { id: 'power', label: on ? 'Power off' : 'Power on ⏻', active: on, onClick: () => app.togglePower() },
-    { id: 'tour', label: 'How it works', active: s.tourStep != null, disabled: !s.booted, onClick: () => app.startTour() },
-    { id: 'labels', label: s.labels ? 'Labels: on' : 'Labels: off', active: s.labels, onClick: () => app.toggleLabels() },
+    { id: 'power', label: on ? 'Power Off' : 'Power On ⏻', active: on, onClick: () => app.togglePower() },
+    { id: 'tour', label: 'How It Works', active: s.tourStep != null, disabled: !s.booted, onClick: () => app.startTour() },
+    { id: 'labels', label: s.labels ? 'Labels: On' : 'Labels: Off', active: s.labels, onClick: () => app.toggleLabels() },
   ], { height: 62, size: 26 });
-  ui.buttons([{ id: 'empty', label: 'Empty the case', onClick: () => app.emptyCase() }], { height: 54, size: 24 });
+  ui.buttons([{ id: 'empty', label: 'Empty the Case', onClick: () => app.emptyCase() }], { height: 54, size: 24 });
   }
 }
 
@@ -67,7 +67,7 @@ function setMenuTab(app, key, id) {
 export function drawInfo(ui, app) {
   const s = app.state;
   const b = s.build;
-  ui.title('Your build', { size: 40 });
+  ui.title('Your Build', { size: 40 });
   const name = (id) => (id ? PARTS[id].short : '—');
   const ram = b.ram.filter(Boolean);
   const drives = [...b.m2, ...b.bays].filter(Boolean);

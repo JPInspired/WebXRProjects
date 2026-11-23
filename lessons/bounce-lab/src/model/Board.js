@@ -4,7 +4,7 @@ import { BALLS, SURFACES, SURFACE_IDS } from '../data/bounce.js';
 // The class board (2.6 m wide). During the starter it shows the prediction question and, once revealed, how
 // the class answered. Otherwise it is the class results chart: for one ball (the one the teacher has picked),
 // every student's mean bounce on each surface as a coloured dot, and the class mean as a bar, so groups can
-// compare and spot results that don't fit. One canvas, redrawn only when something on it changes.
+// compare and spot results that do not fit. One canvas, redrawn only when something on it changes.
 
 const W = 1664;
 const H = 832;
@@ -40,7 +40,7 @@ const median = (a) => {
   const m = s.length >> 1;
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 };
-/** Results more than 12 percentage points from the others' median (with at least 3 results) don't fit. */
+/** Results more than 12 percentage points from the others' median (with at least 3 results) do not fit. */
 export const outlier = (v, all) => all.length >= 3 && Math.abs(v - median(all)) > 12;
 
 export class Board {
@@ -176,7 +176,7 @@ export class Board {
       c.fillRect(cx - colW * 0.4, yOf(mean) - 3, colW * 0.8, 6);
       c.font = `700 30px ${FONT}`;
       c.fillText(`${Math.round(mean)}%`, cx, yOf(mean) - 16);
-      // dots, spread sideways so they don't hide each other
+      // dots, spread sideways so they do not hide each other
       const here = people.filter((p) => p.avg[id] != null);
       here.forEach((p, k) => {
         const val = p.avg[id];

@@ -34,7 +34,7 @@ export function drawControls(ui, app) {
 export function drawSettings(ui, app) {
   if (app.presenting && app.room.tableNear(app.lab.position)) {
     ui.heading('Your table', { size: 22 });
-    ui.buttons([{ id: 'table', label: 'Put lab on my table', onClick: () => app.placeOnTable() }], { height: 56, size: 21 });
+    ui.buttons([{ id: 'table', label: 'Put Lab on My Table', onClick: () => app.placeOnTable() }], { height: 56, size: 21 });
   }
   ui.text(app.presenting
     ? 'Point and pinch / pull the trigger to press. Squeeze the grip to grab and move the whole lab.'
@@ -62,8 +62,8 @@ function atomControls(ui, app) {
   ui.stepper('Neutrons', a.n, { id: 'n', color: '#9aa4b5', onMinus: () => app.changeAtom('n', -1), onPlus: () => app.changeAtom('n', 1) });
   ui.stepper('Electrons', a.e, { id: 'e', color: '#4cc9ff', onMinus: () => app.changeAtom('e', -1), onPlus: () => app.changeAtom('e', 1) });
   ui.buttons([
-    { id: 'neutral', label: 'Make neutral', onClick: () => app.setAtom({ e: a.p }) },
-    { id: 'iso', label: 'Common isotope', onClick: () => app.commonIsotope(), disabled: !a.p },
+    { id: 'neutral', label: 'Make Neutral', onClick: () => app.setAtom({ e: a.p }) },
+    { id: 'iso', label: 'Common Isotope', onClick: () => app.commonIsotope(), disabled: !a.p },
     { id: 'empty', label: 'Empty', onClick: () => app.setAtom({ p: 0, n: 0, e: 0 }) },
   ], { height: 68, size: 27 });
   ui.text(app.presenting
@@ -72,8 +72,8 @@ function atomControls(ui, app) {
   } else if (tab === 'table') {
     periodicTable(ui, a.p, (Z) => app.pickElement(Z));
   } else ui.buttons([
-    { id: 'bohr', label: 'Bohr shells', active: app.state.atomView === 'bohr', onClick: () => app.set({ atomView: 'bohr' }) },
-    { id: 'cloud', label: 'Electron cloud', active: app.state.atomView === 'cloud', onClick: () => app.set({ atomView: 'cloud' }) },
+    { id: 'bohr', label: 'Bohr Shells', active: app.state.atomView === 'bohr', onClick: () => app.set({ atomView: 'bohr' }) },
+    { id: 'cloud', label: 'Electron Cloud', active: app.state.atomView === 'cloud', onClick: () => app.set({ atomView: 'cloud' }) },
     { id: 'spin', label: app.state.spin ? 'Pause' : 'Animate', onClick: () => app.set({ spin: !app.state.spin }) },
   ], { height: 68, size: 27 });
 }
@@ -87,11 +87,11 @@ function moleculeControls(ui, app) {
     active: s.molecule === id && (m.crystal || app.builder.presetMatch === id),
     onClick: () => app.loadMolecule(id),
   })), { cols: 2, height: 62, size: 26, gap: 10 });
-  ui.buttons([{ id: 'empty-bench', label: 'Empty workbench — build from scratch', onClick: () => app.clearWorkbench() }], { height: 62, size: 26 });
+  ui.buttons([{ id: 'empty-bench', label: 'Empty Workbench — Build from Scratch', onClick: () => app.clearWorkbench() }], { height: 62, size: 26 });
   ui.heading('Model style');
   ui.buttons([
-    { id: 'ball', label: 'Ball & stick', active: s.molStyle === 'ball', onClick: () => app.set({ molStyle: 'ball' }) },
-    { id: 'space', label: 'Space-filling', active: s.molStyle === 'space', onClick: () => app.set({ molStyle: 'space' }) },
+    { id: 'ball', label: 'Ball & Stick', active: s.molStyle === 'ball', onClick: () => app.set({ molStyle: 'ball' }) },
+    { id: 'space', label: 'Space-Filling', active: s.molStyle === 'space', onClick: () => app.set({ molStyle: 'space' }) },
   ], { height: 62, size: 26 });
   ui.text(app.presenting
     ? 'Build by hand: pinch an atom and pull to break a bond · hold it near another atom and let go to bond · tap a bond for double/triple · grip to move a whole molecule · drop in the bin to remove.'
@@ -101,9 +101,9 @@ function moleculeControls(ui, app) {
 function scaleControls(ui, app) {
   const s = app.state;
   ui.buttons([
-    { id: 'sub-compare', label: 'Compare atom sizes', active: s.scaleSub === 'compare', onClick: () => app.set({ scaleSub: 'compare' }) },
-    { id: 'sub-room', label: 'Nucleus in the room', active: s.scaleSub === 'room', onClick: () => app.set({ scaleSub: 'room' }) },
-    { id: 'sub-myroom', label: 'What’s my room made of?', active: s.scaleSub === 'myroom', onClick: () => app.set({ scaleSub: 'myroom' }) },
+    { id: 'sub-compare', label: 'Compare Atom Sizes', active: s.scaleSub === 'compare', onClick: () => app.set({ scaleSub: 'compare' }) },
+    { id: 'sub-room', label: 'Nucleus in the Room', active: s.scaleSub === 'room', onClick: () => app.set({ scaleSub: 'room' }) },
+    { id: 'sub-myroom', label: 'What is my room made of?', active: s.scaleSub === 'myroom', onClick: () => app.set({ scaleSub: 'myroom' }) },
   ], { cols: 2, height: 66, size: 26 });
 
   if (s.scaleSub === 'myroom') {
@@ -178,7 +178,7 @@ function atomInfo(ui, app) {
   const mag = app.atom.outerRadius / realR;
   const ratio = atomToNucleusRatio(el, info.A);
   ui.text(`Real size: ≈ ${formatLength(realR * 2)} across. This model is magnified ≈ ${formatNumber(mag)}×.`, { size: 26 });
-  ui.text(`Not to scale! With a nucleus this size, the real electrons would be ≈ ${formatLength(app.atom.nucleusRadius * ratio)} away. Try the Scale tab.`, { size: 26, color: THEME.dim });
+  ui.text(`Not to scale. With a nucleus this size, the real electrons would be ≈ ${formatLength(app.atom.nucleusRadius * ratio)} away. Try the Scale tab.`, { size: 26, color: THEME.dim });
 }
 
 function moleculeInfo(ui, app) {
@@ -204,7 +204,7 @@ function scaleInfo(ui, app) {
   const s = app.state;
   if (s.scaleSub === 'compare') {
     const els = COMPARE_PRESETS[s.comparePreset].z.map(getElement);
-    ui.title('Comparing atom sizes');
+    ui.title('Comparing Atom Sizes');
     ui.text(`Scale: 1 pm → ${COMPARE_SCALE * 1000} mm (magnified ${formatNumber(COMPARE_SCALE / 1e-12)}×).`, { size: 26, color: THEME.dim });
     ui.gap(6);
     for (const el of els) ui.kv(el.name, `${el.radius} pm`, { size: 27 });
@@ -212,19 +212,19 @@ function scaleInfo(ui, app) {
     return;
   }
   const r = roomScale(s);
-  ui.title('Nucleus in the room');
+  ui.title('Nucleus in the Room');
   ui.text(`The red ${r.object.label.toLowerCase()} is the nucleus of ${r.name}, shown ${formatLength(r.object.radius * 2)} wide (real: ${formatLength(r.nucleusFm * 2e-15)}).`, { size: 27 });
   ui.gap(4);
   ui.kv('Atom is bigger than nucleus by', `${formatNumber(r.ratio)}×`);
   ui.kv('Edge of the atom', formatLength(r.R), { color: '#4cc9ff' });
   ui.text(app.windowAimed
-    ? `That is ${compareLength(r.R)}. Look through YOUR window: the blue beacon out there marks the edge of the atom. Everything in between is almost empty space!`
-    : `That is ${compareLength(r.R)}. Look out the window: the faint blue bubble around you is the edge of the atom. Everything between is almost empty space!`, { size: 27, color: THEME.dim });
+    ? `That is ${compareLength(r.R)}. Look through YOUR window: the blue beacon out there marks the edge of the atom. Everything in between is almost empty space.`
+    : `That is ${compareLength(r.R)}. Look out the window: the faint blue bubble around you is the edge of the atom. Everything between is almost empty space.`, { size: 27, color: THEME.dim });
 }
 
 function workbenchInfo(ui, app) {
   const comps = app.builder.components;
-  ui.title('On the workbench');
+  ui.title('On the Workbench');
   if (!comps.length) {
     ui.text('Nothing yet — take atoms from the tray.', { size: 26, color: THEME.dim });
     return;
@@ -280,7 +280,7 @@ function reactionControls(ui, app) {
   ui.buttons(Object.entries(REACTIONS).map(([id, r]) => ({
     id: `rx-${id}`, label: r.equation, active: s.reaction === id, onClick: () => app.loadReaction(id),
   })), { cols: 1, height: 60, size: 28, gap: 10 });
-  ui.buttons([{ id: 'rx-reset', label: 'Start again', onClick: () => app.loadReaction(s.reaction) }], { height: 60, size: 26 });
+  ui.buttons([{ id: 'rx-reset', label: 'Start Again', onClick: () => app.loadReaction(s.reaction) }], { height: 60, size: 26 });
   ui.text(app.presenting
     ? 'Pull atoms apart to break bonds (stronger bonds fight back harder!). Let go of an atom next to another to bond them, tap a bond to make it double. Blue dots are the shared electrons.'
     : 'Drag atoms apart to break bonds, drop them next to each other to bond, click a bond to make it double. Blue dots are the shared electrons.', { size: 24, color: THEME.dim });
@@ -318,11 +318,11 @@ function formulaOfId(id) {
   return formulaOf(counts);
 }
 
-// ───────────────────────── What's my room made of? ─────────────────────────
+// ───────────────────────── What is my room made of? ─────────────────────────
 
 function roomInfo(ui, app) {
   const room = app.room;
-  ui.title('What’s my room made of?', { size: 40 });
+  ui.title('What is my room made of?', { size: 40 });
   if (room.source === 'demo') ui.text('Example room — on a headset your real surfaces appear.', { size: 24, color: THEME.dim });
   if (!room.list.length) {
     ui.text(app.presenting

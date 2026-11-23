@@ -29,24 +29,24 @@ export function drawControls(ui, app) {
   ui.buttons([
     { id: 'count', label: counting ? `Counting… ${Math.ceil(b.timer.left)} s` : 'Count for 10 s', active: counting, disabled: counting || s.mode === 'halflife', onClick: () => app.startCount() },
     { id: 'reset', label: 'Reset', onClick: () => app.resetCount() },
-    { id: 'sound', label: b.sound ? 'Clicks: on' : 'Clicks: off', active: b.sound, onClick: () => app.toggleSound() },
+    { id: 'sound', label: b.sound ? 'Clicks: On' : 'Clicks: Off', active: b.sound, onClick: () => app.toggleSound() },
   ], { height: 50, size: 20, gap: 8 });
-  if (!b.inClip) ui.buttons([{ id: 'clip', label: 'Put the probe back in its clip', onClick: () => app.clipProbe() }], { height: 46, size: 20 });
+  if (!b.inClip) ui.buttons([{ id: 'clip', label: 'Put the Probe Back in Its Clip', onClick: () => app.clipProbe() }], { height: 46, size: 20 });
 
   if (s.mode === 'test' || s.mode === 'start') {
-    if (!s.tongs) ui.buttons([{ id: 'tongs', label: 'Pick up the tongs', onClick: () => app.takeTongs() }], { height: 50, size: 22 });
+    if (!s.tongs) ui.buttons([{ id: 'tongs', label: 'Pick Up the Tongs', onClick: () => app.takeTongs() }], { height: 50, size: 22 });
     if (s.mode === 'test') {
       ui.heading('In the holder', { size: 24 });
       ui.buttons(SOURCE_IDS.map((id) => ({ id: `src-${id}`, label: SOURCES[id].short, active: b.inHolder?.id === id, onClick: () => (b.inHolder?.id === id ? app.emptyHolder() : app.toHolder(id)) })), { cols: 3, height: 42, size: 17, gap: 6 });
       ui.heading('Absorber', { size: 24 });
       ui.buttons(ABSORBER_IDS.map((id) => ({ id: `abs-${id}`, label: ABSORBERS[id].short, active: b.absorber === id, onClick: () => app.setAbsorber(id) })), { height: 44, size: 19, gap: 6 });
     } else ui.text('First, count with nothing in the holder: that is the background. Do it three times: are the counts the same?', { size: 20, color: THEME.dim });
-    ui.buttons([{ id: 'xray', label: s.xray ? 'X-ray vision: on' : 'X-ray vision: off', active: s.xray, onClick: () => app.toggleXray() }], { height: 46, size: 20 });
+    ui.buttons([{ id: 'xray', label: s.xray ? 'X-Ray Vision: On' : 'X-Ray Vision: Off', active: s.xray, onClick: () => app.toggleXray() }], { height: 46, size: 20 });
   } else if (s.mode === 'halflife') {
     ui.text('Protactinium-234m is separated from uranium by shaking the bottle; then it decays with a half-life of about a minute. The counter counts every 10 s by itself.', { size: 19, color: THEME.dim });
     ui.buttons([
-      { id: 'shake', label: app.bench.pa.on ? 'Shake again (restart)' : 'Shake the bottle: start', onClick: () => app.shake() },
-      { id: 'fast', label: s.fast ? 'Time: ×4' : 'Time: real', active: s.fast, onClick: () => app.toggleFast() },
+      { id: 'shake', label: app.bench.pa.on ? 'Shake Again (Restart)' : 'Shake the Bottle: Start', onClick: () => app.shake() },
+      { id: 'fast', label: s.fast ? 'Time: ×4' : 'Time: Real', active: s.fast, onClick: () => app.toggleFast() },
     ], { height: 52, size: 20, gap: 8 });
   } else if (!app.soloTeacher) ui.text('Look at the class board: does the class agree about each source? Your teacher will reveal the answers.', { size: 21, color: THEME.dim });
 
@@ -58,7 +58,7 @@ export function drawTeacher(ui, app) {
   const s = app.state;
   if (s.mode !== 'results') return;
   ui.heading('Answers', { size: 22 });
-  ui.buttons([{ id: 'reveal', label: s.revealed ? 'Hide the answers' : 'Reveal the answers', active: s.revealed, onClick: () => app.reveal() }], { height: 56, size: 22 });
+  ui.buttons([{ id: 'reveal', label: s.revealed ? 'Hide the Answers' : 'Reveal the Answers', active: s.revealed, onClick: () => app.reveal() }], { height: 56, size: 22 });
 }
 
 // ───────────────────────── Right: results, safety, questions ─────────────────────────
@@ -73,7 +73,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the physicist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 18, gap: 8 });
     if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
   })], { height: 56, size: 20 });
@@ -105,7 +105,7 @@ function drawDose(ui, app) {
 
 function drawStart(ui, app) {
   const s = app.state;
-  ui.title('Alpha, beta and gamma', { size: 30 });
+  ui.title('Alpha, Beta and Gamma', { size: 30 });
   for (const t of Object.values(TYPES)) {
     ui.text(`${t.sym}  ${t.name}: ${t.what}`, { size: 20, weight: 700, color: css(t.color) });
     ui.text(`Stopped by ${t.stopped}. Range: ${t.range}. Ionises ${t.ionising}.`, { size: 18, color: THEME.dim });
@@ -114,7 +114,7 @@ function drawStart(ui, app) {
   const bg = s.bg;
   ui.text(bg.length ? `Your background counts in 10 s: ${bg.join(', ')}  (mean ${(bg.reduce((a, x) => a + x, 0) / bg.length).toFixed(1)})` : 'Not measured yet: press “Count for 10 s” with nothing in the holder.', { size: 20, color: bg.length ? GOOD : WARN });
   ui.heading('Safety', { size: 22 });
-  ui.text('Time, distance, shielding: sources out of the lead box for as little time as possible, handled with tongs at arm’s length, never pointed at anyone. Alpha can’t get through your skin, but inside the body (breathed in or swallowed) it is the most dangerous of all: it ionises most strongly.', { size: 19 });
+  ui.text('Time, distance, shielding: sources out of the lead box for as little time as possible, handled with tongs at arm’s length, never pointed at anyone. Alpha cannot get through your skin, but inside the body (breathed in or swallowed) it is the most dangerous of all: it ionises most strongly.', { size: 19 });
   ui.heading('Typical doses', { size: 22 });
   for (const [what, d] of DOSES) ui.kv(what, `${d} µSv`, { size: 19 });
 }
@@ -220,9 +220,9 @@ function drawHalfLife(ui, app) {
 
 function drawMyVerdicts(ui, app) {
   const s = app.state;
-  ui.title('Your verdicts', { size: 30 });
+  ui.title('Your Verdicts', { size: 30 });
   const ids = SOURCE_IDS.filter((id) => s.verdicts[id] != null);
-  if (!ids.length) ui.text('You haven’t decided about any source yet (Test sources).', { size: 20, color: THEME.dim });
+  if (!ids.length) ui.text('You have not decided about any source yet (Test sources).', { size: 20, color: THEME.dim });
   for (const id of ids) {
     const v = s.verdicts[id];
     const ok = v === SOURCES[id].answer;

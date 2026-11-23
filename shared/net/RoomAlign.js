@@ -79,7 +79,7 @@ export class RoomScan {
 /**
  * The room as a rectangle: the 4 possible room frames (origin at the centre on the floor, x along a wall;
  * candidate k is turned k × 90°), and the room's size along each candidate's x and z. Null if the scan
- * doesn't show a mostly-rectangular room.
+ * does not show a mostly-rectangular room.
  */
 export function roomFrames(scan) {
   const walls = scan?.walls ?? [];
@@ -146,7 +146,7 @@ function mismatch(scan, cand, ref) {
 /**
  * This headset's room frame. With a reference (the admin's { size, features }), the candidate that matches it;
  * otherwise the shared rule: x along the longer side, turned so the features' centre lies ahead-right.
- * Returns { matrix, size, sure } or null when the scan isn't usable.
+ * Returns { matrix, size, sure } or null when the scan is not usable.
  */
 export function solveRoom(scan, ref = null) {
   const room = roomFrames(scan);

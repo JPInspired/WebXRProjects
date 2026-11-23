@@ -37,7 +37,7 @@ export function initStartScreen(lessonsURL) {
     screen.type = 'button';
     screen.id = 'btn-screen';
     screen.className = 'secondary';
-    screen.textContent = 'Explore on screen';
+    screen.textContent = 'Explore on Screen';
     screen.onclick = () => setMini(true);
     buttons.appendChild(screen);
   }

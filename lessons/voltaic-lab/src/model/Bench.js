@@ -462,7 +462,7 @@ export class Bench {
         if (!c.left || !c.right) return { ok: false, why: `Cell ${n} needs two metal strips.`, V: 0, I: 0 };
         return { ok: false, why: `Cell ${n} has no electrolyte yet: pour one in.`, V: 0, I: 0 };
       }
-      if (e.open) return { ok: false, open: true, why: `Cell ${c.i + 1} has no salt bridge: the circuit isn't complete, so nothing flows.`, V: 0, I: 0 };
+      if (e.open) return { ok: false, open: true, why: `Cell ${c.i + 1} has no salt bridge: the circuit is not complete, so nothing flows.`, V: 0, I: 0 };
       V += e.V;
       R += e.R;
     }

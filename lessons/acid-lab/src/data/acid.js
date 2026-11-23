@@ -10,7 +10,7 @@ export const SUBSTANCES = {
   hcl: { name: 'Dilute hydrochloric acid', ph: 1.0, color: 0xe8f2f6, fact: 'A strong laboratory acid. Your stomach makes a similar acid to help digest food.' },
   lemon: { name: 'Lemon juice', ph: 2.3, color: 0xf2e36b, fact: 'Sour because of citric acid. Sour tastes are a sign of acids (but never taste anything in a lab!).' },
   cola: { name: 'Cola', ph: 2.5, color: 0x4a2a1a, fact: 'Contains phosphoric acid and dissolved carbon dioxide (carbonic acid): acidic enough to damage tooth enamel.' },
-  vinegar: { name: 'Vinegar', ph: 2.9, color: 0xe9d9a8, fact: 'A solution of ethanoic (acetic) acid, a weak acid. Used to pickle food because microbes can’t grow in it.' },
+  vinegar: { name: 'Vinegar', ph: 2.9, color: 0xe9d9a8, fact: 'A solution of ethanoic (acetic) acid, a weak acid. Used to pickle food because microbes cannot grow in it.' },
   orange: { name: 'Orange juice', ph: 3.5, color: 0xf6a531, fact: 'Contains citric acid and vitamin C (ascorbic acid).' },
   tomato: { name: 'Tomato juice', ph: 4.2, color: 0xd9452b, fact: 'Mildly acidic, which is one reason tomato sauce tastes sharp.' },
   coffee: { name: 'Black coffee', ph: 5.0, color: 0x3b2416, fact: 'Slightly acidic: it contains several weak acids from the coffee beans.' },
@@ -71,7 +71,7 @@ const LITMUS_RED = 0xe2506a;
 const LITMUS_BLUE = 0x4763d6;
 /**
  * What the papers do. Blue litmus turns red in acids (below about pH 5); red litmus turns blue in alkalis
- * (above about pH 8). In between neither changes much, so litmus can't tell weak solutions from neutral ones.
+ * (above about pH 8). In between neither changes much, so litmus cannot tell weak solutions from neutral ones.
  */
 export function paperColor(type, ph) {
   if (type === 'ui') return uiColor(ph);
@@ -120,7 +120,7 @@ export function unknownsFor(seed) {
 // ───────────── comparing the methods ─────────────
 
 export const METHODS = [
-  { id: 'litmus', name: 'Litmus paper', tells: 'Acid or alkali only', pros: 'Cheap, quick, no batteries, easy to carry.', cons: 'No number. Can’t tell a weak acid or alkali from a neutral solution. Each paper is used once.' },
+  { id: 'litmus', name: 'Litmus paper', tells: 'Acid or alkali only', pros: 'Cheap, quick, no batteries, easy to carry.', cons: 'No number. Cannot tell a weak acid or alkali from a neutral solution. Each paper is used once.' },
   { id: 'ui', name: 'Universal indicator paper', tells: 'pH to the nearest whole number', pros: 'Cheap and quick. Gives an approximate pH across the whole scale.', cons: 'You have to judge the colour by eye, so people disagree. Hard to read in coloured or cloudy liquids.' },
   { id: 'meter', name: 'Digital pH meter', tells: 'pH to 0.01', pros: 'Accurate and precise. A number, so no judging colours. Works in coloured liquids. Can log data.', cons: 'Expensive and fragile. Must be calibrated, rinsed between samples and given time to settle.' },
 ];
@@ -132,7 +132,7 @@ export const SAFETY = 'In a real lab: wear eye protection, never taste or sniff 
 export const QUESTIONS = [
   { id: 'what', label: 'What does pH measure?' },
   { id: 'ten', label: 'Is pH 3 much stronger than pH 4?' },
-  { id: 'litmus', label: 'Why can’t litmus give a number?' },
+  { id: 'litmus', label: 'Why cannot litmus give a number?' },
   { id: 'rinse', label: 'Why rinse the probe?' },
   { id: 'calibrate', label: 'Why calibrate a meter?' },
   { id: 'neutral', label: 'What is neutralisation?' },
@@ -142,11 +142,11 @@ export const QUESTIONS = [
 
 export const ANSWERS = {
   what: 'pH measures how acidic or alkaline a solution is, on a scale from 0 to 14. Below 7 is acidic, 7 is neutral, above 7 is alkaline. Acids release hydrogen ions (H⁺) in water: the more hydrogen ions, the lower the pH. Alkalis release hydroxide ions (OH⁻), which remove hydrogen ions.',
-  ten: 'Yes: ten times more acidic! The pH scale is logarithmic, so each step of 1 means ten times more (or fewer) hydrogen ions. Lemon juice at about pH 2 is 100,000 times more acidic than pure water at pH 7. That is why a small error in pH is a big error in concentration.',
-  litmus: 'Litmus is a single dye with only two colours: red in acid, blue in alkali. It changes somewhere between about pH 5 and 8, so it can’t tell a weak acid from a neutral solution. Universal indicator is a mixture of several dyes that each change at a different pH, so it gives a whole rainbow of colours you can match to a chart.',
+  ten: 'Yes: ten times more acidic. The pH scale is logarithmic, so each step of 1 means ten times more (or fewer) hydrogen ions. Lemon juice at about pH 2 is 100,000 times more acidic than pure water at pH 7. That is why a small error in pH is a big error in concentration.',
+  litmus: 'Litmus is a single dye with only two colours: red in acid, blue in alkali. It changes somewhere between about pH 5 and 8, so it cannot tell a weak acid from a neutral solution. Universal indicator is a mixture of several dyes that each change at a different pH, so it gives a whole rainbow of colours you can match to a chart.',
   rinse: 'Drops of the last solution cling to the probe. If you carry them into the next beaker they mix in and change its pH, and your reading drifts towards the previous sample. Rinsing with distilled water (pH 7, with nothing dissolved in it) washes them off. Good scientists rinse between every sample.',
   calibrate: 'The glass probe slowly changes with age and temperature, so its readings drift. Calibrating means dipping it in a buffer solution whose pH is known exactly (often pH 7.00, sometimes 4 and 10 as well) and telling the meter “this is 7.00”. Without calibrating, a meter can look precise (two decimal places!) while being wrong.',
   neutral: 'When an acid and an alkali react, they cancel each other out and make a salt and water. The pH moves towards 7. That is why you treat acid indigestion with an antacid, farmers spread lime on acidic soil, and toothpaste (alkaline) protects teeth from the acids that bacteria make.',
-  real: 'Lots of people! Swimming-pool staff keep the water between pH 7.2 and 7.8. Farmers and gardeners test soil, because crops only grow well in the right range. Doctors monitor blood pH. Water companies, breweries, cheese makers and aquarium keepers all rely on pH meters, because they need accurate numbers, fast.',
+  real: 'Lots of people. Swimming-pool staff keep the water between pH 7.2 and 7.8. Farmers and gardeners test soil, because crops only grow well in the right range. Doctors monitor blood pH. Water companies, breweries, cheese makers and aquarium keepers all rely on pH meters, because they need accurate numbers, fast.',
   safe: 'No. Strong alkalis such as sodium hydroxide are just as corrosive as strong acids, and in some ways worse: they turn the fats in your skin into soap, so they feel slippery while they are damaging you. In a real lab, wear eye protection with both, and rinse spills with lots of water.',
 };

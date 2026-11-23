@@ -96,7 +96,7 @@ class App extends LessonApp {
       halflife: ['Half-life', 'Shake the bottle to separate the protactinium, then watch its count rate fall. How long does it take to halve? And to halve again?'],
       results: ['Class results', 'Everyone’s verdicts are on the class board. Which sources does the class agree about? Where do people disagree, and why?'],
     }[mode];
-    if (mode === 'results' && this.bench.outOfBox.length) text[1] += ' And put your sources back in the lead box!';
+    if (mode === 'results' && this.bench.outOfBox.length) text[1] += ' And put your sources back in the lead box.';
     s.explain = { title: text[0], text: text[1] };
     this.refresh();
   }
@@ -145,7 +145,7 @@ class App extends LessonApp {
       return;
     }
     if (!b.inClip) {
-      this.explain({ title: `${count} counts in 10 s`, text: 'Not recorded: the probe wasn’t in its clip, so it wasn’t a fair test. Put it back in the clip, 3 cm from the holder, to record a count.' });
+      this.explain({ title: `${count} counts in 10 s`, text: 'Not recorded: the probe was not in its clip, so it was not a fair test. Put it back in the clip, 3 cm from the holder, to record a count.' });
       return;
     }
     const h = b.inHolder;
@@ -153,7 +153,7 @@ class App extends LessonApp {
       s.bg.push(count);
       if (s.bg.length > 5) s.bg.shift();
       const mean = s.bg.reduce((a, x) => a + x, 0) / s.bg.length;
-      this.explain({ title: `Background: ${count} counts in 10 s`, text: s.bg.length < 3 ? `Count it again: the number won’t be exactly the same, because radioactive decay is random. (${s.bg.length} of 3)` : `Your background is about ${mean.toFixed(0)} counts in 10 s. Any source has to give clearly more than this to count as radioactive.` });
+      this.explain({ title: `Background: ${count} counts in 10 s`, text: s.bg.length < 3 ? `Count it again: the number will not be exactly the same, because radioactive decay is random. (${s.bg.length} of 3)` : `Your background is about ${mean.toFixed(0)} counts in 10 s. Any source has to give clearly more than this to count as radioactive.` });
       return;
     }
     const ab = b.absorber;
@@ -163,7 +163,7 @@ class App extends LessonApp {
     let hint = '';
     if (r.none != null && ab !== 'none') {
       const drop = r.none - count;
-      hint = drop > Math.max(6, 3 * Math.sqrt(r.none)) ? `A big drop from ${r.none} with no absorber: ${ABSORBERS[ab].name.toLowerCase()} stops some of its radiation.` : `About the same as with no absorber (${r.none}): ${ABSORBERS[ab].name.toLowerCase()} doesn’t stop much of it.`;
+      hint = drop > Math.max(6, 3 * Math.sqrt(r.none)) ? `A big drop from ${r.none} with no absorber: ${ABSORBERS[ab].name.toLowerCase()} stops some of its radiation.` : `About the same as with no absorber (${r.none}): ${ABSORBERS[ab].name.toLowerCase()} does not stop much of it.`;
     } else if (ab === 'none') hint = count < bg + 2 * Math.sqrt(bg) + 2 ? 'Hardly more than background. Is it radioactive at all? Count again to be sure.' : 'Well above background. Now try paper, aluminium and lead.';
     if (count <= bg + 2 * Math.sqrt(bg) + 2 && ab !== 'none') hint += ' That is down to about background.';
     sound.bond();
@@ -180,7 +180,7 @@ class App extends LessonApp {
 
   needTongs() {
     sound.refuse();
-    this.explain({ kicker: 'SAFETY FIRST', title: 'Use the tongs', text: 'Radioactive sources are never handled with bare hands. Pick up the tongs first (on the right of the bench).' });
+    this.explain({ kicker: 'SAFETY FIRST', title: 'Use the Tongs', text: 'Radioactive sources are never handled with bare hands. Pick up the tongs first (on the right of the bench).' });
   }
 
   toHolder(id) {
@@ -210,7 +210,7 @@ class App extends LessonApp {
 
   toggleXray() {
     this.state.xray = !this.state.xray;
-    if (this.state.xray) this.explain({ title: 'X-ray vision', text: 'Radiation is invisible: this shows it as streaks. Alpha (red) only gets a few centimetres; beta (blue) is stopped by aluminium; gamma (yellow) gets through almost everything, and lead stops only some of it.' });
+    if (this.state.xray) this.explain({ title: 'X-Ray Vision', text: 'Radiation is invisible: this shows it as streaks. Alpha (red) only gets a few centimetres; beta (blue) is stopped by aluminium; gamma (yellow) gets through almost everything, and lead stops only some of it.' });
   }
 
   toggleVerdict(id, k) {
@@ -258,7 +258,7 @@ class App extends LessonApp {
     const s = this.state;
     s.hlChecked = true;
     const off = Math.abs(s.estimate - HALF_LIFE);
-    this.explain({ title: off <= 15 ? 'Well measured!' : `It is about ${HALF_LIFE} s`, text: `The half-life of protactinium-234m is ${HALF_LIFE} s: the count rate halves every ${HALF_LIFE} s (the dashed lines on the graph). You said ${s.estimate} s. ${off <= 15 ? 'Random decay makes the points scatter, so that is a good estimate.' : 'Find where the counts are half of the first count, and read off the time.'} Background (about 4 counts in 10 s) is included in every count.` });
+    this.explain({ title: off <= 15 ? 'Well measured' : `It is about ${HALF_LIFE} s`, text: `The half-life of protactinium-234m is ${HALF_LIFE} s: the count rate halves every ${HALF_LIFE} s (the dashed lines on the graph). You said ${s.estimate} s. ${off <= 15 ? 'Random decay makes the points scatter, so that is a good estimate.' : 'Find where the counts are half of the first count, and read off the time.'} Background (about 4 counts in 10 s) is included in every count.` });
   }
 
   // ───────────── doses ─────────────
@@ -278,7 +278,7 @@ class App extends LessonApp {
     this.state.dose += (rate * dt) / 3600;
     if (close && !this.warnedClose) {
       this.warnedClose = true;
-      this.explain({ kicker: 'SAFETY', title: 'Too close!', text: 'Hold sources at arm’s length, away from your face: doubling the distance cuts the dose to a quarter.' });
+      this.explain({ kicker: 'SAFETY', title: 'Too Close', text: 'Hold sources at arm’s length, away from your face: doubling the distance cuts the dose to a quarter.' });
     }
     if (!close && this.warnedClose && rate < 0.5) this.warnedClose = false;
   }
@@ -383,15 +383,15 @@ class App extends LessonApp {
       { heading: 'Activity for everyone', buttons: modesFor(s.level).map(([id, label]) => ({ id: `admin-mode-${id}`, label, active: s.mode === id, onClick: () => this.setMode(id) })) },
       { heading: 'Level for everyone', buttons: [['core', 'Core'], ['advanced', 'Advanced']].map(([id, label]) => ({ id: `admin-level-${id}`, label, active: s.level === id, onClick: () => this.setLevel(id) })) },
     ];
-    if (s.mode === 'results') sections.push({ heading: 'Answers', buttons: [{ id: 'admin-reveal', label: s.revealed ? 'Hide the answers' : 'Reveal the answers', active: s.revealed, onClick: () => this.reveal() }] });
+    if (s.mode === 'results') sections.push({ heading: 'Answers', buttons: [{ id: 'admin-reveal', label: s.revealed ? 'Hide the Answers' : 'Reveal the Answers', active: s.revealed, onClick: () => this.reveal() }] });
     if (this.presence?.sameRoom) {
       const centred = !this.boardLocal || this.boardLocal.every((v) => v === 0);
       sections.push({
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }
@@ -427,7 +427,7 @@ class App extends LessonApp {
 
   // ───────────── shared sessions ─────────────
 
-  /** What colleagues need from me: my verdicts (for the class results) and how many cells I've filled. */
+  /** What colleagues need from me: my verdicts (for the class results) and how many cells I have filled. */
   netState() {
     return { v: this.state.verdicts, n: Object.values(this.state.rec).reduce((a, r) => a + Object.keys(r).length, 0) };
   }

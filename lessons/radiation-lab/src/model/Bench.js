@@ -427,7 +427,7 @@ export class Bench {
     return null;
   }
 
-  /** Close enough to drop into place? (On a screen, where you can't judge depth, close on the screen is enough.) */
+  /** Close enough to drop into place? (On a screen, where you cannot judge depth, close on the screen is enough.) */
   near(p, target, r) {
     if (this.app.presenting) return p.distanceTo(target) < r;
     const cam = this.app.camera;

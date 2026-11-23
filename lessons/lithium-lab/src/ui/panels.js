@@ -25,7 +25,7 @@ export function drawControls(ui, app) {
       const ch = app.challenge();
       ui.text('Read the question out and let everyone pick, then reveal the answer.', { size: 21, color: THEME.dim });
       ui.buttons(app.predictions().map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, height: 52, size: 19, gap: 8 });
-      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the answer' : 'Reveal the answer', active: ch.revealed, onClick: () => app.reveal() }], { height: 60, size: 24 });
+      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the Answer' : 'Reveal the Answer', active: ch.revealed, onClick: () => app.reveal() }], { height: 60, size: 24 });
       const t = app.tally(ch);
       ui.text(`${t.votes} answer${t.votes === 1 ? '' : 's'} in so far.`, { size: 22, weight: 700 });
     } else ui.text('Read the question on the class board and pick your answer on the right.', { size: 22, color: THEME.dim });
@@ -34,7 +34,7 @@ export function drawControls(ui, app) {
     const done = app.steps();
     STEPS.forEach(([id, label], i) => ui.text(`${done[id] ? '✓' : `${i + 1}.`}  ${label}`, { size: 20, weight: done[id] ? 400 : 700, color: done[id] ? GOOD : THEME.text }));
     ui.heading('Safety screen', { size: 24 });
-    ui.buttons([{ id: 'screen', label: app.bench.screenOn ? 'Screen: across the tank' : 'Screen: moved away', active: app.bench.screenOn, onClick: () => app.toggleScreen() }], { height: 50, size: 21 });
+    ui.buttons([{ id: 'screen', label: app.bench.screenOn ? 'Screen: Across the Tank' : 'Screen: Moved Away', active: app.bench.screenOn, onClick: () => app.toggleScreen() }], { height: 50, size: 21 });
     ui.text('Pull it across before testing anything that reacts violently.', { size: 19, color: THEME.dim });
     ui.heading('Without the mouse', { size: 22 });
     ui.buttons(SLOTS.map((sl) => ({ id: `drop-${sl}`, label: `${sl} in water`, disabled: !!app.bench.reaction, onClick: () => app.quickDrop(sl) })), { cols: 3, height: 42, size: 17, gap: 6 });
@@ -50,10 +50,10 @@ export function drawTeacher(ui, app) {
   if (s.mode === 'lab') {
     const armed = app.newArmed && performance.now() - app.newArmed < 3000;
     ui.heading('Mystery metals', { size: 22 });
-    ui.buttons([{ id: 'new', label: armed ? 'Sure? Clears results' : 'New mystery metals', active: armed, onClick: () => app.newMystery() }], { height: 52, size: 20 });
+    ui.buttons([{ id: 'new', label: armed ? 'Sure? Clears Results' : 'New Mystery Metals', active: armed, onClick: () => app.newMystery() }], { height: 52, size: 20 });
   } else if (s.mode === 'results') {
     ui.heading('Answers', { size: 22 });
-    ui.buttons([{ id: 'reveal-ans', label: s.revealed ? 'Hide the answers' : 'Reveal the answers', active: s.revealed, onClick: () => app.reveal() }], { height: 56, size: 22 });
+    ui.buttons([{ id: 'reveal-ans', label: s.revealed ? 'Hide the Answers' : 'Reveal the Answers', active: s.revealed, onClick: () => app.reveal() }], { height: 56, size: 22 });
   }
 }
 
@@ -67,7 +67,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the chemist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.chemistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 17, gap: 8 });
     if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
   })], { height: 56, size: 20 });
@@ -149,9 +149,9 @@ function drawLab(ui, app) {
 
 function drawResults(ui, app) {
   const s = app.state;
-  ui.title('Your conclusions', { size: 30 });
+  ui.title('Your Conclusions', { size: 30 });
   const done = Object.keys(s.verdicts).filter((k) => s.verdicts[k]);
-  ui.text(done.length ? `You identified ${done.length} of 4 mystery metals.` : 'You haven’t identified any mystery metals yet (Experiment).', { size: 20, color: THEME.dim });
+  ui.text(done.length ? `You identified ${done.length} of 4 mystery metals.` : 'You have not identified any mystery metals yet (Experiment).', { size: 20, color: THEME.dim });
   for (const sl of ['B', 'C', 'D', 'E']) {
     const v = s.verdicts[sl];
     if (!v) continue;

@@ -24,7 +24,7 @@ export const glossy = (color, extra = {}) => new THREE.MeshPhysicalMaterial({
   color, roughness: 0.32, metalness: 0, clearcoat: 0.9, clearcoatRoughness: 0.12, envMapIntensity: 0.8, ...extra,
 });
 
-/** A glowing halo sprite (it can't be picked: picking goes to the particle itself). */
+/** A glowing halo sprite (it cannot be picked: picking goes to the particle itself). */
 export function halo(color, size, opacity = 0.7) {
   const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: softDot(), color, transparent: true, opacity, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
   s.scale.setScalar(size);

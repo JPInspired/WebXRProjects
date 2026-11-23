@@ -28,7 +28,7 @@ export function drawControls(ui, app) {
     ui.stepper('Temperature', `${b.T} °C`, { id: 'temp', onMinus: () => app.nudgeT(-1), onPlus: () => app.nudgeT(1), size: 26 });
     const run = b.timing || b.t > 0;
     ui.text(run ? `Stopwatch: ${Math.floor(b.t / 60)}:${String(Math.floor(b.t % 60)).padStart(2, '0')} of 2:00` : 'The stopwatch starts when the stopper goes on.', { size: 22, weight: 700, color: b.timing ? WARN : run ? GOOD : THEME.dim });
-    ui.buttons([{ id: 'next', label: 'Next run: fresh flask', onClick: () => app.nextRun() }], { height: 52, size: 22 });
+    ui.buttons([{ id: 'next', label: 'Next Run: Fresh Flask', onClick: () => app.nextRun() }], { height: 52, size: 22 });
   } else if (s.mode === 'results') {
     ui.text('The class graph is on the board. Where is the peak? Why does the oxygen fall away on both sides?', { size: 21, color: THEME.dim });
   } else {
@@ -47,7 +47,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the biologist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 18, gap: 8 });
     if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
   })], { height: 56, size: 20 });
@@ -59,8 +59,8 @@ function drawQuiz(ui, app) {
   const q = s.quiz;
   if (q.i >= qs.length) {
     ui.title(`Score: ${q.score} / ${qs.length}`, { size: 34 });
-    ui.text(q.score === qs.length ? 'Full marks! You’re ready for the experiment.' : 'Read the explanations, then on to the experiment.', { size: 22 });
-    ui.buttons([{ id: 'quiz-again', label: 'Try the quiz again', onClick: () => app.restartQuiz() }], { height: 50, size: 21 });
+    ui.text(q.score === qs.length ? 'Full marks. You are ready for the experiment.' : 'Read the explanations, then on to the experiment.', { size: 22 });
+    ui.buttons([{ id: 'quiz-again', label: 'Try the Quiz Again', onClick: () => app.restartQuiz() }], { height: 50, size: 21 });
     return;
   }
   const cur = qs[q.i];
@@ -74,7 +74,7 @@ function drawQuiz(ui, app) {
   });
   if (q.picked != null) {
     ui.box(`${q.picked === cur.answer ? '✓ Right. ' : '✗ Not quite. '}${cur.why}`, { size: 20, color: q.picked === cur.answer ? GOOD : WARN });
-    ui.buttons([{ id: 'quiz-next', label: q.i + 1 < qs.length ? 'Next question' : 'See my score', onClick: () => app.nextQuestion() }], { height: 52, size: 22 });
+    ui.buttons([{ id: 'quiz-next', label: q.i + 1 < qs.length ? 'Next Question' : 'See My Score', onClick: () => app.nextQuestion() }], { height: 52, size: 22 });
   }
 }
 
@@ -125,7 +125,7 @@ function drawKeypad(ui, app) {
 
 function drawResults(ui, app) {
   const s = app.state;
-  ui.title('Your graph', { size: 32 });
+  ui.title('Your Graph', { size: 32 });
   const { ctx } = ui;
   const y = ui.y + 6;
   drawGraph(ctx, ui.pad + 70, y, ui.contentWidth - 80, 250, [{ color: 0x5b9bff, me: true, r: s.results }], { size: 0.8 });
@@ -137,7 +137,7 @@ function drawResults(ui, app) {
     'Why is the reaction slow in the cold flask?',
     'At which temperature does catalase work best (its optimum)?',
     'Why is there almost no oxygen at 70 °C and above?',
-    'Which results don’t fit the class pattern, and why might that be?',
+    'Which results do not fit the class pattern, and why might that be?',
     'Where are enzymes used in everyday life?',
   ]) ui.text(`• ${q}`, { size: 19 });
   void BAD;

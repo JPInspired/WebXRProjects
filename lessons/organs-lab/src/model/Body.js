@@ -264,7 +264,7 @@ export class Body {
       const col = i % cols;
       k.deskPos = new THREE.Vector3(DESK.x - DESK_W / 2 + 0.09 + col * 0.18, TOP + 0.04, DESK.z - DESK_D / 2 + 0.065 + r * 0.095);
     });
-    // label slots beside the body, on the side of each organ, at its height, spread so they don't overlap
+    // label slots beside the body, on the side of each organ, at its height, spread so they do not overlap
     for (const k of list) {
       const ps = this.cardPieces(k.id);
       // a pair (lungs, kidneys) points at the one on the body's left
@@ -633,7 +633,7 @@ export class Body {
     // advanced: it stays where it was put (if that is in the body)
     if (this.overBody(world)) {
       const at = this.skel.worldToLocal(world.clone());
-      if (!this.app.presenting) at.z = p.home.z; // a mouse can't set the depth
+      if (!this.app.presenting) at.z = p.home.z; // a mouse cannot set the depth
       this.toBody(p, at);
       this.finish(p.group);
       this.app.onPlaced(p, null);

@@ -12,7 +12,7 @@ import { drawControls, drawInfo, drawCard, MODES } from './ui/panels.js';
 // Bounce Lab: a row of surface mats on the real floor (concrete, wood, carpet, grass, sand, a trampoline and a
 // patch of the Moon) and six real-size balls on a shelf. Students drop the balls by hand, read the rebound
 // height from a slow-motion replay beside a 2 m ruler, and record it. Their means go to a class results chart
-// on the class board, where everyone can compare and spot results that don't fit. It opens with predictions,
+// on the class board, where everyone can compare and spot results that do not fit. It opens with predictions,
 // answered on each student's own panel. The teacher (admin) picks the activity and level for everyone.
 
 const BOARD_IN_LAB = new THREE.Vector3(0, 0.5, -2.4); // behind the mats (solo, or before the room is found)
@@ -89,7 +89,7 @@ class App extends LessonApp {
     const text = {
       predict: ['Predict', 'Read the question on the class board and pick your prediction on the right. Then the answer is revealed, and you can test it by dropping the balls.'],
       drop: ['Drop and measure', 'Pick up a ball, hold it over a mat and let go, or use the Drop button. After each drop a slow-motion replay stops at the top of the first bounce: read the height on the ruler and type it in. Repeat each drop three times.'],
-      compare: ['Compare', 'Which surface keeps the most bounce, and which ball? Look at the class chart on the board: do the results agree? Which ones don’t fit, and what could have gone wrong?'],
+      compare: ['Compare', 'Which surface keeps the most bounce, and which ball? Look at the class chart on the board: do the results agree? Which ones do not fit, and what could have gone wrong?'],
     }[mode];
     s.explain = { title: text[0], text: text[1] };
     this.refresh();
@@ -138,7 +138,7 @@ class App extends LessonApp {
     const h = surf ? p.y - BALLS[ball.id].r - topOf(surf) : 0;
     if (!surf || h < 0.03) {
       this.balls.home(ball);
-      this.explain({ title: 'Back on the shelf', text: surf ? 'Lift the ball higher above the mat before you let go.' : 'Hold the ball over one of the mats on the floor, then let go.' });
+      this.explain({ title: 'Back on the Shelf', text: surf ? 'Lift the ball higher above the mat before you let go.' : 'Hold the ball over one of the mats on the floor, then let go.' });
       return;
     }
     if (this.state.mode !== 'drop') this.setMode('drop', true);
@@ -172,7 +172,7 @@ class App extends LessonApp {
     this.explain({
       kicker: 'READ THE RULER',
       title: `Dropped from ${h1} cm`,
-      text: sim.h2 < 0.005 ? 'It hardly bounced at all! Enter 0 if you can’t see a bounce.' : 'The ghost ball has stopped at the top of its first bounce. Follow the yellow line to the ruler, read the height in centimetres and type it in on the right.',
+      text: sim.h2 < 0.005 ? 'It hardly bounced at all. Enter 0 if you cannot see a bounce.' : 'The ghost ball has stopped at the top of its first bounce. Follow the yellow line to the ruler, read the height in centimetres and type it in on the right.',
     });
   }
 
@@ -201,7 +201,7 @@ class App extends LessonApp {
       p.tries++;
       s.entry = '';
       sound.refuse();
-      this.explain({ kicker: 'LOOK AGAIN', title: 'Check your reading', text: `Not quite. Read where the yellow line meets the ruler, from the bottom of the ball. It is ${read > p.true2 ? 'lower' : 'higher'} than ${read} cm. Press “Replay” to watch it again.` });
+      this.explain({ kicker: 'LOOK AGAIN', title: 'Check Your Reading', text: `Not quite. Read where the yellow line meets the ruler, from the bottom of the ball. It is ${read > p.true2 ? 'lower' : 'higher'} than ${read} cm. Press “Replay” to watch it again.` });
       return;
     }
     const value = ok ? read : Math.round(p.true2);
@@ -246,7 +246,7 @@ class App extends LessonApp {
     return out;
   }
 
-  /** Drops whose bounce doesn't fit the others for the same ball and surface. */
+  /** Drops whose bounce does not fit the others for the same ball and surface. */
   oddDrops() {
     const odd = new Set();
     const groups = {};
@@ -314,7 +314,7 @@ class App extends LessonApp {
   onRevealed(ch) {
     const mine = this.myVote(ch);
     sound[mine === ch.answer ? 'bond' : 'beep']();
-    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right!' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
+    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
   }
 
   // ───────────── ask the physicist ─────────────
@@ -415,8 +415,8 @@ class App extends LessonApp {
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }
@@ -452,7 +452,7 @@ class App extends LessonApp {
 
   // ───────────── shared sessions ─────────────
 
-  /** What colleagues need from me: my prediction, how many drops I've recorded, and my means. */
+  /** What colleagues need from me: my prediction, how many drops I have recorded, and my means. */
   netState() {
     const v = this.state.vote;
     return { v: v ? [v.id, v.a] : null, n: this.state.drops.length, avg: this.myAverages() };

@@ -146,7 +146,7 @@ export class LabelQuiz {
       this.app.interaction.pulse(0.5, 40);
       if (this.right === this.total) {
         sound.release(300);
-        this.app.explain({ done: true, title: `All ${this.total} labelled!`, text: `You named every part of the heart${this.wrong ? ` (with ${this.wrong} wrong tr${this.wrong === 1 ? 'y' : 'ies'} on the way)` : ' without a single mistake'}. Now explain to a partner what each part does.` });
+        this.app.explain({ done: true, title: `All ${this.total} labelled`, text: `You named every part of the heart${this.wrong ? ` (with ${this.wrong} wrong tr${this.wrong === 1 ? 'y' : 'ies'} on the way)` : ' without a single mistake'}. Now explain to a partner what each part does.` });
       } else {
         this.app.explain({ title: `Yes: ${PARTS[id].name}`, text: `${PARTS[id].text} (${this.right} of ${this.total} labelled)` });
       }
@@ -155,7 +155,7 @@ export class LabelQuiz {
       this.setLook(tag, 'wrong');
       sound.refuse();
       this.app.interaction.pulse(0.8, 100);
-      this.app.explain({ title: `Not quite: that’s the ${PARTS[hit.id].name.toLowerCase()}`, text: `Look for ${PARTS[id].look}.` });
+      this.app.explain({ title: `Not quite: that is the ${PARTS[hit.id].name.toLowerCase()}`, text: `Look for ${PARTS[id].look}.` });
       setTimeout(() => {
         if (!tag.userData.done) this.setLook(tag, 'idle');
       }, 1200);

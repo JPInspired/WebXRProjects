@@ -9,7 +9,7 @@ import { sound } from '../util/sound.js';
 //  • grabbing with a closed hand (a fist) as well as a pinch, and a slightly larger reach for hands;
 //  • a wrist menu: turn a palm towards your face for two buttons, Menus (hide / show all panels, like B on a
 //    controller) and Move (the next pinch-and-hold anywhere moves the whole lab, like the grip).
-// Held things are also smoothed for hands (see Interaction.update), so tracking jitter doesn't shake them.
+// Held things are also smoothed for hands (see Interaction.update), so tracking jitter does not shake them.
 //
 // One switch turns all of this off: HANDS.enabled = false (or ?nohands in a lesson's address).
 

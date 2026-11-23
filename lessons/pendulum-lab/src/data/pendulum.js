@@ -66,7 +66,7 @@ export const PREDICTIONS = [
   {
     name: 'Stopping',
     q: 'Why does a pendulum eventually stop swinging?',
-    options: ['Gravity runs out', 'Air resistance and friction take energy away each swing', 'The string gets tired', 'It doesn’t: it swings for ever'],
+    options: ['Gravity runs out', 'Air resistance and friction take energy away each swing', 'The string gets tired', 'It does not: it swings for ever'],
     answer: 1,
     why: 'Air resistance and friction at the pivot turn a little of its energy into heat and sound every swing. In a vacuum, with a perfect pivot, it would swing for ever.',
   },
@@ -83,9 +83,9 @@ export const WORLD = [
 export const SECONDS_L = 9.81 / (Math.PI * Math.PI); // a 2-second ("seconds") pendulum, 0.994 m
 
 export const DISCUSS = [
-  'Which variable changed the period, and which didn’t? Did your results match your predictions?',
+  'Which variable changed the period, and which did not? Did your results match your predictions?',
   'Why does timing 10 swings give a better answer than timing one?',
-  'Your stopwatch and the light gate didn’t agree exactly: why not?',
+  'Your stopwatch and the light gate did not agree exactly: why not?',
   'Which bob kept swinging longest, and why? Where did the energy go?',
   'Why must a pendulum clock be adjusted if it is moved to a mountain top, or to the Moon?',
 ];
@@ -95,7 +95,7 @@ export const DISCUSS = [
 export const QUESTIONS = [
   { id: 'period', label: 'What is the period?' },
   { id: 'length', label: 'Why does length matter?' },
-  { id: 'mass', label: 'Why doesn’t mass matter?' },
+  { id: 'mass', label: 'Why does not mass matter?' },
   { id: 'angle', label: 'Does the angle matter?' },
   { id: 'energy', label: 'Where does the energy go?' },
   { id: 'momentum', label: 'What about momentum?' },
@@ -106,7 +106,7 @@ export const QUESTIONS = [
 export const ANSWERS = {
   period: 'The time for one complete swing, there and back: from one side, across, and back to the same side. A 1 m pendulum on Earth has a period of about 2 seconds.',
   length: 'A longer pendulum swings along a bigger, flatter arc, so gravity pulls it back to the middle more gently and it takes longer. The period grows with the square root of the length: T = 2π√(L/g).',
-  mass: 'A heavier bob is pulled harder by gravity, but it also needs a bigger force to speed it up. The two cancel exactly, so the period doesn’t change. (Mass does change how long it keeps swinging in air.)',
+  mass: 'A heavier bob is pulled harder by gravity, but it also needs a bigger force to speed it up. The two cancel exactly, so the period does not change. (Mass does change how long it keeps swinging in air.)',
   angle: 'Hardly, for small swings: that is why pendulums keep good time even as their swings die away. For big swings (more than about 20°), each swing takes a little longer.',
   energy: 'At the top of a swing it has gravitational potential energy and stops for an instant; at the bottom that has become kinetic energy. A little is lost each swing to the air and the pivot, as heat and sound.',
   momentum: 'The bob’s momentum (mass × velocity) is biggest at the bottom and zero at the ends, where gravity turns it round. Air resistance takes some momentum away every swing, so it slows down and the swings get smaller.',

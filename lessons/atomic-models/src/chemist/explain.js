@@ -29,7 +29,7 @@ export function atomChange(before, after) {
   const b = describeAtom(after);
   const out = [];
   if (before.p !== after.p) {
-    if (!b.element) out.push(`With no protons left there is no element at all!`);
+    if (!b.element) out.push(`With no protons left there is no element at all.`);
     else if (!a.element) out.push(`One proton makes it ${b.element.name}!`);
     else out.push(`It was ${a.element.name} — now it is ${b.element.name}, because the number of protons changed.`);
   } else if (before.n !== after.n && b.element) {
@@ -56,7 +56,7 @@ export function particleDropped(kind, added, before, after) {
 }
 
 export function particleLimit(kind) {
-  return { title: 'That’s the limit here', text: `This lab goes up to krypton (36 protons, 36 electrons, 60 neutrons), so the ${kind} was not added.` };
+  return { title: 'That Is the Limit Here', text: `This lab goes up to krypton (36 protons, 36 electrons, 60 neutrons), so the ${kind} was not added.` };
 }
 
 // ── Molecule building ───────────────────────────────────
@@ -107,14 +107,14 @@ export function bondFormed(a, b) {
 
 export function cannotDestroy(sym) {
   return {
-    title: 'Atoms can’t be destroyed!',
+    title: 'Atoms Cannot Be Destroyed',
     text: `In a chemical reaction atoms are only rearranged — never created or destroyed. ${sym ? `That ${nameOf(sym).toLowerCase()} atom` : 'Every atom'} has to end up in one of the products.`,
   };
 }
 
 export function bondFull(sym) {
   const b = BUILD_ATOMS[sym];
-  return { title: 'No room for another bond', text: `${nameOf(sym)} can only make ${b.valence} bond${b.valence > 1 ? 's' : ''} and they are all used, so no new bond formed. Break one of its bonds first.` };
+  return { title: 'No Room for Another Bond', text: `${nameOf(sym)} can only make ${b.valence} bond${b.valence > 1 ? 's' : ''} and they are all used, so no new bond formed. Break one of its bonds first.` };
 }
 
 export function bondOrderChanged(a, b, order, blocked) {
@@ -148,7 +148,7 @@ export function statusLine(components) {
   const done = components.find((c) => c.complete && c.known && c.justCompleted);
   if (done) {
     const fact = done.known.fact ?? MOLECULES[done.known.preset]?.fact ?? '';
-    return { title: `You built ${done.known.name} (${done.formula})!`, text: `Every atom has a full outer shell. ${fact}` };
+    return { title: `You built ${done.known.name} (${done.formula})`, text: `Every atom has a full outer shell. ${fact}` };
   }
   const fresh = components.find((c) => c.complete && c.justCompleted && c.atoms.length > 1);
   if (fresh) return { title: `Stable molecule: ${fresh.formula}`, text: 'Every atom has all the bonds it needs, so this is a complete molecule.' };
@@ -173,7 +173,7 @@ export const FORCES = {
     text: 'Opposite charges attract: the positive nucleus pulls on your negative electron. That attraction is what keeps electrons in their shells.',
   },
   neutron: {
-    title: 'No push, no pull',
+    title: 'No Push, No Pull',
     text: 'A neutron has no charge, so the nucleus neither repels nor attracts it electrically — it slides straight in.',
   },
 };
@@ -188,7 +188,7 @@ export function reactionDone(r, energy) {
   const net = energy.out - energy.in;
   const exo = net >= 0;
   return {
-    title: exo ? `Exothermic! ${Math.round(net)} kJ released` : `Endothermic: ${Math.round(-net)} kJ taken in`,
+    title: exo ? `Exothermic. ${Math.round(net)} kJ released` : `Endothermic: ${Math.round(-net)} kJ taken in`,
     text: `Breaking bonds took in ${Math.round(energy.in)} kJ; making new ones gave out ${Math.round(energy.out)} kJ (per mole). ${exo ? 'More came out than went in, so the surroundings heat up — the products are shaking with that energy.' : 'More went in than came out, so the surroundings cool down.'} ${r.fact}`,
   };
 }

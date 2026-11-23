@@ -121,7 +121,7 @@ class App extends LessonApp {
     if (!s.seen.includes(id)) s.seen.push(id);
     sound.click();
     const all = s.seen.length === PART_IDS.length;
-    this.explain({ done: all, title: PARTS[id].name, text: `${PARTS[id].job}${all ? ' That’s every part! Next: prepare a slide.' : ''}` });
+    this.explain({ done: all, title: PARTS[id].name, text: `${PARTS[id].job}${all ? ' That is every part. Next: prepare a slide.' : ''}` });
   }
 
   // ───────────── slides ─────────────
@@ -137,11 +137,11 @@ class App extends LessonApp {
     if (this.state.mode !== 'lab') this.setMode('lab', true);
     const smp = SAMPLES[id];
     if (step === 'stain') this.explain({ title: smp.stain === 'water' ? `A drop of water on the ${smp.short.toLowerCase()}` : `${smp.stain[0].toUpperCase()}${smp.stain.slice(1)} on the ${smp.short.toLowerCase()}`, text: `${smp.stain === 'water' ? 'This sample needs no stain: a drop of water keeps it alive and flat.' : 'The stain will colour parts of the cells so that you can see them.'} Next: a coverslip.` });
-    else this.explain({ title: 'Coverslip on', text: 'It keeps the sample flat and stops it drying out. Now move the slide onto the microscope’s stage.' });
+    else this.explain({ title: 'Coverslip On', text: 'It keeps the sample flat and stops it drying out. Now move the slide onto the microscope’s stage.' });
   }
 
   dropFirst() {
-    this.explain({ title: 'A drop first', text: 'Add a drop of stain (or water) with the pipette before the coverslip.' });
+    this.explain({ title: 'A Drop First', text: 'Add a drop of stain (or water) with the pipette before the coverslip.' });
   }
 
   toStage(id) {
@@ -150,7 +150,7 @@ class App extends LessonApp {
     if (!s.stained || !s.covered) {
       s.group.position.copy(s.home);
       sound.refuse();
-      this.explain({ title: 'Not ready yet', text: `This slide still needs ${!s.stained ? 'a drop of stain (or water) and ' : ''}a coverslip.` });
+      this.explain({ title: 'Not Ready Yet', text: `This slide still needs ${!s.stained ? 'a drop of stain (or water) and ' : ''}a coverslip.` });
       return;
     }
     b.putOnStage(s);
@@ -181,7 +181,7 @@ class App extends LessonApp {
     s.mag = m;
     this.bench.setObjective(m);
     sound.click();
-    if (m === 40) this.explain({ title: '×40 lens: ×400', text: 'High power: more detail, a smaller area, and only the fine focus from now on.' });
+    if (m === 40) this.explain({ title: '×40 Lens: ×400', text: 'High power: more detail, a smaller area, and only the fine focus from now on.' });
     else this.explain({ title: `×${m} lens: ×${m * 10}`, text: m === 4 ? 'Low power: the biggest area, easy to find things.' : 'Medium power. Refocus with the fine focus.' });
     this.view.redraw();
   }
@@ -195,14 +195,14 @@ class App extends LessonApp {
     const s = this.state;
     if (knob === 'coarse' && s.mag === 40) {
       sound.refuse();
-      this.explain({ kicker: 'CAREFUL', title: 'Not the coarse focus at ×40', text: 'At high power the lens is almost touching the slide: the coarse knob could crack it. Use the fine focus.' });
+      this.explain({ kicker: 'CAREFUL', title: 'Not the Coarse Focus At ×40', text: 'At high power the lens is almost touching the slide: the coarse knob could crack it. Use the fine focus.' });
       return;
     }
     const before = this.blur();
     s.focus = THREE.MathUtils.clamp(s.focus + d, 0, 100);
     sound.click();
     const after = this.blur();
-    if (before >= 1.5 && after < 1.5 && this.bench.onStage) this.explain({ title: 'In focus', text: this.state.mag === 4 ? 'Sharp! Now try the ×10 lens and label what you see.' : 'Sharp! Pick a label on the right and tap that part in the view.' });
+    if (before >= 1.5 && after < 1.5 && this.bench.onStage) this.explain({ title: 'In Focus', text: this.state.mag === 4 ? 'Sharp. Now try the ×10 lens and label what you see.' : 'Sharp. Pick a label on the right and tap that part in the view.' });
     this.view.redraw();
     this.refresh();
   }
@@ -221,15 +221,15 @@ class App extends LessonApp {
     const v = 1 - uv.y;
     if (!id || Math.hypot(u - 0.5, v - 0.5) > 0.49) return;
     if (!s.pick) {
-      this.explain({ title: 'Pick a label first', text: 'Choose a label on the right, then tap that part in the view.' });
+      this.explain({ title: 'Pick a Label First', text: 'Choose a label on the right, then tap that part in the view.' });
       return;
     }
     if (s.mag === 4) {
-      this.explain({ title: 'Too small at ×4', text: 'Switch to the ×10 or ×40 lens to see the cells clearly enough to label them.' });
+      this.explain({ title: 'Too Small At ×4', text: 'Switch to the ×10 or ×40 lens to see the cells clearly enough to label them.' });
       return;
     }
     if (this.blur() > 3) {
-      this.explain({ title: 'Focus first', text: 'The image is blurred: sharpen it with the fine focus before labelling.' });
+      this.explain({ title: 'Focus First', text: 'The image is blurred: sharpen it with the fine focus before labelling.' });
       return;
     }
     const p = viewToSlide(id, s.mag, u, v);
@@ -237,7 +237,7 @@ class App extends LessonApp {
     const hit = findStructure(id, s.pick, p.x, p.y, tol, this.time());
     if (!hit) {
       sound.refuse();
-      this.explain({ title: 'Not quite', text: `That isn’t a ${s.pick}. ${ABOUT_LABEL[s.pick]} Look again.` });
+      this.explain({ title: 'Not Quite', text: `That is not a ${s.pick}. ${ABOUT_LABEL[s.pick]} Look again.` });
       return;
     }
     const list = (s.found[id] ??= []);
@@ -380,8 +380,8 @@ class App extends LessonApp {
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }

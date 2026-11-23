@@ -28,25 +28,25 @@ export function drawControls(ui, app) {
   } else if (s.mode === 'build') {
     ui.heading('Skeleton', { size: 22 });
     ui.buttons([['solid', 'Ribs solid'], ['clear', 'See-through'], ['hidden', 'Ribs hidden']].map(([id, label]) => ({ id: `ribs-${id}`, label, active: b.ribs === id, onClick: () => app.setRibs(id) })), { height: 46, size: 17, gap: 6 });
-    ui.buttons([{ id: 'cap', label: b.capOpen ? 'Close the skull cap' : 'Open the skull cap', onClick: () => app.toggleCap() }], { height: 46, size: 19 });
+    ui.buttons([{ id: 'cap', label: b.capOpen ? 'Close the Skull Cap' : 'Open the Skull Cap', onClick: () => app.toggleCap() }], { height: 46, size: 19 });
     if (s.level === 'advanced') {
       const placed = b.active.filter((p) => p.where === 'body' && !p.ok).length;
       ui.buttons([{ id: 'check', label: placed ? `Check my body (${placed} to mark)` : 'Check my body', disabled: !placed, onClick: () => app.checkBody() }], { height: 58, size: 22 });
     }
-    ui.buttons([{ id: 'restart', label: 'Start again', onClick: () => app.restart() }], { height: 46, size: 19 });
+    ui.buttons([{ id: 'restart', label: 'Start Again', onClick: () => app.restart() }], { height: 46, size: 19 });
   } else if (s.mode === 'functions') {
     ui.text('Drag each card onto the dashed spot whose line points to the organ that does that job. Right: it sticks. Wrong: it goes back.', { size: 20, color: THEME.dim });
-    ui.buttons([{ id: 'cards-reset', label: 'Take all the cards back', onClick: () => app.resetCards() }], { height: 46, size: 19 });
+    ui.buttons([{ id: 'cards-reset', label: 'Take All the Cards Back', onClick: () => app.resetCards() }], { height: 46, size: 19 });
   } else if (s.mode === 'systems') {
     if (app.controlsSystem) {
       ui.heading('Show a system', { size: 22 });
-      ui.buttons([{ id: 'sys-all', label: 'All of them', active: !s.system, onClick: () => app.setSystem(null) }], { height: 46, size: 19 });
+      ui.buttons([{ id: 'sys-all', label: 'All of Them', active: !s.system, onClick: () => app.setSystem(null) }], { height: 46, size: 19 });
       ui.buttons(SYSTEMS.map((x) => ({ id: `sys-${x.id}`, label: x.name.replace(' (excretory)', '').replace(' system', ''), active: s.system === x.id, onClick: () => app.setSystem(x.id) })), { cols: 2, height: 46, size: 18, gap: 8 });
     } else ui.text('Your teacher picks the system. Its organs light up in your skeleton; the rest fade.', { size: 20, color: THEME.dim });
   } else if (s.mode === 'quiz') {
     const done = s.quiz.filter((a) => a != null).length;
     ui.text(`${done} of ${QUIZ.length} answered`, { size: 24, weight: 700 });
-    ui.buttons([{ id: 'quiz-restart', label: 'Start the quiz again', disabled: !done, onClick: () => app.quizRestart() }], { height: 46, size: 19 });
+    ui.buttons([{ id: 'quiz-restart', label: 'Start the Quiz Again', disabled: !done, onClick: () => app.quizRestart() }], { height: 46, size: 19 });
   }
 
   if (app.soloTeacher) drawTeacher(ui, app);
@@ -72,7 +72,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the doctor', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.doctorEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.doctorEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.doc.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 16, gap: 8 });
     if (s.doc.answer) ui.box(s.doc.answer, { size: 20 });
   })], { height: 56, size: 20 });
@@ -80,13 +80,13 @@ export function drawInfo(ui, app) {
 
 function drawNotes(ui, app) {
   const n = app.state.note;
-  ui.title('Sticky notes', { size: 30 });
+  ui.title('Sticky Notes', { size: 30 });
   ui.text(NOTES_TASK, { size: 20, color: THEME.dim });
   ui.heading('Note 1: the organ', { size: 22 });
   ui.buttons(CARDS.slice(0, 9).map((c) => ({ id: `no-${c.id}`, label: c.name, active: n.organ === c.id, onClick: () => app.noteOrgan(c.id) })), { cols: 3, height: 44, size: 16, gap: 6 });
   ui.heading('Note 2: what it does', { size: 22 });
   for (const c of app.noteFunctions()) ui.buttons([{ id: `nf-${c.id}`, label: c.text, active: n.fn === c.id, onClick: () => app.noteFunction(c.id) }], { height: 40, size: 15, gap: 5 });
-  ui.buttons([{ id: 'stick', label: n.stuck ? 'Stuck on the board ✓ (stick a new pair)' : 'Stick them on the board', disabled: !n.organ || !n.fn, active: !!n.stuck, onClick: () => app.stickNote() }], { height: 50, size: 19 });
+  ui.buttons([{ id: 'stick', label: n.stuck ? 'Stuck on the Board ✓ (Stick a New Pair)' : 'Stick Them on the Board', disabled: !n.organ || !n.fn, active: !!n.stuck, onClick: () => app.stickNote() }], { height: 50, size: 19 });
 }
 
 function drawBuild(ui, app) {
@@ -113,7 +113,7 @@ function drawBuild(ui, app) {
     const p = b.piece(b.hint);
     ui.box(`${p.o.name}: ${p.o.where}`, { size: 19 });
   }
-  if (b.placed === list.length) ui.text('Every organ is in place! Next: the function cards.', { size: 21, weight: 700, color: GOOD });
+  if (b.placed === list.length) ui.text('Every organ is in place. Next: the function cards.', { size: 21, weight: 700, color: GOOD });
 }
 
 function drawFunctions(ui, app) {
@@ -132,7 +132,7 @@ function drawSystems(ui, app) {
     ui.text(sys.job, { size: 20 });
     ui.box(sys.needs, { size: 19 });
   } else {
-    ui.title('Body systems', { size: 30 });
+    ui.title('Body Systems', { size: 30 });
     ui.text('Organs work in teams called organ systems, and the systems depend on each other. Pick one to light up its organs.', { size: 20 });
   }
   ui.heading('Discuss', { size: 22 });
@@ -146,7 +146,7 @@ function drawQuiz(ui, app) {
   if (i >= QUIZ.length) {
     const score = app.quizScore();
     ui.title(`Score: ${score} / ${QUIZ.length}`, { size: 34 });
-    ui.text(score === QUIZ.length ? 'Full marks!' : score >= 7 ? 'Well done.' : 'Have another look at the organs you missed.', { size: 21, color: score >= 7 ? GOOD : WARN });
+    ui.text(score === QUIZ.length ? 'Full marks' : score >= 7 ? 'Well done.' : 'Have another look at the organs you missed.', { size: 21, color: score >= 7 ? GOOD : WARN });
     QUIZ.forEach((q, k) => ui.text(`${s.quiz[k] === q.answer ? '✓' : '✗'} ${k + 1}. ${q.options[q.answer]}`, { size: 17, color: s.quiz[k] === q.answer ? GOOD : BAD }));
     return;
   }
@@ -160,8 +160,8 @@ function drawQuiz(ui, app) {
     ui.buttons([{ id: `qa-${k}`, label: `${'ABCD'[k]}   ${o}`, active: right, color: a === k && !right ? '#5a2f3a' : null, disabled: a != null && a !== k && !right, onClick: () => app.quizAnswer(k) }], { height: 52, size: 18, gap: 6 });
   });
   if (a != null) {
-    ui.text(a === q.answer ? '✓ Right!' : `✗ The answer is ${'ABCD'[q.answer]}: ${q.options[q.answer]}.`, { size: 20, color: a === q.answer ? GOOD : BAD });
-    ui.buttons([{ id: 'quiz-next', label: i + 1 < QUIZ.length ? 'Next question' : 'See my score', onClick: () => app.quizNext() }], { height: 52, size: 21 });
+    ui.text(a === q.answer ? '✓ Right' : `✗ The answer is ${'ABCD'[q.answer]}: ${q.options[q.answer]}.`, { size: 20, color: a === q.answer ? GOOD : BAD });
+    ui.buttons([{ id: 'quiz-next', label: i + 1 < QUIZ.length ? 'Next Question' : 'See My Score', onClick: () => app.quizNext() }], { height: 52, size: 21 });
   }
   ui.text(`${done} answered`, { size: 17, color: THEME.dim });
 }

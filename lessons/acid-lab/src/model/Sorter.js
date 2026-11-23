@@ -131,7 +131,7 @@ export class Sorter {
     };
   }
 
-  /** The pH at a point (lab coordinates), or null if it isn't over the scale. */
+  /** The pH at a point (lab coordinates), or null if it is not over the scale. */
   phAt(p) {
     const local = this.scale.worldToLocal(this.app.lab.localToWorld(p.clone()));
     if (Math.abs(local.y) > 0.11 || Math.abs(local.z) > 0.16 || Math.abs(local.x) > W / 2 + 0.03) return null;

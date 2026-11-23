@@ -26,7 +26,7 @@ export const NET_CONFIG = {
   networkPrefix: 24,
 
   // Fixed, well-known relays (instead of a random pick from a long list), so a web filter only needs
-  // these few addresses allowed. Each device uses all of them, so one being down doesn't matter.
+  // these few addresses allowed. Each device uses all of them, so one being down does not matter.
   relayUrls: ['wss://nos.lol', 'wss://relay.primal.net', 'wss://nostr.mom'],
 
   // Finding the network's public address, and helping devices reach each other.

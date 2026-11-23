@@ -4,7 +4,7 @@ import * as THREE from 'three';
 //  • A frames-per-second counter, in the bottom-left corner of your view: shown to the teacher in a shared
 //    session (the admin) while in the headset, or to anyone who opens a lesson with ?fps in its address
 //    (e.g. lesson/?fps), on a computer too.
-//  • A safety net: in a headset, if a lesson can't keep up with the headset's frame rate for a few seconds, it
+//  • A safety net: in a headset, if a lesson cannot keep up with the headset's frame rate for a few seconds, it
 //    switches off its heaviest effects, one step at a time, on that headset only (computers keep the full look):
 //      step 1: reflections off (scene environment) and the strongest fixed foveation (fewer pixels at the edges)
 //      step 2: the glossy clear coat and sheen off every material

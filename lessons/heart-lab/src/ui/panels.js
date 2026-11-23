@@ -19,8 +19,8 @@ export function drawControls(ui, app) {
   ui.heading('Your heart');
   ui.buttons([
     { id: 'view', label: s.view === 'real' ? 'Realistic' : 'Textbook', active: s.view === 'text', onClick: () => app.toggleView() },
-    { id: 'cut', label: s.cut ? 'Opened up' : 'Open it up', active: s.cut, onClick: () => app.toggleCut() },
-    { id: 'names', label: s.names ? 'Names: on' : 'Names: off', active: s.names, onClick: () => app.toggleNames() },
+    { id: 'cut', label: s.cut ? 'Opened Up' : 'Open It Up', active: s.cut, onClick: () => app.toggleCut() },
+    { id: 'names', label: s.names ? 'Names: On' : 'Names: Off', active: s.names, onClick: () => app.toggleNames() },
   ], { height: 54, size: 22, gap: 8 });
 
   ui.gap(4);
@@ -34,21 +34,21 @@ export function drawControls(ui, app) {
     const playing = s.at == null;
     ui.buttons([
       { id: 'play', label: playing ? '❚❚ Pause' : '▶ Play', onClick: () => app.togglePlay() },
-      { id: 'slow', label: s.slow ? 'Slow motion: on' : 'Slow motion', active: s.slow, onClick: () => app.toggleSlow() },
-      { id: 'sound', label: s.sound ? 'Sound: on' : 'Sound: off', active: s.sound, onClick: () => app.toggleSound() },
+      { id: 'slow', label: s.slow ? 'Slow Motion: On' : 'Slow Motion', active: s.slow, onClick: () => app.toggleSlow() },
+      { id: 'sound', label: s.sound ? 'Sound: On' : 'Sound: Off', active: s.sound, onClick: () => app.toggleSound() },
     ], { height: 52, size: 21, gap: 8 });
     const phases = PHASES[s.level];
     ui.buttons(phases.map((p) => ({ id: `phase-${p.id}`, label: p.title, active: s.at === p.at, onClick: () => app.showPhase(p) })), { cols: phases.length > 3 ? 2 : 1, height: 46, size: 21, gap: 6 });
   } else if (s.mode === 'exercise') {
     ui.buttons(RATES.map((r) => ({ id: `rate-${r.id}`, label: `${r.label} · ${r.bpm}`, active: s.rate === r.id, onClick: () => app.setRate(r.id) })), { cols: 2, height: 54, size: 22, gap: 8 });
-    ui.buttons([{ id: 'sound', label: s.sound ? 'Sound: on' : 'Sound: off', active: s.sound, onClick: () => app.toggleSound() }], { height: 48, size: 21 });
+    ui.buttons([{ id: 'sound', label: s.sound ? 'Sound: On' : 'Sound: Off', active: s.sound, onClick: () => app.toggleSound() }], { height: 48, size: 21 });
   } else if (s.mode === 'conditions') {
     ui.buttons(Object.entries(CONDITIONS).map(([id, c]) => ({ id: `cond-${id}`, label: c.label, active: s.cond === id, onClick: () => app.setCondition(id) })), { cols: 2, height: 52, size: 21, gap: 8 });
-    ui.buttons([{ id: 'sound', label: s.sound ? 'Sound: on' : 'Sound: off', active: s.sound, onClick: () => app.toggleSound() }], { height: 48, size: 21 });
+    ui.buttons([{ id: 'sound', label: s.sound ? 'Sound: On' : 'Sound: Off', active: s.sound, onClick: () => app.toggleSound() }], { height: 48, size: 21 });
   } else if (s.mode === 'label') {
     const q = app.quiz;
     ui.text(`${q.right} of ${q.total} labelled${q.wrong ? ` · ${q.wrong} wrong tr${q.wrong === 1 ? 'y' : 'ies'}` : ''}`, { size: 28, weight: 700, color: q.right === q.total && q.total ? '#7ee2a8' : THEME.text });
-    ui.buttons([{ id: 'quiz-restart', label: 'Start again', onClick: () => app.restartQuiz() }], { height: 52, size: 23 });
+    ui.buttons([{ id: 'quiz-restart', label: 'Start Again', onClick: () => app.restartQuiz() }], { height: 52, size: 23 });
     ui.text('Drag each name onto the spot whose line points to that part. Open it up to see the valves and the septum.', { size: 21, color: THEME.dim });
   }
 
@@ -110,17 +110,17 @@ export function drawInfo(ui, app) {
     ui.text(sel.text, { size: 22 });
     if (adv) ui.text(sel.adv, { size: 20, color: '#ffd166' });
   } else if (s.mode === 'flow') {
-    ui.title('Blood flow', { size: 36 });
+    ui.title('Blood Flow', { size: 36 });
     ui.text('Blue dots are deoxygenated blood; red dots are oxygenated. Watch them wait behind the shut valves and surge through when they open.', { size: 22 });
   } else {
-    ui.title('The human heart', { size: 36 });
+    ui.title('The Human Heart', { size: 36 });
     ui.text('About the size of your fist, it beats around 100,000 times a day and pumps about 7,000 litres of blood. It is really two pumps side by side: the right side pumps blood to the lungs, the left side to the rest of the body.', { size: 22 });
   }
 
   ui.gap(8);
   ui.buttons([app.askButton('Ask the cardiologist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.cardiologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.cardiologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 20, gap: 8 });
     if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
   })], { height: 56, size: 20 });
@@ -139,7 +139,7 @@ export function drawCard(ui, app) {
     ui.text(step.text, { size: 22, width: ui.contentWidth - 10 });
     const y = ui.H - 66;
     ui.button({ id: 'step-back', label: '◀ Back', disabled: s.step === 0, onClick: () => app.journeyTo(s.step - 1) }, ui.pad, y, 150, 46, 23);
-    ui.button({ id: 'step-next', label: s.step === JOURNEY.length - 1 ? 'Start again' : 'Next ▶', onClick: () => app.journeyTo((s.step + 1) % JOURNEY.length) }, ui.right - 160, y, 160, 46, 23);
+    ui.button({ id: 'step-next', label: s.step === JOURNEY.length - 1 ? 'Start Again' : 'Next ▶', onClick: () => app.journeyTo((s.step + 1) % JOURNEY.length) }, ui.right - 160, y, 160, 46, 23);
     return;
   }
   const e = s.explain;

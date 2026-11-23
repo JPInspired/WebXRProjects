@@ -9,7 +9,7 @@ import * as THREE from 'three';
 // shapes beside them in the same group.
 
 const COLOR = 0xbfe4ff;
-const MAX_RADIUS = 0.6; // m: bigger things (a whole bench) don't glow
+const MAX_RADIUS = 0.6; // m: bigger things (a whole bench) do not glow
 const MAX_PARTS = 8;
 
 export class HoverGlow {

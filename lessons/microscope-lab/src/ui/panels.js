@@ -50,7 +50,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the biologist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 17, gap: 8 });
     if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
   })], { height: 56, size: 20 });
@@ -60,7 +60,7 @@ function drawLab(ui, app) {
   const s = app.state;
   const id = app.bench.onStage?.id;
   if (!id) {
-    ui.title('No slide on the stage', { size: 30 });
+    ui.title('No Slide on the Stage', { size: 30 });
     ui.text('Prepare a slide: a drop of stain (or water) with the pipette, then a coverslip. Then put it on the stage.', { size: 21, color: THEME.dim });
     return;
   }
@@ -83,7 +83,7 @@ function drawQuiz(ui, app) {
   const q = s.quiz;
   if (q.i >= qs.length) {
     ui.title(`Score: ${q.score} / ${qs.length}`, { size: 34 });
-    ui.buttons([{ id: 'quiz-again', label: 'Try the quiz again', onClick: () => app.restartQuiz() }], { height: 50, size: 21 });
+    ui.buttons([{ id: 'quiz-again', label: 'Try the Quiz Again', onClick: () => app.restartQuiz() }], { height: 50, size: 21 });
     return;
   }
   const cur = qs[q.i];
@@ -97,7 +97,7 @@ function drawQuiz(ui, app) {
   });
   if (q.picked != null) {
     ui.box(`${q.picked === cur.answer ? '✓ Right. ' : '✗ Not quite. '}${cur.why}`, { size: 20, color: q.picked === cur.answer ? GOOD : WARN });
-    ui.buttons([{ id: 'quiz-next', label: q.i + 1 < qs.length ? 'Next question' : 'See my score', onClick: () => app.nextQuestion() }], { height: 52, size: 22 });
+    ui.buttons([{ id: 'quiz-next', label: q.i + 1 < qs.length ? 'Next Question' : 'See My Score', onClick: () => app.nextQuestion() }], { height: 52, size: 22 });
   }
 }
 

@@ -25,7 +25,7 @@ export function drawControls(ui, app) {
       const ch = app.challenge();
       ui.text('Read the question out and let everyone pick, then reveal the answer.', { size: 21, color: THEME.dim });
       ui.buttons(app.predictions().map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, height: 52, size: 20, gap: 8 });
-      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the answer' : 'Reveal the answer', active: ch.revealed, onClick: () => app.reveal() }], { height: 60, size: 24 });
+      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the Answer' : 'Reveal the Answer', active: ch.revealed, onClick: () => app.reveal() }], { height: 60, size: 24 });
       const t = app.tally(ch);
       ui.text(`${t.votes} answer${t.votes === 1 ? '' : 's'} in so far.`, { size: 22, weight: 700 });
     } else ui.text('Read the question on the class board and pick your answer on the right. Your teacher will reveal it.', { size: 22, color: THEME.dim });
@@ -36,10 +36,10 @@ export function drawControls(ui, app) {
     ui.heading('Timer', { size: 24 });
     ui.text(`${b.clock.toFixed(1)} of 24 h`, { size: 24, weight: 700, color: b.running ? WARN : b.clock >= 24 ? GOOD : THEME.dim });
     ui.buttons([
-      { id: 'play', label: b.running ? 'Soaking…' : 'Play: start the soak', active: b.running, disabled: b.running, onClick: () => app.pressPlay() },
-      { id: 'reset', label: 'Reset clock', onClick: () => app.pressReset() },
+      { id: 'play', label: b.running ? 'Soaking…' : 'Play: Start the Soak', active: b.running, disabled: b.running, onClick: () => app.pressPlay() },
+      { id: 'reset', label: 'Reset Clock', onClick: () => app.pressReset() },
     ], { height: 50, size: 19, gap: 8 });
-    ui.buttons([{ id: 'new', label: 'New potato (repeat)', onClick: () => app.newPotato() }], { height: 50, size: 20 });
+    ui.buttons([{ id: 'new', label: 'New Potato (Repeat)', onClick: () => app.newPotato() }], { height: 50, size: 20 });
   } else {
     ui.text('The class graph is on the board. Where does it cross zero? What is special about that concentration?', { size: 21, color: THEME.dim });
   }
@@ -56,7 +56,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the biologist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 46, size: 17, gap: 8 });
     if (s.bio.answer) ui.box(s.bio.answer, { size: 20 });
   })], { height: 56, size: 20 });
@@ -89,9 +89,9 @@ function drawLab(ui, app) {
   if (onPan) {
     ui.title(`On the balance`, { size: 30 });
     ui.text(onPan.dried ? 'Dry.' : 'Still wet: dry it on the towel first, or the reading will be off.', { size: 21, color: onPan.dried ? GOOD : WARN });
-    ui.buttons([{ id: 'record', label: 'Record this mass', onClick: () => app.record() }], { height: 58, size: 24 });
+    ui.buttons([{ id: 'record', label: 'Record This Mass', onClick: () => app.record() }], { height: 58, size: 24 });
   } else {
-    ui.title('Your pieces', { size: 30 });
+    ui.title('Your Pieces', { size: 30 });
     if (!b.pieces.length) ui.text('Cut 5 equal pieces from the potato with the scalpel.', { size: 21, color: THEME.dim });
   }
   if (b.pieces.length) drawTable(ui, app, adv);
@@ -143,7 +143,7 @@ function drawTable(ui, app, adv) {
 }
 
 function drawResults(ui, app) {
-  ui.title('Your graph', { size: 32 });
+  ui.title('Your Graph', { size: 32 });
   const { ctx } = ui;
   const means = app.means();
   const y = ui.y + 6;
@@ -156,7 +156,7 @@ function drawResults(ui, app) {
     'Why do we measure % change rather than grams, when comparing results?',
     'Which concentration was closest to the potato’s own? How do you know?',
     'Why do doctors use a saline drip, never pure water, into a vein?',
-    'Which results don’t fit the pattern, and what might explain that?',
+    'Which results do not fit the pattern, and what might explain that?',
     'What would happen to an animal cell (no cell wall) in the same solutions?',
   ]) ui.text(`• ${q}`, { size: 19 });
 }

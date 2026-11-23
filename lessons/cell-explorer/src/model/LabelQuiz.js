@@ -5,7 +5,7 @@ import { sound } from '../../../../shared/util/sound.js';
 import { LabelSpots } from '../../../../shared/ui/LabelSpots.js';
 
 // "Label it": name tags wait below the cell; beside it, a spot for each part with a line to that part.
-// Drag each name onto its spot (or straight onto the part). It sticks if it's right; if not, it comes back with a
+// Drag each name onto its spot (or straight onto the part). It sticks if it is right; if not, it comes back with a
 // hint about what to look for.
 
 const LOOK = {
@@ -77,7 +77,7 @@ export class LabelQuiz {
     this.right = 0;
     this.wrong = 0;
     const ids = [...cell.parts.keys()];
-    // shuffle so the order doesn't give the answers away
+    // shuffle so the order does not give the answers away
     for (let i = ids.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [ids[i], ids[j]] = [ids[j], ids[i]];
@@ -165,7 +165,7 @@ export class LabelQuiz {
       this.app.interaction.pulse(0.5, 40);
       if (this.right === this.total) {
         sound.release(300);
-        this.app.explain({ done: true, title: `All ${this.total} labelled!`, text: `You named every part of the ${this.cell.def.name.toLowerCase()}${this.wrong ? ` (with ${this.wrong} wrong tr${this.wrong === 1 ? 'y' : 'ies'} on the way)` : ' without a single mistake'}. Try another cell, or switch to Explore to find out what each part does.` });
+        this.app.explain({ done: true, title: `All ${this.total} labelled`, text: `You named every part of the ${this.cell.def.name.toLowerCase()}${this.wrong ? ` (with ${this.wrong} wrong tr${this.wrong === 1 ? 'y' : 'ies'} on the way)` : ' without a single mistake'}. Try another cell, or switch to Explore to find out what each part does.` });
       } else {
         this.app.explain({ title: `Yes — ${ORGANELLES[id].name}`, text: `${ORGANELLES[id].purpose} (${this.right} of ${this.total} labelled)` });
       }
@@ -174,7 +174,7 @@ export class LabelQuiz {
       this.setLook(tag, 'wrong');
       sound.refuse();
       this.app.interaction.pulse(0.8, 100);
-      this.app.explain({ title: `Not quite — that’s the ${ORGANELLES[hit.id].name.toLowerCase()}`, text: `The ${ORGANELLES[id].name.toLowerCase()} is ${LOOK[id]}.` });
+      this.app.explain({ title: `Not quite — that is the ${ORGANELLES[hit.id].name.toLowerCase()}`, text: `The ${ORGANELLES[id].name.toLowerCase()} is ${LOOK[id]}.` });
       setTimeout(() => {
         if (!tag.userData.done) this.setLook(tag, 'idle');
       }, 1200);

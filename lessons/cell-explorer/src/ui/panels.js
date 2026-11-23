@@ -23,9 +23,9 @@ export function drawControls(ui, app) {
 
   if (s.mode === 'explore') {
     ui.buttons([
-      { id: 'cut', label: s.cut ? 'Cut open: on' : 'Cut open: off', active: s.cut, onClick: () => app.toggleCut() },
-      { id: 'names', label: s.names ? 'Names: on' : 'Names: off', active: s.names, onClick: () => app.toggleNames() },
-      { id: 'restore', label: 'Put all back', onClick: () => app.restoreAll() },
+      { id: 'cut', label: s.cut ? 'Cut Open: On' : 'Cut Open: Off', active: s.cut, onClick: () => app.toggleCut() },
+      { id: 'names', label: s.names ? 'Names: On' : 'Names: Off', active: s.names, onClick: () => app.toggleNames() },
+      { id: 'restore', label: 'Put All Back', onClick: () => app.restoreAll() },
     ], { height: 56, size: 23 });
     ui.text(app.presenting
       ? 'Point at a part to see its name. Pinch it (or pull the trigger) to learn about it. Reach in, grab an organelle and pull it out to put it on the specimen stand.'
@@ -33,7 +33,7 @@ export function drawControls(ui, app) {
   } else if (s.mode === 'label') {
     const q = app.quiz;
     ui.text(`${q.right} of ${q.total} labelled${q.wrong ? ` · ${q.wrong} wrong tr${q.wrong === 1 ? 'y' : 'ies'}` : ''}`, { size: 30, weight: 700, color: q.right === q.total ? '#7ee2a8' : THEME.text });
-    ui.buttons([{ id: 'quiz-restart', label: 'Start again', onClick: () => app.restartQuiz() }], { height: 56, size: 24 });
+    ui.buttons([{ id: 'quiz-restart', label: 'Start Again', onClick: () => app.restartQuiz() }], { height: 56, size: 24 });
     ui.text('Drag each name tag onto the spot whose line points to that part. Right answers stick; wrong ones come back with a hint.', { size: 22, color: THEME.dim });
   } else if (s.mode === 'process') {
     ui.buttons(TOURS[s.cellType].map((step, i) => ({
@@ -51,7 +51,7 @@ export function drawInfo(ui, app) {
   const s = app.state;
   const def = CELLS[s.cellType];
   if (s.mode === 'compare') {
-    ui.title('Comparing sizes', { size: 38 });
+    ui.title('Comparing Sizes', { size: 38 });
     ui.text('magnification = image size ÷ real size', { size: 26, weight: 700, color: '#ffd166' });
     ui.text('At 10,000×, 1 µm becomes 1 cm. An animal cell (20 µm) becomes 20 cm; a bacterium (2 µm) just 2 cm.', { size: 24 });
     ui.gap(4);
@@ -84,7 +84,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the biologist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.biologistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 50, size: 21, gap: 8 });
     if (s.bio.answer) ui.box(s.bio.answer, { size: 22 });
   })], { height: 56, size: 20 });
@@ -104,7 +104,7 @@ export function drawCard(ui, app) {
     ui.text(step.text, { size: 23, width: ui.contentWidth - 10 });
     const y = ui.H - 70;
     ui.button({ id: 'tour-back', label: '◀ Back', disabled: s.tourStep === 0, onClick: () => app.tourTo(s.tourStep - 1) }, ui.pad, y, 150, 48, 23);
-    ui.button({ id: 'tour-next', label: s.tourStep === steps.length - 1 ? 'Start again' : 'Next ▶', onClick: () => app.tourTo((s.tourStep + 1) % steps.length) }, ui.right - 150, y, 150, 48, 23);
+    ui.button({ id: 'tour-next', label: s.tourStep === steps.length - 1 ? 'Start Again' : 'Next ▶', onClick: () => app.tourTo((s.tourStep + 1) % steps.length) }, ui.right - 150, y, 150, 48, 23);
     return;
   }
   const e = s.explain;

@@ -107,7 +107,7 @@ class App extends LessonApp {
 
   busyFlask() {
     sound.refuse();
-    this.explain({ title: 'Already reacting', text: 'Wait for this reaction to finish first.' });
+    this.explain({ title: 'Already Reacting', text: 'Wait for this reaction to finish first.' });
   }
 
   onStarted(opt) {
@@ -200,7 +200,7 @@ class App extends LessonApp {
   onRevealed(ch) {
     const mine = this.myVote(ch);
     sound[mine === ch.answer ? 'bond' : 'beep']();
-    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right!' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
+    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
   }
 
   // ───────────── ask the chemist ─────────────
@@ -305,8 +305,8 @@ class App extends LessonApp {
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }

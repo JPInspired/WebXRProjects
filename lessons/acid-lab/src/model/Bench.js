@@ -9,7 +9,7 @@ import { makeBeaker, benchTop, spottingTile } from '../../../../shared/lab/kit.j
 // distilled water for rinsing the probe and (advanced) a pH 7.00 buffer for calibrating it.
 //
 // The meter behaves like a real one: the reading takes a couple of seconds to settle, drifts towards the last
-// sample if the probe wasn't rinsed, and (advanced) reads wrongly until it has been calibrated.
+// sample if the probe was not rinsed, and (advanced) reads wrongly until it has been calibrated.
 
 export const TOP = -0.3; // bench top (lab coordinates): sits on a real table when the lab is placed on one
 const BEAKER_R = 0.03;
@@ -373,7 +373,7 @@ export class Bench {
     // glide back to the stand when let go outside a beaker
     if (!m.held && !m.rest) this.meter.position.lerp(this.meterHome, Math.min(1, dt * 6));
     let b = m.held || m.rest ? this.liquidAt(this.tip()) : null;
-    // carried past a beaker without stopping: that isn't a dip
+    // carried past a beaker without stopping: that is not a dip
     const over = b ? b.id : null;
     if (over !== m.over) {
       m.over = over;

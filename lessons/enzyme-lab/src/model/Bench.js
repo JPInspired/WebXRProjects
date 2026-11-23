@@ -372,7 +372,7 @@ export class Bench {
     this.app.onStep('stopper');
   }
 
-  /** The three steps by button (for tests and for anyone who can't reach). */
+  /** The three steps by button (for tests and for anyone who cannot reach). */
   quickCut() {
     if (this.whole.visible) this.cut();
   }

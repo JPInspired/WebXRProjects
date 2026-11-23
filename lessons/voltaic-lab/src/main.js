@@ -125,7 +125,7 @@ class App extends LessonApp {
     b.series = !b.series;
     b.refreshAll();
     sound.click();
-    if (b.series) this.explain({ kicker: 'IN SERIES', title: 'Cells linked + to −', text: 'The meter now reads across the whole chain. Their voltages add up, but a cell connected the wrong way round takes its voltage away instead.' });
+    if (b.series) this.explain({ kicker: 'IN SERIES', title: 'Cells Linked + To −', text: 'The meter now reads across the whole chain. Their voltages add up, but a cell connected the wrong way round takes its voltage away instead.' });
   }
 
   quickStrip(side, metal) {
@@ -177,7 +177,7 @@ class App extends LessonApp {
 
   onBridge(c) {
     sound.snap();
-    this.explain({ kicker: 'SALT BRIDGE', title: 'The circuit is complete', text: 'Ions can now move between the two beakers through the soaked paper, keeping each side neutral, so the electrons can keep flowing round the wire.' });
+    this.explain({ kicker: 'SALT BRIDGE', title: 'The Circuit Is Complete', text: 'Ions can now move between the two beakers through the soaked paper, keeping each side neutral, so the electrons can keep flowing round the wire.' });
     void c;
   }
 
@@ -185,7 +185,7 @@ class App extends LessonApp {
     if (this.state.level !== 'advanced') return;
     this.bench.mode = this.bench.mode === 'V' ? 'A' : 'V';
     sound.click();
-    if (this.bench.mode === 'A') this.explain({ kicker: 'AMMETER', title: 'Measuring the current', text: 'Now the meter is in the circuit and current flows through it. The voltage pushes, but the resistance inside the cell (the solutions and the salt bridge) limits how much current flows.' });
+    if (this.bench.mode === 'A') this.explain({ kicker: 'AMMETER', title: 'Measuring the Current', text: 'Now the meter is in the circuit and current flows through it. The voltage pushes, but the resistance inside the cell (the solutions and the salt bridge) limits how much current flows.' });
   }
 
   toggleParticles() {
@@ -213,7 +213,7 @@ class App extends LessonApp {
     this.state.runs.push(row);
     sound.bond();
     const best = Math.max(...this.state.runs.map((x) => x.V));
-    this.explain({ kicker: 'RECORDED', title: `${r.V.toFixed(2)} V`, text: r.V >= best && this.state.runs.length > 1 ? 'Your best so far! Is it the metals, the electrolyte, or linking cells that made the difference?' : 'Try another combination: change one thing at a time so the test is fair.' });
+    this.explain({ kicker: 'RECORDED', title: `${r.V.toFixed(2)} V`, text: r.V >= best && this.state.runs.length > 1 ? 'Your best so far. Is it the metals, the electrolyte, or linking cells that made the difference?' : 'Try another combination: change one thing at a time so the test is fair.' });
   }
 
   /** Time-lapse: the cells being measured power a small load for 24 hours. */
@@ -221,14 +221,14 @@ class App extends LessonApp {
     const chain = this.bench.chain();
     const r = this.bench.reading();
     if (!r.ok) {
-      this.explain({ kicker: 'NOT YET', title: 'Make a working cell first', text: r.why });
+      this.explain({ kicker: 'NOT YET', title: 'Make a Working Cell First', text: r.why });
       return;
     }
     for (const c of chain) c.wear = 0;
     this.state.run = { hours: 0, chain };
     this.state.curve = [[0, r.V]];
     sound.power();
-    this.explain({ kicker: 'TIME-LAPSE', title: '24 hours powering a small clock', text: 'Watch the negative strip wear away as its atoms become ions, and the other strip gain a coating. The voltage drops as the reacting chemicals run out.' });
+    this.explain({ kicker: 'TIME-LAPSE', title: '24 Hours Powering a Small Clock', text: 'Watch the negative strip wear away as its atoms become ions, and the other strip gain a coating. The voltage drops as the reacting chemicals run out.' });
   }
 
   stepRunDown(dt) {
@@ -319,7 +319,7 @@ class App extends LessonApp {
   onRevealed(ch) {
     const mine = this.myVote(ch);
     sound[mine === ch.answer ? 'bond' : 'beep']();
-    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right!' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
+    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
   }
 
   // ───────────── ask the chemist ─────────────
@@ -413,8 +413,8 @@ class App extends LessonApp {
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }

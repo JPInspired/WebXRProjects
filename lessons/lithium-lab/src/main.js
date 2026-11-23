@@ -86,7 +86,7 @@ class App extends LessonApp {
     this.newArmed = 0;
     this.useSeed(1 + Math.floor(Math.random() * 9000));
     this.state.revealed = false;
-    this.explain({ title: 'New mystery metals', text: 'The labels B–E have been shuffled: the observation table is empty again.' });
+    this.explain({ title: 'New Mystery Metals', text: 'The labels B–E have been shuffled: the observation table is empty again.' });
   }
 
   // ───────────── choosing what to do ─────────────
@@ -133,12 +133,12 @@ class App extends LessonApp {
   }
 
   waitForReaction() {
-    this.explain({ title: 'Wait for it to finish', text: 'One reaction at a time: wait until the metal in the tank has completely reacted.' });
+    this.explain({ title: 'Wait for It to Finish', text: 'One reaction at a time: wait until the metal in the tank has completely reacted.' });
   }
 
   onDropped(slot, sinks) {
     if (this.state.mode !== 'lab') this.setMode('lab', true);
-    this.explain({ title: `${slot === 'A' ? 'Lithium' : `Metal ${slot}`} ${sinks ? 'sinks!' : 'floats'}`, text: sinks ? 'It is denser than water, so it has sunk to the bottom. Watch closely.' : 'It is less dense than water. Watch how fast it fizzes, whether it melts into a ball, and whether the hydrogen catches fire.' });
+    this.explain({ title: `${slot === 'A' ? 'Lithium' : `Metal ${slot}`} ${sinks ? 'sinks' : 'floats'}`, text: sinks ? 'It is denser than water, so it has sunk to the bottom. Watch closely.' : 'It is less dense than water. Watch how fast it fizzes, whether it melts into a ball, and whether the hydrogen catches fire.' });
   }
 
   onReacted(slot, r) {
@@ -148,7 +148,7 @@ class App extends LessonApp {
     const name = slot === 'A' ? 'Lithium' : `Metal ${slot}`;
     if (r.violence >= 2 && !r.shielded) {
       this.state.unsafe++;
-      this.explain({ kicker: 'SAFETY', title: `${name} exploded — with no screen!`, text: `It reacted in ${r.seconds.toFixed(1)} s, so violently that the hydrogen exploded. Without the safety screen across, hot metal and alkali would have sprayed out of the tank. Pull the screen across before testing a metal you suspect is very reactive.` });
+      this.explain({ kicker: 'SAFETY', title: `${name} exploded — with no screen`, text: `It reacted in ${r.seconds.toFixed(1)} s, so violently that the hydrogen exploded. Without the safety screen across, hot metal and alkali would have sprayed out of the tank. Pull the screen across before testing a metal you suspect is very reactive.` });
     } else if (r.violence >= 2) {
       this.explain({ title: `${name}: ${r.seconds.toFixed(1)} s, with a bang`, text: 'A violent reaction: the safety screen did its job. Very reactive metals like this are only ever demonstrated behind a screen.' });
     } else {
@@ -219,7 +219,7 @@ class App extends LessonApp {
   onRevealed(ch) {
     const mine = this.myVote(ch);
     sound[mine === ch.answer ? 'bond' : 'beep']();
-    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right!' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
+    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
   }
 
   // ───────────── ask the chemist ─────────────
@@ -327,15 +327,15 @@ class App extends LessonApp {
       { heading: 'Activity for everyone', buttons: MODES.map(([id, label]) => ({ id: `admin-mode-${id}`, label, active: s.mode === id, onClick: () => this.setMode(id) })), cols: 3 },
       { heading: 'Level for everyone', buttons: [['core', 'Core'], ['advanced', 'Advanced']].map(([id, label]) => ({ id: `admin-level-${id}`, label, active: s.level === id, onClick: () => this.setLevel(id) })) },
     ];
-    if (s.mode === 'results') sections.push({ heading: 'Answers', buttons: [{ id: 'admin-reveal', label: s.revealed ? 'Hide the answers' : 'Reveal the answers', active: s.revealed, onClick: () => this.reveal() }] });
+    if (s.mode === 'results') sections.push({ heading: 'Answers', buttons: [{ id: 'admin-reveal', label: s.revealed ? 'Hide the Answers' : 'Reveal the Answers', active: s.revealed, onClick: () => this.reveal() }] });
     if (this.presence?.sameRoom) {
       const centred = !this.boardLocal || this.boardLocal.every((v) => v === 0);
       sections.push({
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }

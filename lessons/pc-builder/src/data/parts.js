@@ -1,6 +1,6 @@
 // Every part students can build with. Sizes are real (metres), so the PC on the table is life-size.
 // The specs are simplified but realistic, and the options are chosen so that some combinations
-// don't fit together — that's the point of the lesson.
+// do not fit together — that is the point of the lesson.
 
 /** What each kind of part is for. `analogy` uses one running comparison: the computer as a kitchen. */
 export const CATEGORIES = {
@@ -24,7 +24,7 @@ export const CATEGORIES = {
   },
   cooler: {
     name: 'CPU cooler', plural: 'Coolers',
-    purpose: 'Carries heat away from the CPU so it doesn’t overheat. Without one a CPU reaches 100 °C within seconds and shuts down.',
+    purpose: 'Carries heat away from the CPU so it does not overheat. Without one a CPU reaches 100 °C within seconds and shuts down.',
     analogy: 'the extractor fan above the cooker',
     connects: 'Clamps on top of the CPU with a thin layer of thermal paste in between, and is powered from a fan header on the motherboard.',
   },

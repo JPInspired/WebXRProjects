@@ -16,7 +16,7 @@ export const ORGANELLES = {
     name: 'Nucleus', size: 'about 6 µm across',
     purpose: 'Contains the DNA — the instructions for making every protein the cell needs. It controls the cell’s activities. The dark nucleolus inside makes ribosomes.',
     analogy: 'city hall, where the plans for everything are kept',
-    knockout: 'Without the nucleus there are no new instructions (mRNA), so no new proteins can be made and the cell can’t divide. It will slowly run down and die. (Mature red blood cells have no nucleus — that’s why they only live about 120 days.)',
+    knockout: 'Without the nucleus there are no new instructions (mRNA), so no new proteins can be made and the cell cannot divide. It will slowly run down and die. (Mature red blood cells have no nucleus — that is why they only live about 120 days.)',
   },
   mitochondria: {
     name: 'Mitochondria', size: 'about 1–2 µm long', plural: true,
@@ -34,7 +34,7 @@ export const ORGANELLES = {
     name: 'Rough endoplasmic reticulum', size: 'a network of folded sheets',
     purpose: 'Folded membranes covered in ribosomes. Proteins made here are folded and carried through its channels towards the Golgi apparatus.',
     analogy: 'the factory assembly line, with workers along it',
-    knockout: 'Without the rough ER, proteins meant to be sent out of the cell (like hormones or digestive enzymes) can’t be made and folded properly, so they never reach the Golgi.',
+    knockout: 'Without the rough ER, proteins meant to be sent out of the cell (like hormones or digestive enzymes) cannot be made and folded properly, so they never reach the Golgi.',
   },
   smoothER: {
     name: 'Smooth endoplasmic reticulum', size: 'a network of tubes',
@@ -45,7 +45,7 @@ export const ORGANELLES = {
     name: 'Golgi apparatus', size: 'about 1–3 µm stack',
     purpose: 'A stack of flattened sacs that modifies, sorts and packages proteins into vesicles, then sends them to where they are needed — often out of the cell.',
     analogy: 'the post office: sorting, packaging and labelling parcels',
-    knockout: 'Without the Golgi, proteins from the rough ER pile up — nothing gets packaged or delivered, so the cell can’t send out hormones or enzymes.',
+    knockout: 'Without the Golgi, proteins from the rough ER pile up — nothing gets packaged or delivered, so the cell cannot send out hormones or enzymes.',
   },
   vesicles: {
     name: 'Vesicles', size: 'about 0.05–1 µm', plural: true,
@@ -79,7 +79,7 @@ export const ORGANELLES = {
     name: 'Chloroplasts', size: 'about 5 µm long', plural: true,
     purpose: 'Contain green chlorophyll, which absorbs light energy for photosynthesis: carbon dioxide + water → glucose + oxygen. The stacked discs (grana) hold the chlorophyll.',
     analogy: 'solar power plants that also make food',
-    knockout: 'No chloroplasts, no photosynthesis: the cell can’t make its own glucose. It can use stored starch for a while, then it runs out of food (like the white parts of a variegated leaf).',
+    knockout: 'No chloroplasts, no photosynthesis: the cell cannot make its own glucose. It can use stored starch for a while, then it runs out of food (like the white parts of a variegated leaf).',
   },
   nucleoid: {
     name: 'Nucleoid (bacterial DNA)', size: 'a single loop of DNA',
@@ -97,7 +97,7 @@ export const ORGANELLES = {
     name: 'Flagellum', size: 'up to about 10 µm long — shortened here',
     purpose: 'A long whip-like tail that spins like a propeller to move the bacterium through liquid.',
     analogy: 'an outboard motor',
-    knockout: 'Without its flagellum the bacterium can’t swim towards food or away from danger.',
+    knockout: 'Without its flagellum the bacterium cannot swim towards food or away from danger.',
   },
   pili: {
     name: 'Pili', size: 'thin hairs, about 1 µm', plural: true,
@@ -167,23 +167,23 @@ export const CELLS = {
 // Guided processes: flows go between organelles (or 'outside'), step by step.
 export const TOURS = {
   animal: [
-    { title: 'Making a protein · 1', flows: [['nucleus', 'roughER', 'rna']], highlight: ['nucleus'], text: 'In the nucleus a gene in the DNA is copied into a messenger molecule (mRNA). The mRNA leaves through a pore in the nuclear envelope.' },
-    { title: 'Making a protein · 2', flows: [['roughER', 'roughER', 'protein']], highlight: ['roughER', 'ribosomes'], text: 'Ribosomes on the rough ER read the mRNA and join amino acids in the right order to build the protein, which is folded inside the ER.' },
-    { title: 'Packaging & delivery', flows: [['roughER', 'golgi', 'protein'], ['golgi', 'outside', 'protein']], highlight: ['golgi', 'vesicles'], text: 'Vesicles carry the protein to the Golgi apparatus, which modifies and packages it. New vesicles take it to the membrane and release it outside the cell — this is how hormones like insulin leave.' },
-    { title: 'Releasing energy', flows: [['outside', 'mitochondria', 'glucose'], ['mitochondria', 'nucleus', 'energy'], ['mitochondria', 'golgi', 'energy']], highlight: ['mitochondria'], text: 'Glucose and oxygen enter through the membrane. In the mitochondria, aerobic respiration releases energy (as ATP) that powers every other job in the cell.' },
+    { title: 'Making a Protein · 1', flows: [['nucleus', 'roughER', 'rna']], highlight: ['nucleus'], text: 'In the nucleus a gene in the DNA is copied into a messenger molecule (mRNA). The mRNA leaves through a pore in the nuclear envelope.' },
+    { title: 'Making a Protein · 2', flows: [['roughER', 'roughER', 'protein']], highlight: ['roughER', 'ribosomes'], text: 'Ribosomes on the rough ER read the mRNA and join amino acids in the right order to build the protein, which is folded inside the ER.' },
+    { title: 'Packaging & Delivery', flows: [['roughER', 'golgi', 'protein'], ['golgi', 'outside', 'protein']], highlight: ['golgi', 'vesicles'], text: 'Vesicles carry the protein to the Golgi apparatus, which modifies and packages it. New vesicles take it to the membrane and release it outside the cell — this is how hormones like insulin leave.' },
+    { title: 'Releasing Energy', flows: [['outside', 'mitochondria', 'glucose'], ['mitochondria', 'nucleus', 'energy'], ['mitochondria', 'golgi', 'energy']], highlight: ['mitochondria'], text: 'Glucose and oxygen enter through the membrane. In the mitochondria, aerobic respiration releases energy (as ATP) that powers every other job in the cell.' },
     { title: 'Recycling', flows: [['lysosomes', 'mitochondria', 'waste']], highlight: ['lysosomes'], text: 'Lysosomes fuse with worn-out organelles or waste and digest them with enzymes, so the building blocks can be reused.' },
   ],
   plant: [
     { title: 'Photosynthesis', flows: [['outside', 'chloroplasts', 'light'], ['chloroplasts', 'mitochondria', 'glucose']], highlight: ['chloroplasts'], text: 'Chlorophyll in the chloroplasts absorbs light energy. It is used to turn carbon dioxide and water into glucose, giving off oxygen.' },
-    { title: 'Respiration', flows: [['mitochondria', 'nucleus', 'energy'], ['mitochondria', 'golgi', 'energy']], highlight: ['mitochondria'], text: 'Plants respire too! Mitochondria use glucose and oxygen to release energy (ATP) for the cell’s work — day and night.' },
-    { title: 'Water and support', flows: [['outside', 'vacuole', 'water']], highlight: ['vacuole', 'cellWall'], text: 'Water moves in by osmosis and fills the vacuole. The vacuole pushes against the cell wall, keeping the cell firm (turgid) — like air in a tyre.' },
-    { title: 'Making proteins', flows: [['nucleus', 'roughER', 'rna'], ['roughER', 'golgi', 'protein']], highlight: ['nucleus', 'roughER', 'golgi'], text: 'Just like in animal cells: DNA instructions → mRNA → ribosomes on the rough ER → Golgi for packaging.' },
+    { title: 'Respiration', flows: [['mitochondria', 'nucleus', 'energy'], ['mitochondria', 'golgi', 'energy']], highlight: ['mitochondria'], text: 'Plants respire too. Mitochondria use glucose and oxygen to release energy (ATP) for the cell’s work — day and night.' },
+    { title: 'Water and Support', flows: [['outside', 'vacuole', 'water']], highlight: ['vacuole', 'cellWall'], text: 'Water moves in by osmosis and fills the vacuole. The vacuole pushes against the cell wall, keeping the cell firm (turgid) — like air in a tyre.' },
+    { title: 'Making Proteins', flows: [['nucleus', 'roughER', 'rna'], ['roughER', 'golgi', 'protein']], highlight: ['nucleus', 'roughER', 'golgi'], text: 'Just like in animal cells: DNA instructions → mRNA → ribosomes on the rough ER → Golgi for packaging.' },
   ],
   bacterium: [
-    { title: 'Making proteins', flows: [['nucleoid', 'ribosomes', 'rna']], highlight: ['nucleoid', 'ribosomes'], text: 'There is no nucleus, so the DNA is read right where it floats. Ribosomes start making the protein straight away — even before the copy is finished.' },
+    { title: 'Making Proteins', flows: [['nucleoid', 'ribosomes', 'rna']], highlight: ['nucleoid', 'ribosomes'], text: 'There is no nucleus, so the DNA is read right where it floats. Ribosomes start making the protein straight away — even before the copy is finished.' },
     { title: 'Energy', flows: [['outside', 'membrane', 'glucose'], ['membrane', 'flagellum', 'energy']], highlight: ['membrane'], text: 'No mitochondria either: respiration happens on the inside of the cell membrane, releasing the energy the bacterium needs.' },
     { title: 'Moving', flows: [['membrane', 'flagellum', 'energy']], highlight: ['flagellum'], text: 'A tiny motor in the membrane spins the flagellum like a propeller, pushing the bacterium along — up to 50 body-lengths a second.' },
-    { title: 'Sharing genes', flows: [['plasmids', 'outside', 'dna']], highlight: ['plasmids', 'pili'], text: 'A copy of a plasmid can pass through a pilus to another bacterium. That is how genes for antibiotic resistance spread so quickly.' },
+    { title: 'Sharing Genes', flows: [['plasmids', 'outside', 'dna']], highlight: ['plasmids', 'pili'], text: 'A copy of a plasmid can pass through a pilus to another bacterium. That is how genes for antibiotic resistance spread so quickly.' },
   ],
 };
 
@@ -200,7 +200,7 @@ export const ANSWERS = {
   plantAnimal: 'Both have a nucleus, cytoplasm, cell membrane, mitochondria and ribosomes. Plant cells also have a cellulose cell wall, a permanent vacuole full of cell sap, and chloroplasts for photosynthesis. Animal cells have no cell wall, so they can change shape.',
   prokaryote: 'Prokaryotic cells (bacteria) have no nucleus — their DNA is a single loop in the cytoplasm, often with extra plasmids. They are much smaller (about 1–5 µm) and have no mitochondria or chloroplasts. Eukaryotic cells (plants, animals, fungi) have a nucleus.',
   mito: 'Cells that use lots of energy need lots of respiration. Muscle cells, sperm cells and nerve cells can have thousands of mitochondria each, while a skin cell needs far fewer.',
-  small: 'Everything a cell needs must get in through its surface. As a cell grows, its volume grows faster than its surface area, so a big cell couldn’t get enough oxygen and food in, or waste out, quickly enough. Small cells have a large surface area for their volume.',
+  small: 'Everything a cell needs must get in through its surface. As a cell grows, its volume grows faster than its surface area, so a big cell could not get enough oxygen and food in, or waste out, quickly enough. Small cells have a large surface area for their volume.',
   microscope: 'Light microscopes magnify up to about 1,500× and show cells, nuclei and chloroplasts. Electron microscopes use beams of electrons and magnify over 1,000,000×, showing ribosomes and the inside of mitochondria — that is how we know the details in these models.',
   magnification: 'magnification = image size ÷ real size. Remember to use the same units: 1 mm = 1,000 µm. For example, this animal cell model is 0.5 m = 500,000 µm across and the real cell is 20 µm, so the magnification is 500,000 ÷ 20 = 25,000×.',
 };

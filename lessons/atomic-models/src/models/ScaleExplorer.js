@@ -12,17 +12,17 @@ import { makeLabel, clearGroup } from '../../../../shared/ui/labels.js';
 export const COMPARE_SCALE = 0.0004; // metres of model per picometre
 
 export const COMPARE_PRESETS = {
-  period2: { label: 'Across period 2', z: [3, 4, 5, 6, 7, 8, 9, 10] },
-  group1: { label: 'Down group 1', z: [1, 3, 11, 19] },
-  everyday: { label: 'Everyday atoms', z: [1, 6, 7, 8, 11, 17, 26] },
-  noble: { label: 'Noble gases', z: [2, 10, 18, 36] },
+  period2: { label: 'Across Period 2', z: [3, 4, 5, 6, 7, 8, 9, 10] },
+  group1: { label: 'Down Group 1', z: [1, 3, 11, 19] },
+  everyday: { label: 'Everyday Atoms', z: [1, 6, 7, 8, 11, 17, 26] },
+  noble: { label: 'Noble Gases', z: [2, 10, 18, 36] },
 };
 
 export const NUCLEUS_OBJECTS = {
   pea: { label: 'Pea', radius: 0.0045 },
   marble: { label: 'Marble', radius: 0.008 },
-  golf: { label: 'Golf ball', radius: 0.0214 },
-  tennis: { label: 'Tennis ball', radius: 0.0335 },
+  golf: { label: 'Golf Ball', radius: 0.0214 },
+  tennis: { label: 'Tennis Ball', radius: 0.0335 },
   football: { label: 'Football', radius: 0.11 },
 };
 

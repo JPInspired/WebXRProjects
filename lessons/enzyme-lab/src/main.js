@@ -123,7 +123,7 @@ class App extends LessonApp {
     const b = this.bench;
     if (b.inFlask) {
       sound.refuse();
-      this.explain({ title: 'Set it before you start', text: 'For a fair test the temperature stays the same for the whole run. Finish this run, press “Next run”, then change the temperature.' });
+      this.explain({ title: 'Set It Before You Start', text: 'For a fair test the temperature stays the same for the whole run. Finish this run, press “Next run”, then change the temperature.' });
       return;
     }
     const i = Math.max(0, Math.min(TEMPS.length - 1, TEMPS.indexOf(b.T) + d));
@@ -139,18 +139,18 @@ class App extends LessonApp {
     const b = this.bench;
     const text = {
       cut: ['Liver cut in half', 'Now pick up one half and put it in the flask.'],
-      liver: ['Fizzing!', 'The catalase in the liver is already breaking the hydrogen peroxide down. Quick: put the stopper on, or the oxygen escapes into the air.'],
+      liver: ['Fizzing', 'The catalase in the liver is already breaking the hydrogen peroxide down. Quick: put the stopper on, or the oxygen escapes into the air.'],
       stopper: ['Stopper on: stopwatch started', `The oxygen now goes down the tube and up into the cylinder, pushing the water out. Every 30 s a red ring marks the level: read each one on the right. (${b.T} °C)`],
     }[step];
     this.explain({ title: text[0], text: text[1] });
   }
 
   liverFirst() {
-    this.explain({ title: 'Liver first', text: 'Put half of the liver in the flask first, then the stopper on straight away.' });
+    this.explain({ title: 'Liver First', text: 'Put half of the liver in the flask first, then the stopper on straight away.' });
   }
 
   oneAtATime() {
-    this.explain({ title: 'One piece at a time', text: 'There is already liver in the flask. Finish this run first, then press “Next run”.' });
+    this.explain({ title: 'One Piece at a Time', text: 'There is already liver in the flask. Finish this run first, then press “Next run”.' });
   }
 
   onMark() {
@@ -160,7 +160,7 @@ class App extends LessonApp {
 
   onRunDone() {
     sound.power();
-    this.explain({ title: '2 minutes', text: 'Time’s up. Read the last ring (120 s): that is your result for this temperature. Then press “Next run” and try another temperature.' });
+    this.explain({ title: '2 Minutes', text: 'Time is up. Read the last ring (120 s): that is your result for this temperature. Then press “Next run” and try another temperature.' });
   }
 
   /** What the keypad is for right now: reading a ring, or (advanced) working out the rate. */
@@ -218,7 +218,7 @@ class App extends LessonApp {
     s.entry = '';
     this.jitter = 1 + 0.04 * gauss();
     sound.click();
-    this.explain({ title: 'Fresh flask', text: `New hydrogen peroxide and a refilled cylinder. ${this.bench.whole.visible ? 'Here is a new piece of liver to cut.' : 'Use the other half of the liver.'} Choose the temperature, then start.` });
+    this.explain({ title: 'Fresh Flask', text: `New hydrogen peroxide and a refilled cylinder. ${this.bench.whole.visible ? 'Here is a new piece of liver to cut.' : 'Use the other half of the liver.'} Choose the temperature, then start.` });
   }
 
   // ───────────── ask the biologist ─────────────
@@ -306,8 +306,8 @@ class App extends LessonApp {
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }

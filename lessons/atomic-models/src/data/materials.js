@@ -1,4 +1,4 @@
-// What the surfaces in a typical room are made of — used by "What's my room made of?".
+// What the surfaces in a typical room are made of — used by "What is my room made of?".
 // thickness (m) and density (kg/m³) give a rough mass; gPerAtom = average mass per atom (g/mol),
 // so atoms ≈ mass / gPerAtom × Avogadro.
 

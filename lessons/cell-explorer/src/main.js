@@ -42,7 +42,7 @@ class App extends LessonApp {
     this.explorer = new Explorer(this);
     this.quiz = new LabelQuiz(this);
     this.flows = new Flows(this.lab);
-    this.compare = null; // built the first time it's needed
+    this.compare = null; // built the first time it is needed
     this.setCell('animal');
 
     this.controlPanel.setBuilder((ui) => drawControls(ui, this));
@@ -79,7 +79,7 @@ class App extends LessonApp {
     this.quiz.group.visible = mode === 'label';
     if (mode === 'label') {
       this.quiz.start(this.cell);
-      s.explain = { title: 'Label it', text: `Drag each of the ${this.quiz.total} name tags onto its spot: follow each spot's line to its part of the ${CELLS[s.cellType].name.toLowerCase()}. (You can also drop a tag straight onto the part.)` };
+      s.explain = { title: 'Label It', text: `Drag each of the ${this.quiz.total} name tags onto its spot: follow each spot's line to its part of the ${CELLS[s.cellType].name.toLowerCase()}. (You can also drop a tag straight onto the part.)` };
     } else if (mode === 'process') {
       this.tourTo(0, true);
     } else if (mode === 'compare') {
@@ -88,7 +88,7 @@ class App extends LessonApp {
         this.compare.group.position.copy(CELL_POS);
         this.lab.add(this.compare.group);
       }
-      s.explain = { title: 'Same magnification', text: 'Here every model keeps its true size compared with the others. The tiny rod on the left is a whole bacterium!' };
+      s.explain = { title: 'Same Magnification', text: 'Here every model keeps its true size compared with the others. The tiny rod on the left is a whole bacterium.' };
     } else {
       s.explain = { title: CELLS[s.cellType].name, text: CELLS[s.cellType].intro };
     }

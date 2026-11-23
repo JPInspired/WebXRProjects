@@ -176,7 +176,7 @@ class App extends LessonApp {
       if (m.waveOk && !s.done.measure) {
         s.done.measure = true;
         sound.bond();
-        this.explain({ title: 'One wavelength', text: `Crest to crest is ${(m.span * 100).toFixed(1)} cm: that is the wavelength. Unfreeze, change the frequency or the tension, freeze again, and see how it has changed.` });
+        this.explain({ title: 'One Wavelength', text: `Crest to crest is ${(m.span * 100).toFixed(1)} cm: that is the wavelength. Unfreeze, change the frequency or the tension, freeze again, and see how it has changed.` });
         return;
       }
     }
@@ -224,7 +224,7 @@ class App extends LessonApp {
       const p = PREDICTIONS[d.round] ?? PREDICTIONS[0];
       return { ...p, id: `p${d.round}`, kind: 'predict', title: `Prediction ${d.round + 1} of ${PREDICTIONS.length}: ${p.name.toLowerCase()}`, revealed: !!d.rev };
     }
-    if (d.mode === 'quiz') return { ...quizFor(d.seed, d.level), id: `q${d.seed}${d.level[0]}`, kind: 'quiz', title: 'Mystery wave', revealed: !!d.rev };
+    if (d.mode === 'quiz') return { ...quizFor(d.seed, d.level), id: `q${d.seed}${d.level[0]}`, kind: 'quiz', title: 'Mystery Wave', revealed: !!d.rev };
     return null;
   }
 
@@ -273,7 +273,7 @@ class App extends LessonApp {
     sound[mine === ch.answer ? 'bond' : 'beep']();
     this.explain({
       kicker: ch.kind === 'predict' ? 'THE WAVE IS MOVING' : 'THE ANSWER',
-      title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right!' : `It was: ${ch.options[ch.answer]}`,
+      title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right' : `It was: ${ch.options[ch.answer]}`,
       text: ch.why,
     });
   }
@@ -383,8 +383,8 @@ class App extends LessonApp {
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }
@@ -421,13 +421,13 @@ class App extends LessonApp {
 
   // ───────────── shared sessions ─────────────
 
-  /** What colleagues need from me: my answer to the question on the board, and how far I've got. */
+  /** What colleagues need from me: my answer to the question on the board, and how far I have got. */
   netState() {
     const v = this.state.vote;
     return { v: v ? [v.id, v.a] : null, n: this.progress() };
   }
 
-  /** Others' ropes aren't drawn beside mine (the class board is the shared thing); I keep their answers. */
+  /** Others' ropes are not drawn beside mine (the class board is the shared thing); I keep their answers. */
   createReplica() {
     const r = {
       group: new THREE.Group(),

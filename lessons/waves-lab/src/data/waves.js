@@ -51,11 +51,11 @@ export const pitch = (l) => ROPE.f(l) * 220; // Hz you hear
 // ───────────── ripple tank set-ups ─────────────
 
 export const SETUPS = [
-  { id: 'open', label: 'Open water', title: 'Open water', note: 'A bar dips in and out of the water at one end and sends straight ripples across the tank.' },
+  { id: 'open', label: 'Open Water', title: 'Open Water', note: 'A bar dips in and out of the water at one end and sends straight ripples across the tank.' },
   { id: 'barrier', label: 'Barrier', title: 'Reflection', note: 'The ripples hit a slanted wall and bounce off it, leaving at the same angle as they arrived. Where the two sets cross, they make a criss-cross pattern.' },
   { id: 'gap', label: 'Gap', title: 'Diffraction', note: 'Ripples squeeze through a gap in a wall and spread out on the other side. Try both gaps: the narrower the gap compared with the wavelength, the more they spread.' },
-  { id: 'two', label: 'Two sources', title: 'Interference', note: 'Two dippers make circular ripples that overlap. Where crests meet crests the water is choppy; where crests meet troughs they cancel, leaving calm lines.' },
-  { id: 'shallow', label: 'Shallow patch', title: 'Refraction', note: 'Over the shallow patch the ripples slow down, bunch up (a shorter wavelength) and change direction. The frequency does not change.' },
+  { id: 'two', label: 'Two Sources', title: 'Interference', note: 'Two dippers make circular ripples that overlap. Where crests meet crests the water is choppy; where crests meet troughs they cancel, leaving calm lines.' },
+  { id: 'shallow', label: 'Shallow Patch', title: 'Refraction', note: 'Over the shallow patch the ripples slow down, bunch up (a shorter wavelength) and change direction. The frequency does not change.' },
 ];
 export const SETUP_INDEX = Object.fromEntries(SETUPS.map((s, i) => [s.id, i]));
 export const GAPS = { narrow: 0.035, wide: 0.2 }; // m
@@ -192,9 +192,9 @@ export const TASKS = [
 export const QUESTIONS = [
   { id: 'what', label: 'What is a wave?' },
   { id: 'three', label: 'Frequency, amplitude, speed?' },
-  { id: 'equation', label: 'The wave equation' },
-  { id: 'speed', label: 'Why can’t I set the speed?' },
-  { id: 'kinds', label: 'Two kinds of wave' },
+  { id: 'equation', label: 'The Wave Equation' },
+  { id: 'speed', label: 'Why cannot I set the speed?' },
+  { id: 'kinds', label: 'Two Kinds of Wave' },
   { id: 'sound', label: 'Is sound like this?' },
   { id: 'light', label: 'Is light like this?' },
   { id: 'real', label: 'Is this rope realistic?' },

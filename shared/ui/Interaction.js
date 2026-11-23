@@ -45,7 +45,7 @@ export class Interaction {
     this.reach = new Map(); // controller → what it was last reaching for (for the haptic tick)
 
     const dom = app.renderer.domElement;
-    // Capture phase so OrbitControls doesn't rotate the view when something is pressed.
+    // Capture phase so OrbitControls does not rotate the view when something is pressed.
     dom.addEventListener('pointerdown', (ev) => this.onPointerDown(ev), { capture: true });
     dom.addEventListener('pointermove', (ev) => this.onPointerMove(ev));
     dom.addEventListener('pointerup', (ev) => this.onPointerUp(ev));
@@ -171,7 +171,7 @@ export class Interaction {
     const before = sound.stamp;
     const held = g.object.getWorldPosition(new THREE.Vector3());
     g.session.release(p);
-    if (sound.stamp === before) sound.put(); // the lesson didn't make a sound of its own
+    if (sound.stamp === before) sound.put(); // the lesson did not make a sound of its own
     this.settle(g.object, held);
     this.app.refresh();
   }
@@ -187,7 +187,7 @@ export class Interaction {
     const from = object.parent.worldToLocal(fromWorld.clone());
     const d = from.distanceTo(to);
     const scale = object.parent.getWorldScale(new THREE.Vector3()).x || 1;
-    if (d * scale < 0.004 || d * scale > 0.8) return; // didn't move, or went somewhere far (a reset)
+    if (d * scale < 0.004 || d * scale > 0.8) return; // did not move, or went somewhere far (a reset)
     this.settling = this.settling.filter((s) => s.object !== object);
     object.position.copy(from);
     this.settling.push({ object, from, to, t: 0, dur: 0.12 + Math.min(0.2, d * scale * 0.4), last: from.clone() });
@@ -227,7 +227,7 @@ export class Interaction {
     const sources = source ? [source] : [...this.active.keys()];
     for (const s of sources) {
       if (s === 'mouse' || !s) continue;
-      if (s.userData.inputSource?.hand) this.handsFx?.flash(s); // hands can't buzz: the pinch ring flashes
+      if (s.userData.inputSource?.hand) this.handsFx?.flash(s); // hands cannot buzz: the pinch ring flashes
       s.userData.inputSource?.gamepad?.hapticActuators?.[0]?.pulse?.(intensity, ms);
     }
   }
@@ -412,7 +412,7 @@ export class Interaction {
       }
     });
 
-    // Grip: grab a whole molecule if you're on one, otherwise move the whole lab.
+    // Grip: grab a whole molecule if you are on one, otherwise move the whole lab.
     c.addEventListener('squeezestart', () => {
       if (c.userData.mode !== 'tracked-pointer' || this.blocked) return;
       const hit = this.pick(c);
@@ -431,7 +431,7 @@ export class Interaction {
     this.hands.push(hand);
   }
 
-  /** While lining up with the room, a press that isn't on a panel marks a point. */
+  /** While lining up with the room, a press that is not on a panel marks a point. */
   grabLab(c) {
     if (this.labGrabber) return;
     if (this.app.state.locked) {
@@ -531,12 +531,12 @@ export class Interaction {
       p.setHover(id);
     }
     this.showHover(hoverObject);
-    // what's held glows a little too, so it's clear what you've got
+    // what is held glows a little too, so it is clear what you have got
     for (const g of this.active.values()) if (g.object.visible) reaching.add(g.object);
     this.glow.update(reaching, dt, this.active);
   }
 
-  /** Small floating label saying what you're pointing at. */
+  /** Small floating label saying what you are pointing at. */
   showHover(object) {
     const text = object ? object.userData.handler.describe?.(object) ?? '' : '';
     if (text !== this.hoverText) {

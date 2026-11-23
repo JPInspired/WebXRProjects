@@ -86,7 +86,7 @@ export const PREDICTIONS = [
 export const CHECKS = {
   drop: { q: 'Does the drop time depend on the height in a straight line (double the height, double the time)?', options: ['Yes', 'No: double the height takes about 1.4 times as long'], answer: 1, why: 'h = ½gt², so t = √(2h/g): double the height multiplies the time by √2 ≈ 1.4.' },
   pendulum: { q: 'Which changed the period: the length, the mass, or both?', options: ['Only the length', 'Only the mass', 'Both', 'Neither'], answer: 0, why: 'Only the length (and, a little, very big swings). T = 2π√(L/g) has no mass in it.' },
-  spring: { q: 'With a heavier mass on the same spring, the bounces are…', options: ['Quicker', 'Slower', 'The same'], answer: 1, why: 'Slower: T = 2π√(m/k). Four times the mass, twice the period. (A pendulum doesn’t do this, but a spring does!)' },
+  spring: { q: 'With a heavier mass on the same spring, the bounces are…', options: ['Quicker', 'Slower', 'The same'], answer: 1, why: 'Slower: T = 2π√(m/k). Four times the mass, twice the period. (A pendulum does not do this, but a spring does!)' },
   ramp: { q: 'Steeper ramp, bigger acceleration. Which line on a distance-time graph shows steady acceleration?', options: ['A straight line', 'A curve getting steeper', 'A curve getting flatter'], answer: 1, why: 'A curve getting steeper: the ball covers more distance every second. On a velocity-time graph the same motion is a straight sloping line.' },
 };
 
@@ -105,7 +105,7 @@ export const INSIGHTS = [
 ];
 
 export const DISCUSS = [
-  'Which variable surprised you most: one you expected to matter that didn’t, or the other way round?',
+  'Which variable surprised you most: one you expected to matter that did not, or the other way round?',
   'How close were your values of g to 9.81 m/s²? What made them less accurate?',
   'Why time 10 swings and divide by 10, rather than timing one?',
   'Where do you see pendulums and springs in real life (clocks, cars, buildings, bungee jumps)?',
@@ -118,7 +118,7 @@ export const QUESTIONS = [
   { id: 'vel', label: 'Speed vs velocity?' },
   { id: 'acc', label: 'What is acceleration?' },
   { id: 'g', label: 'Why 9.81 m/s²?' },
-  { id: 'mass', label: 'Why doesn’t mass matter?' },
+  { id: 'mass', label: 'Why does not mass matter?' },
   { id: 'shm', label: 'What is simple harmonic motion?' },
   { id: 'graphs', label: 'How do I read the graphs?' },
   { id: 'clock', label: 'How do pendulum clocks work?' },
@@ -130,7 +130,7 @@ export const ANSWERS = {
   acc: 'The rate velocity changes, in m/s every second (m/s²). A falling ball gains about 9.8 m/s every second. Slowing down and turning are accelerations too.',
   g: 'It is the acceleration Earth’s gravity gives everything near the ground, about 9.81 m/s². It is a little less at the equator and on mountains, and only 1.6 m/s² on the Moon.',
   mass: 'A heavier object is pulled harder by gravity, but it also needs a bigger force to speed it up (it has more inertia). The two effects cancel exactly, so everything falls with the same acceleration, unless air resistance gets in the way.',
-  shm: 'Simple harmonic motion is the smooth to-and-fro of a spring or a small pendulum swing: the pull back to the middle grows with the distance from it. Its graphs are sine waves, and its period doesn’t depend on how big the swing is.',
+  shm: 'Simple harmonic motion is the smooth to-and-fro of a spring or a small pendulum swing: the pull back to the middle grows with the distance from it. Its graphs are sine waves, and its period does not depend on how big the swing is.',
   graphs: 'On a displacement-time graph, the slope is the velocity (steeper = faster). On a velocity-time graph, the slope is the acceleration, and the area underneath is the distance travelled.',
   clock: 'A pendulum’s swing takes the same time each time, so a clock counts swings. A pendulum about 1 m long takes 1 second for each swing across (2 s there and back): the classic grandfather clock.',
 };

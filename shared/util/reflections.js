@@ -4,8 +4,8 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 /**
  * Soft studio reflections for a lesson's scene, so metal, glass and glossy surfaces look real (a bright room
  * reflected in them). Made once in code, nothing downloaded.
- * Plain (non-metal) surfaces that haven't chosen their own strength get a gentler reflection, so light colours
- * (paper, wood, sand) don't wash out; this is checked every couple of seconds, so parts added later are included.
+ * Plain (non-metal) surfaces that have not chosen their own strength get a gentler reflection, so light colours
+ * (paper, wood, sand) do not wash out; this is checked every couple of seconds, so parts added later are included.
  * Materials that set envMapIntensity themselves keep it.
  */
 export function studioReflections(app) {

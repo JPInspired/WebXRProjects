@@ -59,7 +59,7 @@ export function drawControls(ui, app) {
     slider(ui, 'Amplitude', w.a, adv ? `${(ROPE.a(w.a) * 100).toFixed(1)} cm` : pct(w.a), 'a', (d) => app.nudge('a', d), '#ff9ecb');
     slider(ui, 'Tension of the rope', w.t, pct(w.t), 't', (d) => app.nudge('t', d), GOOD);
     ui.buttons([
-      { id: 'freeze', label: s.frozen ? 'Unfreeze' : 'Freeze + measure', active: s.frozen, onClick: () => app.toggleFreeze() },
+      { id: 'freeze', label: s.frozen ? 'Unfreeze' : 'Freeze + Measure', active: s.frozen, onClick: () => app.toggleFreeze() },
       { id: 'snap', label: `Keep snapshot (${s.snaps.length}/3)`, onClick: () => app.keepSnapshot() },
     ], { height: 54, size: 21, gap: 8 });
     ui.heading('See it as', { size: 24 });
@@ -71,7 +71,7 @@ export function drawControls(ui, app) {
     slider(ui, 'Depth of the water', k.d, adv ? `${TANK.depth(k.d).toFixed(1)} mm` : pct(k.d), 'd', (d) => app.nudge('d', d), GOOD);
     ui.heading('In the tank', { size: 24 });
     ui.buttons(SETUPS.map((x) => ({ id: `setup-${x.id}`, label: x.label, active: s.setup === x.id, onClick: () => app.setSetup(x.id) })), { cols: 3, height: 50, size: 20, gap: 8 });
-    const row = [{ id: 'freeze', label: s.frozen ? 'Unfreeze' : 'Freeze + measure', active: s.frozen, onClick: () => app.toggleFreeze() }];
+    const row = [{ id: 'freeze', label: s.frozen ? 'Unfreeze' : 'Freeze + Measure', active: s.frozen, onClick: () => app.toggleFreeze() }];
     if (s.setup === 'gap') row.push({ id: 'gap', label: s.gap === 'wide' ? 'Gap: wide' : 'Gap: narrow', onClick: () => app.toggleGap() });
     ui.buttons(row, { height: 54, size: 21, gap: 8 });
   } else if (!app.soloTeacher) {
@@ -89,12 +89,12 @@ export function drawTeacher(ui, app) {
   if (s.mode === 'predict') {
     ui.heading('Prediction on the board', { size: 22 });
     ui.buttons(PREDICTIONS.map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { height: 52, size: 20, gap: 8 });
-    ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Freeze it again' : 'Test it: unfreeze the wave', active: ch.revealed, onClick: () => app.reveal() }], { height: 58, size: 22 });
+    ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Freeze It Again' : 'Test It: Unfreeze the Wave', active: ch.revealed, onClick: () => app.reveal() }], { height: 58, size: 22 });
   } else {
     ui.heading('Mystery wave', { size: 22 });
     ui.buttons([
-      { id: 'new-quiz', label: 'New mystery wave', onClick: () => app.newQuiz() },
-      { id: 'reveal', label: ch.revealed ? 'Hide the answer' : 'Reveal the answer', active: ch.revealed, onClick: () => app.reveal() },
+      { id: 'new-quiz', label: 'New Mystery Wave', onClick: () => app.newQuiz() },
+      { id: 'reveal', label: ch.revealed ? 'Hide the Answer' : 'Reveal the Answer', active: ch.revealed, onClick: () => app.reveal() },
     ], { height: 58, size: 21, gap: 8 });
   }
   const t = app.tally(ch);
@@ -109,7 +109,7 @@ export function drawInfo(ui, app) {
   if (s.mode === 'rope') {
     const w = s.w;
     const lam = ropeLambda(w);
-    ui.title('Your wave', { size: 36 });
+    ui.title('Your Wave', { size: 36 });
     if (adv) {
       ui.kv('Frequency', `${ROPE.f(w.f).toFixed(2)} Hz`, { size: 23 });
       ui.kv('Period (one wave takes)', `${(1 / ROPE.f(w.f)).toFixed(2)} s`, { size: 23 });
@@ -138,7 +138,7 @@ export function drawInfo(ui, app) {
         ui.text(`${i + 1}:  frequency ${pct(p.f)}${same('f')}  ·  amplitude ${pct(p.a)}${same('a')}  ·  tension ${pct(p.t)}${same('t')}${adv ? `  →  ${(ropeLambda(p) * 100).toFixed(1)} cm` : ''}`, { size: 19, color: ['#9ad0ff', '#d3a8ff', '#ffb38a'][i] });
       });
       ui.text('Arrows compare each snapshot with the wave now: what changed, and what stayed the same?', { size: 18, color: THEME.dim });
-      ui.buttons([{ id: 'snap-clear', label: 'Clear snapshots', onClick: () => app.clearSnapshots() }], { height: 44, size: 20 });
+      ui.buttons([{ id: 'snap-clear', label: 'Clear Snapshots', onClick: () => app.clearSnapshots() }], { height: 44, size: 20 });
     }
     drawTasks(ui, app);
   } else if (s.mode === 'tank') {
@@ -185,7 +185,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the physicist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 19, gap: 8 });
     if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
   })], { height: 56, size: 20 });

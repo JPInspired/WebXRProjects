@@ -38,14 +38,14 @@ export function installed(id, slot, build) {
     const n = build.ram.filter(Boolean).length;
     extra = n === 1 ? ' One stick works; a second stick lets the CPU use two channels at once — faster.' : ` ${n} sticks = ${build.ram.filter(Boolean).reduce((s, r) => s + PARTS[r].gb, 0)} GB of memory.`;
   }
-  if (p.cat === 'storage') extra = ` It reads at about ${p.mbps.toLocaleString('en-GB')} MB/s${p.size === 3.5 ? ' — a spinning disk with a moving read head, so it’s the slowest' : p.iface === 'nvme' ? ' — the fastest kind' : ''}.`;
+  if (p.cat === 'storage') extra = ` It reads at about ${p.mbps.toLocaleString('en-GB')} MB/s${p.size === 3.5 ? ' — a spinning disk with a moving read head, so it is the slowest' : p.iface === 'nvme' ? ' — the fastest kind' : ''}.`;
   if (p.cat === 'cpu' && !p.igpu) extra = ' This CPU has no built-in graphics, so the computer will need a graphics card to show anything.';
   if (p.cat === 'cooler') extra = ' A thin layer of thermal paste fills the tiny gaps between the CPU and the cooler so heat flows across.';
   return { title: `${c.name} installed: ${p.short}`, text: `${c.connects}${extra}` };
 }
 
 export function refused(id, reason) {
-  return { title: `${PARTS[id].short} doesn’t fit there`, text: reason };
+  return { title: `${PARTS[id].short} does not fit there`, text: reason };
 }
 
 export function removed(id, stash) {
@@ -59,7 +59,7 @@ export function caseChanged(caseId, c, dropped) {
 }
 
 export const SAFETY = {
-  title: 'Switched off first',
+  title: 'Switched Off First',
   text: 'Always switch off (and unplug) a computer before working inside it. Parts can be damaged — and the power supply holds dangerous voltages.',
 };
 
@@ -71,14 +71,14 @@ export const QUESTIONS = [
   { id: 'board', label: 'Why a motherboard?' },
   { id: 'boot', label: 'What happens at power on?' },
   { id: 'gpu', label: 'Do I need a graphics card?' },
-  { id: 'fit', label: 'Why don’t all parts fit?' },
+  { id: 'fit', label: 'Why do not all parts fit?' },
 ];
 
 export const ANSWERS = {
   cpu: 'The CPU runs the fetch–decode–execute cycle: it FETCHES the next instruction from RAM, DECODES what it means, then EXECUTES it (add, compare, move data…). A 5 GHz CPU does this billions of times a second, on several cores at once.',
   ram: 'RAM is fast but temporary: it holds what you are using right now and is wiped when the power goes off. Storage is slower but permanent: it keeps the operating system, apps and files. When you open an app it is copied from storage into RAM so the CPU can reach it quickly.',
   board: 'The motherboard connects everything. Its copper tracks (buses) carry data between the CPU, RAM, storage and graphics card, it shares out power from the PSU, and its BIOS/UEFI chip holds the start-up program that checks the hardware and loads the operating system.',
-  boot: '1) The PSU powers up. 2) The BIOS on the motherboard runs the POST (power-on self-test) to check the CPU and memory. 3) It finds a drive with an operating system. 4) The OS is copied from storage into RAM. 5) The CPU runs it and the graphics hardware draws the desktop. Press Power to watch it!',
+  boot: '1) The PSU powers up. 2) The BIOS on the motherboard runs the POST (power-on self-test) to check the CPU and memory. 3) It finds a drive with an operating system. 4) The OS is copied from storage into RAM. 5) The CPU runs it and the graphics hardware draws the desktop. Press Power to watch it.',
   gpu: 'Something has to turn data into a picture. Many CPUs have small built-in graphics, which is enough for school work and video. A graphics card has thousands of cores for games and 3D work. A CPU without built-in graphics (like the Ryzen 7 5800X, or any Intel CPU whose name ends in “F”, such as the Core i3-12100F) always needs a graphics card.',
   fit: 'Parts follow standards: the CPU must match the motherboard’s socket, the RAM generation (DDR4/DDR5) must match the memory slots, the motherboard size (ATX, Micro-ATX, Mini-ITX) must suit the case, and the graphics card, cooler and radiator must physically fit inside. Watch out for look-alikes too: laptop memory (SO-DIMM) is shorter than desktop memory, and an M.2 SATA SSD has the same shape as an NVMe one but only works in M.2 slots that support SATA. Even when parts fit, a budget motherboard may not deliver enough power for a big CPU. Picking compatible parts is the first job of a PC builder.',
 };
@@ -89,7 +89,7 @@ export const TOUR = [
   { flows: [['psu', 'board', 'power'], ['psu', 'gpu', 'power'], ['psu', 'storage', 'power']], highlight: ['psu'],
     title: '1 · Power', text: 'The power supply turns mains electricity into 12 V, 5 V and 3.3 V DC and sends it through cables to the motherboard, graphics card and drives.' },
   { flows: [['board', 'cpu', 'data']], highlight: ['board', 'cpu'],
-    title: '2 · Start-up (BIOS)', text: 'A chip on the motherboard holds the BIOS. It wakes the CPU, runs a self-test (POST) of the CPU and memory, then looks for a drive with an operating system.' },
+    title: '2 · Start-Up (BIOS)', text: 'A chip on the motherboard holds the BIOS. It wakes the CPU, runs a self-test (POST) of the CPU and memory, then looks for a drive with an operating system.' },
   { flows: [['storage', 'ram', 'data']], highlight: ['storage', 'ram'],
     title: '3 · Loading', text: 'The operating system and apps are copied from storage (permanent, slower) into RAM (temporary, much faster), so the CPU can get to them quickly.' },
   { flows: [['ram', 'cpu', 'data'], ['cpu', 'ram', 'data']], highlight: ['cpu', 'ram'],

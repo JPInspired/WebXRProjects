@@ -248,7 +248,7 @@ export class Bench {
       const p = u.piece;
       if (p.where === 'beaker' && this.clock < SOAK_HOURS) return null;
       if (this.onPan === p) this.onPan = null;
-      p.home.copy(p.group.position); // snap back here if the drop isn't valid
+      p.home.copy(p.group.position); // snap back here if the drop is not valid
       const was = p.where;
       const move = this.follow(p.group, world);
       p.where = 'held';
@@ -432,7 +432,7 @@ export class Bench {
     t.needsUpdate = true;
   }
 
-  // ───────────── quick steps (for tests, or anyone who can't reach) ─────────────
+  // ───────────── quick steps (for tests, or anyone who cannot reach) ─────────────
 
   quickCutAll() {
     while (this.pieces.length < 5) this.cut();

@@ -93,7 +93,7 @@ function noise(dur, gain, freq, { type = 'lowpass', q = 0.7, delay = 0 } = {}) {
   src.stop(t0 + dur + 0.02);
 }
 
-/** Wrap a sound so it counts towards `stamp` and doesn't double up when two callers play it at once. */
+/** Wrap a sound so it counts towards `stamp` and does not double up when two callers play it at once. */
 function play(name, fn, gapMs = 45) {
   return (...args) => {
     const now = performance.now();

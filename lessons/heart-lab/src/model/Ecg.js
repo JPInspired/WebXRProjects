@@ -132,7 +132,7 @@ export class Ecg {
       c.stroke();
     }
     const y = yOf(f);
-    // wave names (advanced), just behind the pen so the wipe doesn’t erase them
+    // wave names (advanced), just behind the pen so the wipe does not erase them
     if (this.labels) {
       const marks = [[(T.pStart + T.pEnd) / 2, 'P'], [T.qrsStart + 0.027, 'QRS'], [(T.tStart + T.tEnd) / 2, 'T']];
       for (const [at, name] of marks) {

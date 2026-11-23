@@ -9,7 +9,7 @@ import { PARTS, T } from '../data/heart.js';
 //  • beating: the chambers squeeze towards their centres in the right order. Done in the vertex shader from
 //    each vertex's position, so the pieces of the wall move together and never crack apart
 //  • valves: the real tricuspid, mitral and pulmonary valves open and shut (shader); the aortic valve, which the
-//    scan doesn't include, is drawn in code inside the aorta
+//    scan does not include, is drawn in code inside the aorta
 //  • opened up: cut along the four-chamber plane, and turned to face you, like a textbook section
 //  • looks, highlight, conditions (narrowed / blocked coronary artery, dying muscle, leaky valve, hole in the septum)
 
@@ -36,7 +36,7 @@ const VALVES = ['tricuspid', 'mitral', 'pulmonaryValve', 'aorticValve'];
 const NODES = ['saNode', 'avNode', 'bundleOfHis', 'purkinje'];
 const NO_CLIP = new Set(['tricuspid', 'mitral', 'chordae', 'saNode', 'avNode', 'bundleOfHis', 'purkinje']); // stay whole inside
 
-/** Load the model and its landmarks (null if it can't be loaded: the lesson then uses the code-built heart). */
+/** Load the model and its landmarks (null if it cannot be loaded: the lesson then uses the code-built heart). */
 export async function loadHeartModel(base) {
   const [{ GLTFLoader }, { MeshoptDecoder }] = await Promise.all([
     import('three/addons/loaders/GLTFLoader.js'),

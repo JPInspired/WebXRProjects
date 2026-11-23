@@ -4,7 +4,7 @@ import { makeLabel } from '../../../../shared/ui/labels.js';
 import { sup, formatLength } from '../util/format.js';
 
 // Uses the headset's knowledge of the real room (WebXR plane detection: table, wall, window, floor…).
-//  • "What's my room made of?" puts a tag on each real surface; tap it to learn its atoms
+//  • "What is my room made of?" puts a tag on each real surface; tap it to learn its atoms
 //  • the Scale tab points the "edge of the atom" through your real window
 //  • "Put the lab on my table"
 // Without a headset (or before Space Setup) an example room is shown so the idea still works on screen.

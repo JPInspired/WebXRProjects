@@ -54,7 +54,7 @@ export class MoleculeBuilder {
     this.held = new Set(); // every atom currently held (single or whole-molecule)
     this.components = [];
     this.completeIds = new Set();
-    this.rules = { tray: true, bin: true }; // reactions turn both off: atoms can't be created or destroyed
+    this.rules = { tray: true, bin: true }; // reactions turn both off: atoms cannot be created or destroyed
     this.energy = { in: 0, out: 0 }; // kJ/mol taken in breaking bonds / given out making bonds
     this.heat = 0; // after a reaction the products vibrate
     this.showElectrons = true;

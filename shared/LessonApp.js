@@ -46,16 +46,17 @@ export const PANEL_Y = 0.04;
 export const PANEL_Z = 0.14;
 
 export class LessonApp {
-  constructor({ labPos = new THREE.Vector3(0, 1.2, 0), camPos = new THREE.Vector3(0, 1.45, 1.35), background = 0x0d1020, panelX = PANEL_X } = {}) {
+  constructor({ labPos = new THREE.Vector3(0, 1.2, 0), camPos = new THREE.Vector3(0, 1.45, 1.35), camTarget = null, background = 0x0d1020, panelX = PANEL_X } = {}) {
     this.labPos = labPos.clone();
     this.panelX = panelX; // a lesson with a wider set-up can move its side panels further out
     this.camPos = camPos.clone();
+    this.camTarget = (camTarget ?? labPos).clone(); // what the on-screen view looks at
     this.state = {
       explain: null, // { title, text } shown on the floating card
       placing: false,
       speak: false,
       seated: false, // seated students: lab placed closer and lower
-      locked: false, // lab can't be moved by grabbing it
+      locked: false, // lab cannot be moved by grabbing it
     };
     this.presenting = false;
     this.hitTestSource = null;
@@ -131,7 +132,7 @@ export class LessonApp {
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 100000);
     this.camera.position.copy(this.camPos);
     this.controls = new OrbitControls(this.camera, renderer.domElement);
-    this.controls.target.copy(this.labPos);
+    this.controls.target.copy(this.camTarget);
     this.controls.enableDamping = true;
     this.controls.maxDistance = 20;
     this.controls.update();
@@ -266,20 +267,20 @@ export class LessonApp {
   /** Standard buttons for the bottom of a control panel: move the lab, seated mode, lock, voice. */
   generalButtons() {
     const s = this.state;
-    if (this.lockedByAdmin) return [{ id: 'speak', label: s.speak ? 'Voice: on' : 'Voice: off', active: s.speak, onClick: () => this.toggleSpeak(), disabled: !('speechSynthesis' in window) }];
-    const b = [{ id: 'recenter', label: this.presenting ? 'Bring lab to me' : 'Reset view', onClick: () => this.recenter() }];
-    if (this.hitTestSource) b.push({ id: 'place', label: s.placing ? 'Tap to drop here' : 'Place on surface', active: s.placing, disabled: s.locked, onClick: () => this.togglePlacing() });
-    b.push({ id: 'seated', label: s.seated ? 'Seated: on' : 'Seated: off', active: s.seated, onClick: () => this.toggleSeated() });
-    if (this.realRoom && (this.isAR || !this.presenting)) b.push({ id: 'realroom', label: this.realRoom.on ? 'Real room: on' : 'Real room: off', active: this.realRoom.on, onClick: () => this.realRoom.toggle() });
+    if (this.lockedByAdmin) return [{ id: 'speak', label: s.speak ? 'Voice: On' : 'Voice: Off', active: s.speak, onClick: () => this.toggleSpeak(), disabled: !('speechSynthesis' in window) }];
+    const b = [{ id: 'recenter', label: this.presenting ? 'Bring Lab to Me' : 'Reset View', onClick: () => this.recenter() }];
+    if (this.hitTestSource) b.push({ id: 'place', label: s.placing ? 'Tap to Drop Here' : 'Place on Surface', active: s.placing, disabled: s.locked, onClick: () => this.togglePlacing() });
+    b.push({ id: 'seated', label: s.seated ? 'Seated: On' : 'Seated: Off', active: s.seated, onClick: () => this.toggleSeated() });
+    if (this.realRoom && (this.isAR || !this.presenting)) b.push({ id: 'realroom', label: this.realRoom.on ? 'Real Room: On' : 'Real Room: Off', active: this.realRoom.on, onClick: () => this.realRoom.toggle() });
     if (this.realRoom?.on && !this.realRoom.noDepth && (this.isAR || !this.presenting)) {
       // real hands (and things) in front hide the lab behind them: Quest 3, from the next time you enter
       const h = this.realRoom.handsInFront;
       const later = this.presenting && h !== !!this.depthRequested ? ' (next time)' : '';
       b.push({ id: 'occlude', label: `Hands in front: ${h ? 'on' : 'off'}${later}`, active: h, onClick: () => this.realRoom.toggleHands() });
     }
-    b.push({ id: 'lock', label: s.locked ? 'Lab locked' : 'Lab unlocked', active: s.locked, onClick: () => this.toggleLocked() });
-    b.push({ id: 'speak', label: s.speak ? 'Voice: on' : 'Voice: off', active: s.speak, onClick: () => this.toggleSpeak(), disabled: !('speechSynthesis' in window) });
-    b.push({ id: 'sound', label: sound.muted ? 'Sound: off' : 'Sound: on', active: !sound.muted, onClick: () => { sound.muted = !sound.muted; this.refresh(); } });
+    b.push({ id: 'lock', label: s.locked ? 'Lab Locked' : 'Lab Unlocked', active: s.locked, onClick: () => this.toggleLocked() });
+    b.push({ id: 'speak', label: s.speak ? 'Voice: On' : 'Voice: Off', active: s.speak, onClick: () => this.toggleSpeak(), disabled: !('speechSynthesis' in window) });
+    b.push({ id: 'sound', label: sound.muted ? 'Sound: Off' : 'Sound: On', active: !sound.muted, onClick: () => { sound.muted = !sound.muted; this.refresh(); } });
     b.push(this.lessonsButton());
     return b;
   }
@@ -312,7 +313,7 @@ export class LessonApp {
       }
       if (this.soloTeacher && this.toggleBoard && 'big' in s) {
         ui.heading('Class board', { size: 22 });
-        ui.buttons([{ id: 'board', label: s.big ? 'Shown (tap to hide)' : 'Hidden (tap to show)', active: s.big, onClick: () => this.toggleBoard() }], { height: 56, size: 21 });
+        ui.buttons([{ id: 'board', label: s.big ? 'Shown (Tap to Hide)' : 'Hidden (Tap to Show)', active: s.big, onClick: () => this.toggleBoard() }], { height: 56, size: 21 });
       }
       this.settingsSections?.(ui);
     });
@@ -384,7 +385,7 @@ export class LessonApp {
   /** "← Lessons": back to the lessons page. Press twice (within 3 s) so nobody leaves by accident. */
   lessonsButton() {
     const armed = this.leaveArmed && performance.now() - this.leaveArmed < 3000;
-    return { id: 'lessons', label: armed ? 'Tap again to leave' : '← Lessons', active: armed, color: '#3a2f55', onClick: () => this.backToLessons() };
+    return { id: 'lessons', label: armed ? 'Tap Again to Leave' : '← Lessons', active: armed, color: '#3a2f55', onClick: () => this.backToLessons() };
   }
 
   backToLessons() {
@@ -402,7 +403,7 @@ export class LessonApp {
     else leave();
   }
 
-  /** The lessons page (keeps a shared session's name so people don't retype it). */
+  /** The lessons page (keeps a shared session's name so people do not retype it). */
   lessonsURL() {
     const url = new URL('../../', location.href);
     const name = new URLSearchParams(location.search).get('name');
@@ -429,7 +430,7 @@ export class LessonApp {
     this.lab.position.copy(this.labPos);
     this.lab.rotation.set(0, 0, 0);
     this.camera.position.copy(this.camPos);
-    this.controls.target.copy(this.labPos);
+    this.controls.target.copy(this.camTarget);
   }
 
   /** The camera currently in use (headset or desktop). */
@@ -453,10 +454,10 @@ export class LessonApp {
     }
     if (pr.status === 'reconnecting') return { text: ' · reconnecting…', help: 'Lost touch with the class for a moment. Reconnecting by itself: your work stays as it is.' };
     if (pr.status !== 'connected') return { text: ' · connecting…', help: null };
-    if (pr.peers.size) return { text: '', help: this.adminHere ? null : 'Your teacher isn’t connected right now. Everything carries on as they left it.' };
+    if (pr.peers.size) return { text: '', help: this.adminHere ? null : 'Your teacher is not connected right now. Everything carries on as they left it.' };
     const waiting = this.isAdmin ? ' · waiting for students' : ' · waiting for your teacher';
     if (pr.everJoined) {
-      return { text: waiting, help: this.isAdmin ? 'Everyone else has left. They can rejoin with the same code.' : 'Your teacher isn’t connected right now. Everything carries on as they left it.' };
+      return { text: waiting, help: this.isAdmin ? 'Everyone else has left. They can rejoin with the same code.' : 'Your teacher is not connected right now. Everything carries on as they left it.' };
     }
     const long = performance.now() - (pr.connectedAt ?? 0) > 20000;
     // the teacher is told straight away what students do; a student only after a while (it usually just works)
@@ -507,7 +508,7 @@ export class LessonApp {
   // ───────────── player list (a panel beside the others) ─────────────
 
   /**
-   * Who's in the session: a "Players" button under the info panel (mirroring the session panel under the
+   * Who is in the session: a "Players" button under the info panel (mirroring the session panel under the
    * controls); the list drops down below it.
    */
   initPlayerList() {
@@ -708,7 +709,7 @@ export class LessonApp {
     if (tab === 'board') {
       if (this.toggleBoard && 'big' in this.state) {
         ui.heading('Class board', { size: 22 });
-        ui.buttons([{ id: 'admin-board', label: this.state.big ? 'Showing (tap to hide)' : 'Hidden (tap to show)', active: this.state.big, onClick: () => this.toggleBoard() }], { height: 52, size: 20 });
+        ui.buttons([{ id: 'admin-board', label: this.state.big ? 'Showing (Tap to Hide)' : 'Hidden (Tap to Show)', active: this.state.big, onClick: () => this.toggleBoard() }], { height: 52, size: 20 });
       }
       for (const s of sections.filter(isBoard)) draw(s);
       return;
@@ -716,8 +717,8 @@ export class LessonApp {
     for (const s of sections.filter(isProgress)) draw(s);
     ui.heading('Students', { size: 22 });
     ui.buttons([
-      { id: 'lock-students', label: this.admin.lock ? 'Menus: locked' : 'Menus: unlocked', active: this.admin.lock, onClick: () => this.toggleStudentLock() },
-      ...(this.presence.sameRoom ? [{ id: 'refind', label: 'Re-find room (all)', onClick: () => { this.adminSend({ k: 'refind' }); this.roomLineUp?.changed(); } }] : []),
+      { id: 'lock-students', label: this.admin.lock ? 'Menus: Locked' : 'Menus: Unlocked', active: this.admin.lock, onClick: () => this.toggleStudentLock() },
+      ...(this.presence.sameRoom ? [{ id: 'refind', label: 'Re-find Room (All)', onClick: () => { this.adminSend({ k: 'refind' }); this.roomLineUp?.changed(); } }] : []),
     ], { height: 52, size: 21, gap: 8 });
     if (this.roomLineUp) {
       ui.heading('Room Line-Up', { size: 22 });
@@ -732,7 +733,7 @@ export class LessonApp {
     const students = this.presence.people.filter((p) => !p.you);
     ui.heading('Effects (every device)', { size: 22 });
     ui.buttons([
-      { id: 'effects-auto', label: 'Full (automatic)', active: this.admin.effects !== 'light', onClick: () => this.setClassEffects('auto') },
+      { id: 'effects-auto', label: 'Full (Automatic)', active: this.admin.effects !== 'light', onClick: () => this.setClassEffects('auto') },
       { id: 'effects-light', label: 'Light', active: this.admin.effects === 'light', onClick: () => this.setClassEffects('light') },
     ], { height: 52, size: 21, gap: 8 });
     ui.text('Light: no reflections or gloss, for older or slower headsets. Full still lightens any headset that struggles.', { size: 19, color: THEME.dim });
@@ -754,7 +755,7 @@ export class LessonApp {
     if (!ch) return;
     ui.heading('Prediction on the board', { size: 22 });
     ui.buttons(this.predictions().map((p, i) => ({ id: `t-round-${i}`, label: `${i + 1}. ${p.name}`, active: this.state.round === i, onClick: () => { this.setRound(i); this.refresh(); } })), { cols: 2, height: 50, size: 19, gap: 8 });
-    ui.buttons([{ id: 't-reveal', label: ch.revealed ? 'Hide the answer' : 'Reveal the answer', active: ch.revealed, onClick: () => { this.reveal(); this.refresh(); } }], { height: 58, size: 22 });
+    ui.buttons([{ id: 't-reveal', label: ch.revealed ? 'Hide the Answer' : 'Reveal the Answer', active: ch.revealed, onClick: () => { this.reveal(); this.refresh(); } }], { height: 58, size: 22 });
     const t = this.tally?.(ch);
     if (t) ui.text(`${t.votes} answer${t.votes === 1 ? '' : 's'} in so far.`, { size: 20, weight: 700 });
   }
@@ -826,7 +827,7 @@ export class LessonApp {
       const lock = !!d.lock;
       if (lock !== this.lockedByAdmin) {
         this.lockedByAdmin = lock;
-        this.state.locked = lock; // locked: the lab and its panels can't be moved
+        this.state.locked = lock; // locked: the lab and its panels cannot be moved
         if (lock) this.state.placing = false;
         this.refresh();
       }
@@ -923,7 +924,7 @@ export class LessonApp {
         <p class="note">${where} Press <b>Enter Mixed Reality</b> to begin.</p>
         <div class="buttons"><button class="secondary" id="copy-link">Copy the Link</button><button class="secondary" id="leave-session">Leave the Class</button></div>`;
       box.querySelector('#copy-link').onclick = (e) => {
-        navigator.clipboard?.writeText(url.toString()).then(() => { e.target.textContent = 'Link copied'; }).catch(() => prompt('Copy this link:', url.toString()));
+        navigator.clipboard?.writeText(url.toString()).then(() => { e.target.textContent = 'Link Copied'; }).catch(() => prompt('Copy this link:', url.toString()));
       };
       box.querySelector('#leave-session').onclick = () => {
         url.searchParams.delete('session');
@@ -933,17 +934,14 @@ export class LessonApp {
     } else {
       box.innerHTML = `<p class="label">Teaching a Class?</p>
         <p class="note">Start a class session, then share its code: every student joins your lesson and you lead it from the Teacher menu.</p>
-        <label class="same-room"><input type="checkbox" id="same-room"> Everyone is in this room (the lessons line up with the classroom)</label>
         <div class="buttons"><button id="start-session">Start a Class Session</button></div>
         <p class="label join-label">Joining a Class?</p>
         <form class="buttons" id="join-form"><input id="join-code" maxlength="8" placeholder="CODE" autocomplete="off" aria-label="Class code"><button class="secondary">Join the Class</button></form>`;
-      const sameRoom = () => {
-        if (box.querySelector('#same-room').checked) url.searchParams.set('room', 'same');
-      };
+      // (no "same room" choice: lining up with the real room needs every headset to have scanned it first, too much
+      // to ask in a school; a lesson address with &room=same still turns it on)
       box.querySelector('#start-session').onclick = () => {
         url.searchParams.set('session', newSessionCode());
         url.searchParams.set('host', '1');
-        sameRoom();
         location.href = url.toString();
       };
       box.querySelector('#join-form').onsubmit = async (e) => {
@@ -964,7 +962,6 @@ export class LessonApp {
           if (found.teacher) to.searchParams.set('teacher', found.teacher);
         } catch { /* not found in time */ }
         to.searchParams.set('session', code);
-        if (to === url) sameRoom();
         location.href = to.toString();
       };
     }
@@ -997,7 +994,7 @@ export class LessonApp {
     const vrBtn = document.getElementById('btn-vr');
     const hint = document.getElementById('hint');
     if (!('xr' in navigator)) {
-      arBtn.textContent = 'Mixed reality not available';
+      arBtn.textContent = 'Mixed Reality Not Available';
       arBtn.classList.add('unavailable');
       hint.textContent = window.isSecureContext
         ? 'This browser has no WebXR. Open this page in the Meta Quest Browser (or Chrome on Android) for mixed reality — you can still explore on screen.'
@@ -1013,7 +1010,7 @@ export class LessonApp {
       arBtn.textContent = 'Enter Mixed Reality';
       arBtn.onclick = () => this.startSession('immersive-ar');
     } else {
-      arBtn.textContent = 'Mixed reality not supported here';
+      arBtn.textContent = 'Mixed Reality Not Supported Here';
       arBtn.classList.add('unavailable');
     }
     if (vr) {

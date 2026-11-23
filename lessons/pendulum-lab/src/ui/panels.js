@@ -28,7 +28,7 @@ export function drawControls(ui, app) {
       const ch = app.challenge();
       ui.text('Question on the class board:', { size: 20, color: THEME.dim });
       ui.buttons(app.predictions().map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, ...MID });
-      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the answer' : 'Reveal the answer', active: ch.revealed, onClick: () => app.reveal() }], BIG);
+      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the Answer' : 'Reveal the Answer', active: ch.revealed, onClick: () => app.reveal() }], BIG);
       const t = app.tally(ch);
       ui.text(`${t.votes} answer${t.votes === 1 ? '' : 's'} in so far.`, { size: 21, weight: 700 });
     } else ui.text('Answer the question on the right. Your teacher will reveal it.', { size: 22, color: THEME.dim });
@@ -44,7 +44,7 @@ export function drawControls(ui, app) {
       if (r.target === 'giant') ui.buttons(GIANT_LENGTHS.map((L) => ({ id: `gl-${L}`, label: `${L.toFixed(1)} m`, active: r.giant.L === L, onClick: () => app.setLength(L) })), MID);
       else ui.buttons(LENGTHS.map((L) => ({ id: `l-${L}`, label: `${L.toFixed(1)}`, active: Math.abs(r.bench.L - L) < 1e-6, onClick: () => app.setLength(L) })), { cols: 4, ...MID });
       drawAngles(ui, app);
-      ui.buttons([{ id: 'next', label: 'Next: time it  ›', onClick: () => app.setSub('measure', 'time') }], MID);
+      ui.buttons([{ id: 'next', label: 'Next: Time It  ›', onClick: () => app.setSub('measure', 'time') }], MID);
     } else {
       drawRelease(ui, app);
       const w = r.watch;
@@ -66,7 +66,7 @@ export function drawControls(ui, app) {
       ui.buttons(Object.entries(BOBS).map(([id, b]) => ({ id: `b-${id}`, label: b.name, active: r.bench.bob === id, onClick: () => app.setBob(id) })), { cols: 2, ...MID });
       ui.heading('Air', { size: 20 });
       ui.buttons(AIR.map(([id, label, f]) => ({ id: `a-${id}`, label, active: r.bench.air === f, onClick: () => app.setAir(f) })), { cols: 2, ...MID });
-      ui.buttons([{ id: 'next', label: 'Next: swing it  ›', onClick: () => app.setSub('energy', 'run') }], MID);
+      ui.buttons([{ id: 'next', label: 'Next: Swing It  ›', onClick: () => app.setSub('energy', 'run') }], MID);
     } else {
       drawAngles(ui, app);
       drawRelease(ui, app);
@@ -83,7 +83,7 @@ export function drawControls(ui, app) {
     ui.buttons([['-0.001', '− 1 mm'], ['0.001', '+ 1 mm']].map(([d, label]) => ({ id: `c${d}`, label, onClick: () => app.adjustClock(+d) })), BIG);
   } else if (s.world === 'swing') {
     ui.buttons([['swing', 'Swing'], ['ship', 'Pirate ship']].map(([id, label]) => ({ id: `ride-${id}`, label, active: w.ride === id, onClick: () => app.setRide(id) })), MID);
-    ui.buttons([{ id: 'push', label: 'Push!', onClick: () => app.pushSwing() }], { height: 90, size: 32 });
+    ui.buttons([{ id: 'push', label: 'Push', onClick: () => app.pushSwing() }], { height: 90, size: 32 });
   } else if (s.world === 'metronome') {
     ui.heading('Beats per minute', { size: 20 });
     ui.buttons([40, 60, 80, 100, 120, 144, 176, 208].map((b) => ({ id: `bpm-${b}`, label: String(b), active: w.bpm === b, onClick: () => app.setBpm(b) })), { cols: 4, ...MID });
@@ -101,7 +101,7 @@ function drawAngles(ui, app) {
 
 function drawRelease(ui, app) {
   const r = app.rig;
-  ui.buttons([{ id: 'release', label: r.active.running ? 'Swinging…' : 'Let go', disabled: r.active.running, onClick: () => app.release() }, { id: 'stop', label: 'Stop', onClick: () => app.stopSwing() }], BIG);
+  ui.buttons([{ id: 'release', label: r.active.running ? 'Swinging…' : 'Let Go', disabled: r.active.running, onClick: () => app.release() }, { id: 'stop', label: 'Stop', onClick: () => app.stopSwing() }], BIG);
 }
 
 /** The lesson's own part of the settings pop-up (after the level and class board). */
@@ -109,7 +109,7 @@ export function drawSettings(ui, app) {
   const s = app.state;
   if (s.mode === 'measure') {
     ui.heading('Light gate', { size: 22 });
-    ui.buttons([{ id: 'gate', label: s.gateShown ? 'Reading shown' : 'Reading hidden', active: s.gateShown, onClick: () => app.toggleGate() }], { height: 56, size: 21 });
+    ui.buttons([{ id: 'gate', label: s.gateShown ? 'Reading Shown' : 'Reading Hidden', active: s.gateShown, onClick: () => app.toggleGate() }], { height: 56, size: 21 });
   }
 }
 
@@ -117,7 +117,7 @@ export function drawSettings(ui, app) {
 export function drawAsk(ui, app) {
   const s = app.state;
   const qs = [...QUESTIONS];
-  if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+  if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
   ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.phys.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 54, size: 18, gap: 8 });
   if (s.phys.answer) ui.box(s.phys.answer, { size: 21 });
 }
@@ -136,7 +136,7 @@ export function drawInfo(ui, app) {
   else if (s.mode === 'energy') drawEnergy(ui, app);
   else drawWorld(ui, app);
   ui.gap(8);
-  const row = [{ id: 'ask', label: 'Ask the physicist', active: app.popupOpen === 'Ask the physicist', onClick: () => app.openAsk() }];
+  const row = [{ id: 'ask', label: 'Ask the Physicist', active: app.popupOpen === 'Ask the physicist', onClick: () => app.openAsk() }];
   if (s.mode === 'world' || s.mode === 'energy') row.push({ id: 'discuss', label: 'Discuss', active: app.popupOpen === 'Discuss', onClick: () => app.openDiscuss() });
   ui.buttons(row, { height: 56, size: 20, gap: 10 });
 }
@@ -149,7 +149,7 @@ function drawPredict(ui, app) {
   ui.gap(4);
   if (!ch.revealed) {
     ch.options.forEach((o, i) => ui.buttons([{ id: `opt-${i}`, label: `${'ABCD'[i]}   ${o}`, active: mine === i, onClick: () => app.vote(i) }], { height: 54, size: 18, gap: 8 }));
-    ui.text(mine == null ? 'Pick your answer.' : 'Saved: you can change it until it’s revealed.', { size: 19, color: mine == null ? WARN : GOOD });
+    ui.text(mine == null ? 'Pick your answer.' : 'Saved: you can change it until it is revealed.', { size: 19, color: mine == null ? WARN : GOOD });
   } else {
     ch.options.forEach((o, i) => {
       const right = i === ch.answer;
@@ -226,7 +226,7 @@ function drawWorld(ui, app) {
     const err = w.clockError;
     ui.text('Pendulum clock', { size: 22, weight: 700, color: THEME.dim });
     ui.text(`${(w.clockPend.L * 100).toFixed(1)} cm`, { size: 44, weight: 800 });
-    ui.text(Math.abs(err) < 5 ? 'Keeping perfect time!' : `${err > 0 ? 'Gains' : 'Loses'} ${Math.abs(err) >= 120 ? `${(Math.abs(err) / 60).toFixed(1)} min` : `${Math.round(Math.abs(err))} s`} a day`, { size: 28, weight: 800, color: Math.abs(err) < 60 ? GOOD : WARN });
+    ui.text(Math.abs(err) < 5 ? 'Keeping perfect time' : `${err > 0 ? 'Gains' : 'Loses'} ${Math.abs(err) >= 120 ? `${(Math.abs(err) / 60).toFixed(1)} min` : `${Math.round(Math.abs(err))} s`} a day`, { size: 28, weight: 800, color: Math.abs(err) < 60 ? GOOD : WARN });
     ui.text(err < -5 ? 'Running slow: shorten it.' : err > 5 ? 'Running fast: lengthen it.' : '', { size: 19 });
     if (s.level === 'advanced') ui.text(`A 2 s period needs L = g ÷ π² = ${(SECONDS_L * 100).toFixed(2)} cm.`, { size: 17, color: THEME.dim });
   } else if (s.world === 'swing') {

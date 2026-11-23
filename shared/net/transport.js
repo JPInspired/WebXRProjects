@@ -8,7 +8,7 @@
 //
 // Both expose the same small interface:
 //   selfId, onPeerJoin(fn), onPeerLeave(fn), onProblem(fn(text)), channel(name) → { send(data, peerId?), onMessage(fn(data, peerId)) }, leave()
-// connect() rejects with a plain-language Error when it can't start (e.g. the network can't be checked).
+// connect() rejects with a plain-language Error when it cannot start (e.g. the network cannot be checked).
 
 import { NET_CONFIG } from './config.js';
 
@@ -18,7 +18,7 @@ export async function connect(kind, roomId) {
 
 /**
  * Which network this device is on: the start of its public IPv4 address (as seen by a STUN server),
- * e.g. "203.0.113". Devices behind the same school router share it. Null if it can't be found.
+ * e.g. "203.0.113". Devices behind the same school router share it. Null if it cannot be found.
  */
 export async function networkKey(timeoutMs = 5000) {
   if (typeof RTCPeerConnection === 'undefined') return null;
@@ -72,7 +72,7 @@ async function p2p(roomId) {
   if (NET_CONFIG.sameNetworkOnly) {
     const key = await networkKey();
     if (!key) {
-      throw new Error('Couldn’t check which network this device is on, so it can’t join a shared session. The network may block STUN (UDP port 19302 / 3478). Ask IT to allow it, or work solo.');
+      throw new Error('Could not check which network this device is on, so it cannot join a shared session. The network may block STUN (UDP port 19302 / 3478). Ask IT to allow it, or work solo.');
     }
     room = `${roomId}-${await sha(`webxr-classes|${key}`)}`; // (the address itself is never sent anywhere)
   }
@@ -86,7 +86,7 @@ async function p2p(roomId) {
   const r = joinRoom(config, room, {
     onJoinError: (e) => {
       console.warn('Shared session:', e.error);
-      problem('Found someone, but couldn’t connect to them. The Wi-Fi may block devices from talking to each other (“client isolation”).');
+      problem('Found someone, but could not connect to them. The Wi-Fi may block devices from talking to each other (“client isolation”).');
     },
   });
   return {

@@ -166,7 +166,7 @@ export class PCBuild {
     }
   }
 
-  /** Outlines on every free slot a held part could go into (green = fits, red = won't). */
+  /** Outlines on every free slot a held part could go into (green = fits, red = will not). */
   showMarkers(partId) {
     for (const o of [...this.markers.children]) this.markers.remove(o);
     if (!partId) return;
@@ -313,7 +313,7 @@ export class PCBuild {
     return t;
   }
 
-  /** Change the case, keeping every part that still fits. Returns the parts that didn't. */
+  /** Change the case, keeping every part that still fits. Returns the parts that did not. */
   changeCase(caseId) {
     const old = this.build;
     const fresh = emptyBuild(caseId);

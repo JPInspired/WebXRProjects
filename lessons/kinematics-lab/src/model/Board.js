@@ -19,10 +19,10 @@ const css = (c) => `#${c.toString(16).padStart(6, '0')}`;
 
 const SPRING_COLS = { soft: '#7cc4ff', medium: '#7ee2a8', stiff: '#ffd166', mystery: '#c9a6ff' };
 export const RESULT_AXES = {
-  drop: { title: 'drop tower', x: [3, 17], ticks: [5, 10, 15], xLabel: 'height (m)', yLabel: 'time to fall (s)', yMax: 2.5, theory: [{ col: '#ffffff', fn: (h) => Math.sqrt((2 * h) / G) }] },
-  pendulum: { title: 'pendulum', x: [0.1, 0.7], ticks: [0.2, 0.3, 0.4, 0.5, 0.6], xLabel: 'length (m)', yLabel: 'period (s)', yMax: 2, theory: [{ col: '#ffffff', fn: pendulumT }] },
-  spring: { title: 'springs', x: [0, 350], ticks: [50, 100, 200, 300], xLabel: 'mass (g)', yLabel: 'period (s)', yMax: 1.2, theory: Object.entries(SPRINGS).map(([id, s]) => ({ col: SPRING_COLS[id], fn: (m) => springT(Math.max(1, m), s.k) })), key: Object.entries(SPRINGS).map(([id, s]) => [s.name, SPRING_COLS[id]]) },
-  ramp: { title: 'ramp', x: [0, 35], ticks: [5, 10, 15, 20, 25, 30], xLabel: 'angle (°)', yLabel: 'acceleration (m/s²)', yMax: 4, theory: [{ col: '#ffffff', fn: rampA }] },
+  drop: { title: 'Drop Tower', x: [3, 17], ticks: [5, 10, 15], xLabel: 'height (m)', yLabel: 'time to fall (s)', yMax: 2.5, theory: [{ col: '#ffffff', fn: (h) => Math.sqrt((2 * h) / G) }] },
+  pendulum: { title: 'Pendulum', x: [0.1, 0.7], ticks: [0.2, 0.3, 0.4, 0.5, 0.6], xLabel: 'length (m)', yLabel: 'period (s)', yMax: 2, theory: [{ col: '#ffffff', fn: pendulumT }] },
+  spring: { title: 'Springs', x: [0, 350], ticks: [50, 100, 200, 300], xLabel: 'mass (g)', yLabel: 'period (s)', yMax: 1.2, theory: Object.entries(SPRINGS).map(([id, s]) => ({ col: SPRING_COLS[id], fn: (m) => springT(Math.max(1, m), s.k) })), key: Object.entries(SPRINGS).map(([id, s]) => [s.name, SPRING_COLS[id]]) },
+  ramp: { title: 'Ramp', x: [0, 35], ticks: [5, 10, 15, 20, 25, 30], xLabel: 'angle (°)', yLabel: 'acceleration (m/s²)', yMax: 4, theory: [{ col: '#ffffff', fn: rampA }] },
 };
 export const springColour = (id) => SPRING_COLS[id];
 

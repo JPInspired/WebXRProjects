@@ -11,7 +11,7 @@ import { teacherKey, prove, check, pinned, pin, keysSupported, FP_RE } from './t
 //  • On each desk you see a live copy of that person's work, built by the lesson from the state they
 //    share (lesson.netState / lesson.createReplica). There are no avatars: in mixed reality you see the
 //    real people.
-//  • Everything is sent relative to the sender's own lab, so it lines up whatever room they're in.
+//  • Everything is sent relative to the sender's own lab, so it lines up whatever room they are in.
 //  • Same-room sessions (?room=same): every headset lines itself up with the room from its room scan
 //    (RoomAlign.js), so each desk appears where that person really is.
 //  • Reconnecting (NET_CONFIG.autoReconnect): if this headset loses touch (it slept, the Wi-Fi dropped,
@@ -40,7 +40,7 @@ export function myName() {
   }
 }
 
-/** Two room frames within 1 cm and about half a degree: don't move anything. */
+/** Two room frames within 1 cm and about half a degree: do not move anything. */
 function nearlySame(a, b) {
   const pa = new THREE.Vector3().setFromMatrixPosition(a);
   const pb = new THREE.Vector3().setFromMatrixPosition(b);
@@ -78,7 +78,7 @@ export class Presence {
     this.roomToWorld = null; // set once this headset has lined up with the room
     this.name = myName();
     this.status = 'connecting';
-    this.error = null; // why it couldn't start (plain language)
+    this.error = null; // why it could not start (plain language)
     this.problem = null; // something going wrong while connected (plain language)
     this.peers = new Map();
     this.blocked = new Set(); // headsets the teacher removed: everything from them is ignored
@@ -311,7 +311,7 @@ export class Presence {
 
   /**
    * Where the shared room frame is in this headset's world (see RoomAlign.js), or null.
-   * status: 'ok' | 'unsure' (couldn't tell which way round) | 'no-scan' (no room scan) | 'waiting'.
+   * status: 'ok' | 'unsure' (could not tell which way round) | 'no-scan' (no room scan) | 'waiting'.
    */
   setRoomFrame(matrix, status) {
     this.roomStatus = status;

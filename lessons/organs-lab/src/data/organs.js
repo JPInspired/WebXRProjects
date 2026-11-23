@@ -66,7 +66,7 @@ export const SYSTEMS = [
   {
     id: 'circulatory', name: 'Circulatory system', color: '#ff7b7b',
     organs: ['heart', 'spleen'],
-    job: 'The heart pumps blood through the blood vessels, carrying oxygen, nutrients and waste around the body. (The blood vessels themselves aren’t shown here.)',
+    job: 'The heart pumps blood through the blood vessels, carrying oxygen, nutrients and waste around the body. (The blood vessels themselves are not shown here.)',
     needs: 'It links all the others: it collects oxygen from the lungs and nutrients from the intestines, and takes waste to the kidneys. The heart muscle needs that oxygen too.',
   },
   {
@@ -86,7 +86,7 @@ export const SYSTEMS = [
 export const DISCUSS = [
   'If the heart stopped, which other organs would stop working, and how quickly?',
   'Follow a sandwich from the mouth to the large intestine: which organs does it pass through, and what happens in each?',
-  'Why are the brain, heart and lungs surrounded by bone, but the intestines aren’t?',
+  'Why are the brain, heart and lungs surrounded by bone, but the intestines are not?',
   'How do the digestive and circulatory systems depend on each other?',
   'If the kidneys stopped working, what would build up in the blood?',
 ];
@@ -126,7 +126,7 @@ export const QUESTIONS = [
 export const ANSWERS = {
   organ: 'An organ is a group of different tissues working together to do a job: the stomach has muscle to churn food, glands that make acid and a lining that protects it. Organs that work together, like everything that digests food, make an organ system.',
   biggest: 'Inside the body, the liver: about 1.5 kg, as heavy as a bag of sugar. The biggest organ of all is on the outside: your skin, at around 4 kg.',
-  without: 'Some, yes. People live well with one kidney, and without their spleen, gallbladder or appendix. The liver can even regrow if part of it is removed. You can’t live without your heart, brain, or both lungs, or both kidneys without help from a machine.',
+  without: 'Some, yes. People live well with one kidney, and without their spleen, gallbladder or appendix. The liver can even regrow if part of it is removed. You cannot live without your heart, brain, or both lungs, or both kidneys without help from a machine.',
   leftlung: 'The left lung has two lobes and the right has three. The left one is smaller because the heart, tipped towards the left, takes up some of the space.',
   length: 'Altogether about 7.5 m: around 6 m of small intestine and 1.5 m of large intestine, folded up to fit inside the abdomen. The “small” intestine is the longer one; it is just narrower.',
   ribs: 'The skull protects the brain. The ribcage (ribs, breastbone and spine) protects the heart and lungs, and partly covers the liver, stomach, spleen and kidneys. The pelvis cradles the bladder. The intestines have only muscle in front, so they can move and stretch.',

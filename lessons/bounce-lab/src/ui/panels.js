@@ -25,7 +25,7 @@ export function drawControls(ui, app) {
       const ch = app.challenge();
       ui.text('Read the question out and let everyone pick, then reveal the answer and test it by dropping the balls.', { size: 21, color: THEME.dim });
       ui.buttons(PREDICTIONS.map((p, i) => ({ id: `round-${i}`, label: `${i + 1}. ${p.name}`, active: s.round === i, onClick: () => app.setRound(i) })), { cols: 2, height: 52, size: 21, gap: 8 });
-      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the answer' : 'Reveal the answer', active: ch.revealed, onClick: () => app.reveal() }], { height: 60, size: 24 });
+      ui.buttons([{ id: 'reveal', label: ch.revealed ? 'Hide the Answer' : 'Reveal the Answer', active: ch.revealed, onClick: () => app.reveal() }], { height: 60, size: 24 });
       const t = app.tally(ch);
       ui.text(`${t.votes} answer${t.votes === 1 ? '' : 's'} in so far.`, { size: 22, weight: 700 });
     } else ui.text('Read the question on the class board and pick your prediction on the right. Your teacher will reveal the answer.', { size: 22, color: THEME.dim });
@@ -39,8 +39,8 @@ export function drawControls(ui, app) {
       ui.buttons([{ id: 'drop', label: `Drop the ${BALLS[s.ball].short.toLowerCase()}`, onClick: () => app.dropButton() }], { height: 58, size: 24 });
       ui.text('Or pick a ball up from the shelf, hold it over a mat at any height and let go. Repeat each drop three times.', { size: 19, color: THEME.dim });
     } else {
-      ui.text('Your means are on the right; the class board shows everyone’s for the chosen ball. Which surface keeps the most bounce? Which results don’t fit, and why?', { size: 21, color: THEME.dim });
-      ui.buttons([{ id: 'odd', label: s.showOdd ? 'Odd results: shown' : 'Find odd results', active: s.showOdd, onClick: () => app.toggleOdd() }], { height: 56, size: 22 });
+      ui.text('Your means are on the right; the class board shows everyone’s for the chosen ball. Which surface keeps the most bounce? Which results do not fit, and why?', { size: 21, color: THEME.dim });
+      ui.buttons([{ id: 'odd', label: s.showOdd ? 'Odd Results: Shown' : 'Find Odd Results', active: s.showOdd, onClick: () => app.toggleOdd() }], { height: 56, size: 22 });
     }
   }
 
@@ -55,11 +55,11 @@ export function drawInfo(ui, app) {
   else if (s.mode === 'drop') {
     const p = s.pending;
     if (p) {
-      ui.title('Read the bounce', { size: 34 });
+      ui.title('Read the Bounce', { size: 34 });
       ui.text(`${BALLS[p.ball].name} dropped from ${p.h1} cm onto ${SURFACES[p.surf].name.toLowerCase()}. Follow the yellow line from the bottom of the ghost ball to the ruler.`, { size: 21 });
       drawKeypad(ui, app);
     } else {
-      ui.title('Drop + measure', { size: 34 });
+      ui.title('Drop + Measure', { size: 34 });
       ui.text(s.drops.length ? 'Drop again, or try another ball or surface.' : 'Drop a ball onto a mat. A slow-motion replay stops at the top of the first bounce, next to the ruler: read the height and type it in.', { size: 21, color: THEME.dim });
     }
     const last = s.drops[s.drops.length - 1];
@@ -70,7 +70,7 @@ export function drawInfo(ui, app) {
   ui.gap(8);
   ui.buttons([app.askButton('Ask the physicist', (ui) => {
     const qs = [...QUESTIONS];
-    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI about this' });
+    if (window.WEBXR_CLASSES_CONFIG?.physicistEndpoint) qs.push({ id: 'ai', label: 'Ask AI About This' });
     ui.buttons(qs.map((q) => ({ id: `q-${q.id}`, label: q.label, active: s.bio.qid === q.id, onClick: () => app.ask(q.id) })), { cols: 2, height: 48, size: 19, gap: 8 });
     if (s.bio.answer) ui.box(s.bio.answer, { size: 21 });
   })], { height: 56, size: 20 });
@@ -111,7 +111,7 @@ function drawKeypad(ui, app) {
   ui.y = y + 82;
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', '✓'];
   ui.buttons(keys.map((k) => ({ id: `key-${k}`, label: k === '✓' ? '✓ Record' : k, active: k === '✓' && !!s.entry, disabled: k === '✓' && !s.entry, onClick: () => app.key(k) })), { cols: 3, height: 54, size: 28, gap: 8 });
-  ui.buttons([{ id: 'replay', label: 'Replay in slow motion', onClick: () => app.replay() }], { height: 48, size: 21 });
+  ui.buttons([{ id: 'replay', label: 'Replay in Slow Motion', onClick: () => app.replay() }], { height: 48, size: 21 });
 }
 
 /** Advanced: the energy and momentum of a drop, worked out from its heights. */
@@ -163,7 +163,7 @@ function drawCompare(ui, app) {
   const s = app.state;
   const adv = s.level === 'advanced';
   const means = app.means();
-  ui.title('Your means', { size: 34 });
+  ui.title('Your Means', { size: 34 });
   const balls = BALL_IDS.filter((b) => SURFACE_IDS.some((x) => means[`${b}|${x}`]));
   if (!balls.length) {
     ui.text('No results yet. Drop some balls first (Drop + measure).', { size: 22, color: THEME.dim });

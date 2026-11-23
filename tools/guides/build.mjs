@@ -161,7 +161,7 @@ const CLASS = `
       <div>
         <h2>Running It With a Class</h2>
         <ol class="steps">
-          <li><b>Start the Class Session</b>Open the lesson, tick Everyone is in this room and choose Start a Class Session. The lesson shows a four-character class code and who has joined.</li>
+          <li><b>Start the Class Session</b>Open the lesson and choose Start a Class Session. The lesson shows a four-character class code and who has joined.</li>
           <li><b>Students Join With the Code</b>Students type the code and their name into Joining a Class? at the top of the lessons page. They are taken straight into this lesson, lined up with the room.</li>
           <li><b>Lead From the Teacher Menu</b>The Lesson tab sets the activity for everyone, the Students tab shows progress and the Class tab holds the class tools.</li>
         </ol>
@@ -258,7 +258,7 @@ const index = `    <div style="padding:52px 0 30px">
         <ul class="tips">
           <li>Run the <a href="../network/">Network Check</a> once on the school Wi-Fi, ideally with two headsets, and send the report to the IT team if anything needs attention.</li>
           <li>Try the lesson on a headset with the <a href="../checklist/">Testing Checklist</a>.</li>
-          <li>Make sure each headset has completed Space Setup in the classroom, so every lab lines up with the room.</li>
+          <li>Charge the headsets and switch them on before the lesson.</li>
         </ul>
       </div>
       <div>

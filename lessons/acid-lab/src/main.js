@@ -101,7 +101,7 @@ class App extends LessonApp {
     }
     this.newArmed = 0;
     this.useSeed(1 + Math.floor(Math.random() * 9000));
-    this.explain({ title: 'New solutions', text: 'Six new mystery solutions are on the bench, and the results table is empty.' });
+    this.explain({ title: 'New Solutions', text: 'Six new mystery solutions are on the bench, and the results table is empty.' });
   }
 
   ph(letter) {
@@ -139,14 +139,14 @@ class App extends LessonApp {
   putGogglesOn() {
     this.state.goggles = true;
     sound.bond();
-    this.explain({ title: 'Goggles on', text: 'Good. In a real lab you would keep them on until everything is cleared away.' });
+    this.explain({ title: 'Goggles On', text: 'Good. In a real lab you would keep them on until everything is cleared away.' });
   }
 
   /** Papers and the meter can only be picked up with goggles on. */
   gogglesOn() {
     if (this.state.goggles) return true;
     sound.refuse();
-    this.explain({ kicker: 'SAFETY FIRST', title: 'Put your goggles on', text: `Press “Put my goggles on” on the left before you handle the solutions. ${SAFETY}` });
+    this.explain({ kicker: 'SAFETY FIRST', title: 'Put Your Goggles On', text: `Press “Put my goggles on” on the left before you handle the solutions. ${SAFETY}` });
     return false;
   }
 
@@ -164,13 +164,13 @@ class App extends LessonApp {
     const q = this.sorter;
     if (!ok) {
       this.state.substance = { id, known: false };
-      this.explain({ title: 'Not quite', text: q.hint(id, guess) });
+      this.explain({ title: 'Not Quite', text: q.hint(id, guess) });
       return;
     }
     this.state.substance = { id, known: true };
     if (q.placed.length === q.total) {
       sound.release(300);
-      this.explain({ done: true, title: 'Every one placed!', text: `You sorted all ${q.total} substances${q.wrong ? ` (with ${q.wrong} wrong tr${q.wrong === 1 ? 'y' : 'ies'})` : ' without a mistake'}. Notice how many everyday things are acids or alkalis. Next: test some mystery solutions.` });
+      this.explain({ done: true, title: 'Every One Placed', text: `You sorted all ${q.total} substances${q.wrong ? ` (with ${q.wrong} wrong tr${q.wrong === 1 ? 'y' : 'ies'})` : ' without a mistake'}. Notice how many everyday things are acids or alkalis. Next: test some mystery solutions.` });
     } else {
       const adv = this.state.level === 'advanced' ? ` Hydrogen ions: ${hydrogen(sub.ph)}.` : '';
       this.explain({ title: `${sub.name}: pH ${sub.ph}`, text: `${describePH(sub.ph)[0].toUpperCase()}${describePH(sub.ph).slice(1)}. ${sub.fact}${adv}` });
@@ -222,8 +222,8 @@ class App extends LessonApp {
     sound.bond();
     const notes = [];
     if (m.stable < 1) notes.push('The reading was still changing: next time wait for STABLE.');
-    if (m.contaminated) notes.push('The probe wasn’t rinsed after the last solution, so this reading may be off.');
-    if (!m.calibrated) notes.push('The meter hasn’t been calibrated, so every reading will be out by the same amount.');
+    if (m.contaminated) notes.push('The probe was not rinsed after the last solution, so this reading may be off.');
+    if (!m.calibrated) notes.push('The meter has not been calibrated, so every reading will be out by the same amount.');
     this.explain({ title: `Recorded: ${m.in} = pH ${value.toFixed(2)}`, text: notes.length ? notes.join(' ') : 'A stable reading from a clean probe. Rinse it in distilled water before the next solution.' });
   }
 
@@ -232,12 +232,12 @@ class App extends LessonApp {
   }
 
   onRinsed() {
-    this.explain({ title: 'Probe rinsed', text: 'Distilled water has washed off the last solution, so it can’t contaminate the next one.' });
+    this.explain({ title: 'Probe Rinsed', text: 'Distilled water has washed off the last solution, so it cannot contaminate the next one.' });
   }
 
   onContaminated() {
     sound.refuse();
-    this.explain({ kicker: 'CAREFUL', title: 'The probe wasn’t rinsed', text: 'Drops of the last solution are still on the probe and are mixing into this one, so the reading is being pulled towards the last sample. Rinse in distilled water, then measure again.' });
+    this.explain({ kicker: 'CAREFUL', title: 'The Probe Was Not Rinsed', text: 'Drops of the last solution are still on the probe and are mixing into this one, so the reading is being pulled towards the last sample. Rinse in distilled water, then measure again.' });
   }
 
   /** How many of the 18 results (6 solutions × 3 methods) have been recorded. */
@@ -298,7 +298,7 @@ class App extends LessonApp {
     const corrosive = this.unknowns.filter((u) => u.ph <= 1.5 || u.ph >= 12.5).map((u) => u.letter);
     this.explain({
       title: 'How did each method do?',
-      text: `${sum.meterDone ? `The meter was within ${Math.max(0.01, sum.meterErr).toFixed(2)} pH on average` : 'You haven’t used the meter yet'}${sum.uiDone ? `; indicator paper within ${sum.uiErr.toFixed(1)}` : ''}. Litmus only says acid or alkali.${corrosive.length ? ` Safety: ${corrosive.join(' and ')} ${corrosive.length > 1 ? 'were' : 'was'} corrosive. In a real lab that means goggles, and washing any splash off straight away.` : ''}`,
+      text: `${sum.meterDone ? `The meter was within ${Math.max(0.01, sum.meterErr).toFixed(2)} pH on average` : 'You have not used the meter yet'}${sum.uiDone ? `; indicator paper within ${sum.uiErr.toFixed(1)}` : ''}. Litmus only says acid or alkali.${corrosive.length ? ` Safety: ${corrosive.join(' and ')} ${corrosive.length > 1 ? 'were' : 'was'} corrosive. In a real lab that means goggles, and washing any splash off straight away.` : ''}`,
     });
   }
 
@@ -395,8 +395,8 @@ class App extends LessonApp {
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }
@@ -437,12 +437,12 @@ class App extends LessonApp {
 
   // ───────────── shared sessions ─────────────
 
-  /** What colleagues need from me: how much I've recorded (for the teacher). */
+  /** What colleagues need from me: how much I have recorded (for the teacher). */
   netState() {
     return { n: this.progress() };
   }
 
-  /** Others' benches aren't drawn beside mine (the class board is the shared thing); I keep their progress. */
+  /** Others' benches are not drawn beside mine (the class board is the shared thing); I keep their progress. */
   createReplica() {
     const r = {
       group: new THREE.Group(),

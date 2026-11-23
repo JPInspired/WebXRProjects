@@ -182,7 +182,7 @@ class App extends LessonApp {
         this.controls.target.set(-0.9, 5.5, -0.6);
         this.controls.update();
       }
-      this.explain({ kicker: 'LIFE-SIZE', title: 'The full measuring pole', text: this.presenting ? 'Look up: the pole rises 16 m through the ceiling, with the balcony at the height you chose. Drop it and watch it land beside you.' : 'Here is the full 16 m pole beside your bench. Drop it and watch the real fall. (“Reset view” brings you back to the bench.)' });
+      this.explain({ kicker: 'LIFE-SIZE', title: 'The Full Measuring Pole', text: this.presenting ? 'Look up: the pole rises 16 m through the ceiling, with the balcony at the height you chose. Drop it and watch it land beside you.' : 'Here is the full 16 m pole beside your bench. Drop it and watch the real fall. (“Reset view” brings you back to the bench.)' });
     } else if (!this.presenting) this.recenter();
   }
 
@@ -240,7 +240,7 @@ class App extends LessonApp {
   onRevealed(ch) {
     const mine = this.myVote(ch);
     sound[mine === ch.answer ? 'bond' : 'beep']();
-    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right!' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
+    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
   }
 
   // ───────────── ask the physicist ─────────────
@@ -353,8 +353,8 @@ class App extends LessonApp {
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }

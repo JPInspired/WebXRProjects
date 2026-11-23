@@ -14,7 +14,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 // └──────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 export const ROOMS = { enabled: true };
 
-// Which room each lesson gets. A lesson that isn't listed (Hintze Hall, Reef Dive: they have their own places)
+// Which room each lesson gets. A lesson that is not listed (Hintze Hall, Reef Dive: they have their own places)
 // keeps the grid.
 const SUBJECT = {
   'atomic-models': 'chemistry', 'acid-lab': 'chemistry', 'lithium-lab': 'chemistry', 'kinetics-lab': 'chemistry', 'voltaic-lab': 'chemistry',
@@ -510,7 +510,7 @@ export class Classroom {
 
     this.group.add(furniture(subject, t));
 
-    // a soft shadow on the floor under the lesson, so the bench doesn't seem to float
+    // a soft shadow on the floor under the lesson, so the bench does not seem to float
     const sh = canvas(256, 256, (g, W) => {
       const r = g.createRadialGradient(W / 2, W / 2, 0, W / 2, W / 2, W / 2);
       r.addColorStop(0, 'rgba(0,0,0,0.32)'); r.addColorStop(0.6, 'rgba(0,0,0,0.14)'); r.addColorStop(1, 'rgba(0,0,0,0)');

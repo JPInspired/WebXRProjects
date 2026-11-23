@@ -35,7 +35,7 @@ export const PREDICTIONS = [
   {
     name: 'Mass',
     q: 'The same pull keeps a ball going round on a string. Swap it for a heavier ball. To keep the same circle, it will go round…',
-    options: ['Faster', 'Slower', 'At the same speed', 'It can’t go round at all'],
+    options: ['Faster', 'Slower', 'At the same speed', 'It cannot go round at all'],
     answer: 1,
     why: 'Slower. A heavier ball needs a bigger force to turn it at the same speed. With the same pull, it can only be turned at a lower speed.',
   },
@@ -44,10 +44,10 @@ export const PREDICTIONS = [
     q: 'Same ball, same pull, but a longer string (a bigger circle). The number of turns each second will…',
     options: ['Go up', 'Go down', 'Stay the same'],
     answer: 1,
-    why: 'Go down. A bigger circle takes longer to go round, and the same pull can’t turn the ball as quickly on it.',
+    why: 'Go down. A bigger circle takes longer to go round, and the same pull cannot turn the ball as quickly on it.',
   },
   {
-    name: 'Snap!',
+    name: 'Snap',
     q: 'You are whirling a ball above your head and the string snaps. Which way does the ball fly?',
     options: ['Straight outwards, away from the centre', 'Straight on, along the line it was moving (the tangent)', 'In a curve, still turning', 'Straight down'],
     answer: 1,
@@ -66,7 +66,7 @@ export const EXAMPLES = [
 export const DISCUSS = [
   'Which mattered more for the speed: doubling the mass or doubling the length? How do your results show it?',
   'Why must the clip stay just below the tube while you time the turns?',
-  'Which of your results don’t fit the pattern? What might have caused them?',
+  'Which of your results do not fit the pattern? What might have caused them?',
   'Why do racing tracks bank their bends?',
   'A washing machine’s drum spins fast: where does the water go, and why?',
 ];
@@ -78,18 +78,18 @@ export const QUESTIONS = [
   { id: 'centrifugal', label: 'Is there a “centrifugal” force?' },
   { id: 'accelerating', label: 'How is it accelerating?' },
   { id: 'formula', label: 'Where does F = mv²/r come from?' },
-  { id: 'orbit', label: 'Why don’t satellites fall?' },
+  { id: 'orbit', label: 'Why do not satellites fall?' },
   { id: 'errors', label: 'What makes results less accurate?' },
   { id: 'banked', label: 'Why are bends banked?' },
   { id: 'everyday', label: 'Where else do we see it?' },
 ];
 
 export const ANSWERS = {
-  centripetal: 'Any force that keeps something moving in a circle, by pulling it towards the centre. It isn’t a new kind of force: here it is the tension in the string; for the Moon it is gravity; for a car on a bend it is friction.',
+  centripetal: 'Any force that keeps something moving in a circle, by pulling it towards the centre. It is not a new kind of force: here it is the tension in the string; for the Moon it is gravity; for a car on a bend it is friction.',
   centrifugal: 'Not really. The outward “fling” you feel is your body trying to carry straight on (inertia) while something pulls you round. Cut the string and the ball flies off along the tangent, not straight outwards, which shows nothing was pushing it out.',
   accelerating: 'Acceleration is any change in velocity, and velocity includes direction. Going round a circle at a steady speed, the direction changes all the time, so it is always accelerating, towards the centre.',
   formula: 'Turning something at speed v round a circle of radius r needs an acceleration v²/r towards the centre. Newton’s second law (F = ma) then gives F = mv²/r, or F = mω²r using the turns: ω = 2π × turns per second.',
-  orbit: 'They are falling! Gravity pulls them towards Earth, but they move sideways so fast (about 7.7 km/s for the space station) that the ground curves away beneath them as quickly as they fall.',
+  orbit: 'They are falling. Gravity pulls them towards Earth, but they move sideways so fast (about 7.7 km/s for the space station) that the ground curves away beneath them as quickly as they fall.',
   errors: 'Your reaction time when starting and stopping the stopwatch (time 10 or more turns to make it smaller), keeping the clip in the same place, the string rubbing in the tube, and the ball dipping below a horizontal circle.',
   banked: 'On a sloping (banked) bend, part of the road’s push on the car points towards the centre of the turn, so the car can go round faster without relying only on friction. Cycling tracks and racing circuits are banked for this.',
   everyday: 'Washing-machine spin cycles, theme-park rides, a hammer thrower, the Moon round Earth, Earth round the Sun, electrons in particle accelerators, and centrifuges that separate blood.',

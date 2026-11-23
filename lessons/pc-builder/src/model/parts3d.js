@@ -138,7 +138,7 @@ const honeycomb = (cell = 14) => once(`hc${cell}`, () => {
   return t;
 });
 
-/** Lightly brushed metal / matte paint, so big flat panels aren't a single flat colour. */
+/** Lightly brushed metal / matte paint, so big flat panels are not a single flat colour. */
 const brushed = () => once('brushed', () => {
   const t = canvas(256, 256, (g, W, H) => {
     g.fillStyle = '#d8d8d8';
@@ -754,7 +754,7 @@ export function caseMesh(caseId) {
   return bake(g);
 }
 
-/** A see-through copy of a part, used to preview where it will go (green = fits, red = doesn't). */
+/** A see-through copy of a part, used to preview where it will go (green = fits, red = does not). */
 export function ghostOf(id, ok) {
   const g = partMesh(id);
   const m = new THREE.MeshBasicMaterial({ color: ok ? 0x56d68c : 0xff5a5a, transparent: true, opacity: 0.35, depthWrite: false });

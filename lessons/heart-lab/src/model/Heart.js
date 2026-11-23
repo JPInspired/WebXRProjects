@@ -427,7 +427,7 @@ export class Heart {
     return { group: g, leaves, def, open: 0 };
   }
 
-  /** Rays shouldn't hit the part of the wall that has been cut away. */
+  /** Rays should not hit the part of the wall that has been cut away. */
   makeClipAwarePicking() {
     const heart = this;
     for (const m of this.clipMats) m.userData.clipped = true;

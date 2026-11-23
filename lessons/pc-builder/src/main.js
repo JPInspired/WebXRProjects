@@ -25,7 +25,7 @@ class App extends LessonApp {
       tourStep: null,
       tech: { qid: null, answer: null },
       explain: {
-        title: 'Build your own computer',
+        title: 'Build Your Own Computer',
         text: 'Start with a motherboard: pick it up from the tray and bring it into the case — when the preview turns green, let go. Then add the CPU, cooler, RAM, storage, graphics card and power supply. Press Power to test it.',
       },
     };
@@ -95,7 +95,7 @@ class App extends LessonApp {
     this.state.build = emptyBuild(this.state.build.case);
     this.state.booted = false;
     this.pc.rebuild();
-    this.explain({ title: 'Empty case', text: 'All parts are back in the tray. Start with the motherboard.' });
+    this.explain({ title: 'Empty Case', text: 'All parts are back in the tray. Start with the motherboard.' });
   }
 
   toggleLabels() {
@@ -122,7 +122,7 @@ class App extends LessonApp {
       {
         heading: 'Case for everyone',
         buttons: [
-          { id: 'admin-case-free', label: 'Free choice', active: !a.case, onClick: () => this.adminCase(null) },
+          { id: 'admin-case-free', label: 'Free Choice', active: !a.case, onClick: () => this.adminCase(null) },
           ...Object.entries(CASES).map(([id, c]) => ({ id: `admin-case-${id}`, label: c.short, active: a.case === id, onClick: () => this.adminCase(id) })),
         ],
         cols: 2,
@@ -130,8 +130,8 @@ class App extends LessonApp {
       {
         heading: 'Every computer',
         buttons: [
-          { id: 'admin-off', label: 'Turn all off', onClick: () => this.adminAll('off') },
-          { id: 'admin-empty', label: armed ? 'Sure? Press again' : 'Empty all cases', active: armed, onClick: () => this.adminAll('reset') },
+          { id: 'admin-off', label: 'Turn All Off', onClick: () => this.adminAll('off') },
+          { id: 'admin-empty', label: armed ? 'Sure? Press Again' : 'Empty All Cases', active: armed, onClick: () => this.adminAll('reset') },
         ],
       },
     ];
@@ -158,7 +158,7 @@ class App extends LessonApp {
       this.emptyCase();
     } else {
       this.powerOff();
-      this.explain({ title: 'Every computer is off', text: 'You switched off everyone’s computer.' });
+      this.explain({ title: 'Every Computer Is Off', text: 'You switched off everyone’s computer.' });
     }
     this.pcAdmin[what]++;
     this.broadcastAdmin();
@@ -183,11 +183,11 @@ class App extends LessonApp {
     // one-off commands: only ones given after I joined (the first message just says where the counters are)
     if (seen && l.reset !== seen.reset) {
       this.emptyCase();
-      this.explain({ title: 'Start again', text: `${this.adminName} emptied every case. All the parts are back in the tray — start with the motherboard.` });
+      this.explain({ title: 'Start Again', text: `${this.adminName} emptied every case. All the parts are back in the tray — start with the motherboard.` });
       changed = true;
     } else if (seen && l.off !== seen.off && this.state.power !== 'off') {
       this.powerOff();
-      this.explain({ title: 'Computer off', text: `${this.adminName} switched every computer off.` });
+      this.explain({ title: 'Computer Off', text: `${this.adminName} switched every computer off.` });
       changed = true;
     }
     if (changed) this.refresh();
@@ -257,7 +257,7 @@ class App extends LessonApp {
         this.state.power = 'on';
         this.state.booted = true;
         this.celebrate();
-        if (!this.state.screen.note) this.state.screen.note = { title: 'It works!', text: 'Every part is doing its job. Press “How it works” to watch power, data and heat flow between them.' };
+        if (!this.state.screen.note) this.state.screen.note = { title: 'It Works', text: 'Every part is doing its job. Press “How it works” to watch power, data and heat flow between them.' };
       } else {
         this.bootTimer = setTimeout(next, step.wait * 1000);
       }
@@ -299,7 +299,7 @@ class App extends LessonApp {
     const n = this.state.tourStep + d;
     if (n >= T.TOUR.length) {
       this.endTour();
-      this.state.explain = { title: 'That’s a working computer', text: 'Power from the PSU, start-up from the motherboard’s BIOS, programs loaded from storage into RAM, the CPU processing them, graphics drawing the picture, and the cooler keeping everything safe — every part depends on the others.' };
+      this.state.explain = { title: 'That Is a Working Computer', text: 'Power from the PSU, start-up from the motherboard’s BIOS, programs loaded from storage into RAM, the CPU processing them, graphics drawing the picture, and the cooler keeping everything safe — every part depends on the others.' };
     } else {
       this.state.tourStep = Math.max(0, n);
       this.tour.show(T.TOUR[this.state.tourStep]);

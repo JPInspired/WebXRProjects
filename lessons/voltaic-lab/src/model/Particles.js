@@ -143,7 +143,7 @@ export class Particles {
       c.stroke();
       c.fillStyle = bridgeOn ? '#5a4a2a' : '#888';
       c.font = '600 16px system-ui, sans-serif';
-      c.fillText(bridgeOn ? 'salt bridge' : 'no salt bridge!', 335, 104);
+      c.fillText(bridgeOn ? 'salt bridge' : 'no salt bridge', 335, 104);
     }
     // wire and meter
     const wireY = 72;

@@ -34,7 +34,7 @@ class App extends LessonApp {
       quizAt: 0,
       doc: { qid: null, answer: null },
       explain: {
-        title: 'Welcome: identifying organs',
+        title: 'Welcome: Identifying Organs',
         text: 'This skeleton is yours, and it is missing all its organs: they are on the desk. First, sticky notes: pick an organ and what it does on the right, and stick them on the class board.',
       },
     };
@@ -72,7 +72,7 @@ class App extends LessonApp {
       })
       .catch((e) => {
         console.error(e);
-        this.explain({ kicker: 'PROBLEM', title: 'The skeleton didn’t load', text: `Check the internet connection and reload the page (${e.message}).` });
+        this.explain({ kicker: 'PROBLEM', title: 'The Skeleton Did Not Load', text: `Check the internet connection and reload the page (${e.message}).` });
       });
   }
 
@@ -135,7 +135,7 @@ class App extends LessonApp {
     if (!n.organ || !n.fn) return;
     n.stuck = [n.organ, n.fn];
     sound.snap();
-    this.explain({ kicker: 'STICKY NOTES', title: 'On the board', text: 'Your pair is on the class board. Read everyone’s: do you agree with them all? Your teacher can mark them.' });
+    this.explain({ kicker: 'STICKY NOTES', title: 'On the Board', text: 'Your pair is on the class board. Read everyone’s: do you agree with them all? Your teacher can mark them.' });
   }
 
   // ───────────── building the body ─────────────
@@ -149,7 +149,7 @@ class App extends LessonApp {
       sound.bond();
       const b = this.body;
       const left = b.active.length - b.placed;
-      this.explain({ done: !left, kicker: 'IN PLACE', title: p.o.name, text: left ? `${p.o.where} ${left} to go.` : 'Every organ is in its place. Well done! Next: what does each one do?' });
+      this.explain({ done: !left, kicker: 'IN PLACE', title: p.o.name, text: left ? `${p.o.where} ${left} to go.` : 'Every organ is in its place. Well done. Next: what does each one do?' });
     } else sound.click();
   }
 
@@ -158,7 +158,7 @@ class App extends LessonApp {
     const sameKind = p.o.card === other.o.card;
     this.explain({
       kicker: 'NOT THERE',
-      title: `That’s where the ${other.o.name.toLowerCase()} goes`,
+      title: `That is where the ${other.o.name.toLowerCase()} goes`,
       text: sameKind ? 'Careful with left and right: they are the body’s own. Its left is on your right, as it faces you.' : `The ${p.o.name.toLowerCase()} is back on the desk. Press its name on the right for a hint.`,
     });
   }
@@ -203,7 +203,7 @@ class App extends LessonApp {
     this.explain({
       kicker: 'CHECKED',
       title: `${r.right} right, ${r.wrong} wrong`,
-      text: r.wrong ? `The wrong ${r.wrong === 1 ? 'one has' : 'ones have'} gone back on the desk. ${b.active.length - b.placed} still to place.` : b.placed === b.active.length ? 'Every organ is in its place. Well done!' : 'All correct so far: keep going.',
+      text: r.wrong ? `The wrong ${r.wrong === 1 ? 'one has' : 'ones have'} gone back on the desk. ${b.active.length - b.placed} still to place.` : b.placed === b.active.length ? 'Every organ is in its place. Well done.' : 'All correct so far: keep going.',
     });
   }
 
@@ -212,7 +212,7 @@ class App extends LessonApp {
     this.body.setLevel(this.state.level);
     this.applyMode();
     sound.click();
-    this.explain({ title: 'Back on the desk', text: 'Every organ is back on the desk. Start again!' });
+    this.explain({ title: 'Back on the Desk', text: 'Every organ is back on the desk. Start again.' });
   }
 
   // ───────────── function cards ─────────────
@@ -220,12 +220,12 @@ class App extends LessonApp {
   onCardMatched(k) {
     sound.bond();
     const b = this.body;
-    this.explain({ done: b.matched === b.activeCards.length, kicker: 'MATCHED', title: k.c.name, text: `${k.c.text}. ${b.matched === b.activeCards.length ? 'All the cards are matched: your skeleton is a labelled diagram!' : `${b.activeCards.length - b.matched} cards to go.`}` });
+    this.explain({ done: b.matched === b.activeCards.length, kicker: 'MATCHED', title: k.c.name, text: `${k.c.text}. ${b.matched === b.activeCards.length ? 'All the cards are matched: your skeleton is a labelled diagram.' : `${b.activeCards.length - b.matched} cards to go.`}` });
   }
 
   onCardWrong(k, p) {
     sound.refuse();
-    this.explain({ kicker: 'NOT THAT ONE', title: `That’s the ${p.o.name.toLowerCase()}`, text: `“${k.c.text}” isn’t its job. The card is back on the desk.` });
+    this.explain({ kicker: 'NOT THAT ONE', title: `That is the ${p.o.name.toLowerCase()}`, text: `“${k.c.text}” is not its job. The card is back on the desk.` });
   }
 
   resetCards() {
@@ -385,7 +385,7 @@ class App extends LessonApp {
     const sections = [
       { heading: 'Activity for everyone', buttons: MODES.map(([id, label]) => ({ id: `admin-mode-${id}`, label, active: s.mode === id, onClick: () => this.setMode(id) })), cols: 3 },
       { heading: 'Level for everyone', buttons: [['core', 'Core'], ['advanced', 'Advanced']].map(([id, label]) => ({ id: `admin-level-${id}`, label, active: s.level === id, onClick: () => this.setLevel(id) })) },
-      { heading: 'Answers', buttons: [{ id: 'admin-answers', label: s.answers ? 'Hide the answers' : 'Show the answers in every skeleton', active: s.answers, onClick: () => { s.answers = !s.answers; } }] },
+      { heading: 'Answers', buttons: [{ id: 'admin-answers', label: s.answers ? 'Hide the Answers' : 'Show the Answers in Every Skeleton', active: s.answers, onClick: () => { s.answers = !s.answers; } }] },
     ];
     if (s.mode === 'systems') {
       sections.push({ heading: 'System for everyone', buttons: [{ id: 'admin-sys-all', label: 'All', active: !s.system, onClick: () => this.setSystem(null) }, ...SYSTEMS.map((x) => ({ id: `admin-sys-${x.id}`, label: x.name.split(' ')[0], active: s.system === x.id, onClick: () => this.setSystem(x.id) }))], cols: 3 });
@@ -396,8 +396,8 @@ class App extends LessonApp {
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }

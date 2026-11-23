@@ -46,7 +46,7 @@ export const REACTIONS = {
     equation: 'N₂ + 3H₂ → 2NH₃',
     reactants: [['N2', 1], ['H2', 3]],
     products: { NH3: 2 },
-    hint: 'The N≡N triple bond is very strong — pull hard! Then give each N three H.',
+    hint: 'The N≡N triple bond is very strong — pull hard. Then give each N three H.',
     fact: 'Fertiliser made this way helps feed about half of the people on Earth.',
   },
   hydrogenation: {

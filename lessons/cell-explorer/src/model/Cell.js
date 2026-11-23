@@ -43,7 +43,7 @@ export class Cell {
     return obj;
   }
 
-  /** Rays shouldn't hit the part of a shell that has been cut away. */
+  /** Rays should not hit the part of a shell that has been cut away. */
   makeClipAwarePicking() {
     const clip = this.clip;
     this.group.traverse((o) => {

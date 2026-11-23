@@ -112,8 +112,8 @@ class App extends LessonApp {
 
   onWeighing(p) {
     sound.click();
-    if (!p.dried) this.explain({ kicker: 'CAREFUL', title: 'Still wet', text: 'A wet piece reads heavier than it really is. Dry it on the towel first, or record it anyway and see what happens.' });
-    else this.explain({ title: 'On the balance', text: 'Press “Record this mass” on the left when you are ready.' });
+    if (!p.dried) this.explain({ kicker: 'CAREFUL', title: 'Still Wet', text: 'A wet piece reads heavier than it really is. Dry it on the towel first, or record it anyway and see what happens.' });
+    else this.explain({ title: 'On the Balance', text: 'Press “Record this mass” on the left when you are ready.' });
   }
 
   record() {
@@ -123,7 +123,7 @@ class App extends LessonApp {
   onRecorded(p, which) {
     sound.bond();
     if (which === 'initial') {
-      this.explain({ title: `Starting mass: ${p.initialMass.toFixed(2)} g`, text: p.wet0 ? 'That reading includes some water that hadn’t been dried off: it will look a little high.' : 'Now put it in one of the five beakers.' });
+      this.explain({ title: `Starting mass: ${p.initialMass.toFixed(2)} g`, text: p.wet0 ? 'That reading includes some water that had not been dried off: it will look a little high.' : 'Now put it in one of the five beakers.' });
     } else {
       const change = p.finalMass - p.initialMass;
       const pct = (change / p.initialMass) * 100;
@@ -132,7 +132,7 @@ class App extends LessonApp {
       sound[change >= 0 ? 'bond' : 'beep']();
       this.explain({
         title: `${p.conc.toFixed(2)} M: ${change > 0 ? '+' : ''}${change.toFixed(2)} g (${pct > 0 ? '+' : ''}${pct.toFixed(1)}%)`,
-        text: `${p.wet1 ? 'That reading includes some solution that hadn’t been dried off, so it may look a little off. ' : ''}${change > 0 ? 'It gained mass: water moved in.' : change < 0 ? 'It lost mass: water moved out.' : 'Almost no change.'}`,
+        text: `${p.wet1 ? 'That reading includes some solution that had not been dried off, so it may look a little off. ' : ''}${change > 0 ? 'It gained mass: water moved in.' : change < 0 ? 'It lost mass: water moved out.' : 'Almost no change.'}`,
       });
     }
   }
@@ -157,13 +157,13 @@ class App extends LessonApp {
 
   onSoakDone() {
     sound.bond();
-    this.explain({ title: '24 hours done', text: 'Take each piece out, dry it on the towel and weigh it again to find its final mass.' });
+    this.explain({ title: '24 Hours Done', text: 'Take each piece out, dry it on the towel and weigh it again to find its final mass.' });
   }
 
   newPotato() {
     this.bench.reset(true);
     sound.click();
-    this.explain({ title: 'A fresh potato', text: 'Cut, dry, weigh, soak and weigh again, just like before. Repeating the experiment and averaging the results makes the class graph more reliable.' });
+    this.explain({ title: 'A Fresh Potato', text: 'Cut, dry, weigh, soak and weigh again, just like before. Repeating the experiment and averaging the results makes the class graph more reliable.' });
   }
 
   /** Mean mass change (%) per concentration, across every finished piece so far. */
@@ -234,7 +234,7 @@ class App extends LessonApp {
   onRevealed(ch) {
     const mine = this.myVote(ch);
     sound[mine === ch.answer ? 'bond' : 'beep']();
-    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right!' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
+    this.explain({ kicker: 'THE ANSWER', title: mine == null ? ch.options[ch.answer] : mine === ch.answer ? 'You were right' : `It was: ${ch.options[ch.answer]}`, text: ch.why });
   }
 
   // ───────────── ask the biologist ─────────────
@@ -326,8 +326,8 @@ class App extends LessonApp {
         heading: 'Class board',
         text: this.presence.roomToWorld ? (centred ? 'In the middle of the room.' : 'Where you put it.') : 'Put on the headset to place it in the room.',
         buttons: [
-          { id: 'board-centre', label: 'Middle of room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
-          { id: 'board-here', label: 'In front of me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
+          { id: 'board-centre', label: 'Middle of Room', active: centred, disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard(null) },
+          { id: 'board-here', label: 'In Front of Me', disabled: !this.presence.roomToWorld, onClick: () => this.moveBoard('here') },
         ],
       });
     }

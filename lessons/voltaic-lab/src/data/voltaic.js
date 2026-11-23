@@ -29,7 +29,7 @@ export const METAL_IDS = Object.keys(METALS);
 export const ELECTROLYTES = {
   salt: { name: 'Salt water', short: 'Salt water', k: 0.72, R: 25, color: 0xe6f4ff, ions: true, why: 'Dissolved salt splits into sodium and chloride ions that carry charge through the water.' },
   vinegar: { name: 'Vinegar', short: 'Vinegar', k: 0.78, R: 70, color: 0xf2e7c4, ions: true, why: 'Vinegar is a weak acid: it has some hydrogen ions, but not many, so it conducts less well than salt water.' },
-  lemon: { name: 'Lemon juice', short: 'Lemon', k: 0.8, R: 450, color: 0xf6ef9a, ions: true, why: 'Citric acid gives ions, enough for a decent voltage but only a tiny current: a lemon battery can’t light a bulb.' },
+  lemon: { name: 'Lemon juice', short: 'Lemon', k: 0.8, R: 450, color: 0xf6ef9a, ions: true, why: 'Citric acid gives ions, enough for a decent voltage but only a tiny current: a lemon battery cannot light a bulb.' },
   acid: { name: 'Dilute sulfuric acid', short: 'Dilute acid', k: 0.85, R: 8, color: 0xf2f6ff, ions: true, why: 'A strong acid is full of hydrogen and sulfate ions, so it conducts well: the best electrolyte here.' },
   sugar: { name: 'Sugar water', short: 'Sugar water', k: 0.06, R: 60000, color: 0xfaf6ee, ions: false, why: 'Sugar dissolves as whole molecules, not ions, so there is almost nothing to carry the charge.' },
   water: { name: 'Pure water', short: 'Pure water', k: 0.08, R: 40000, color: 0xeaf6ff, ions: false, why: 'Pure water has hardly any ions, so it barely conducts and the cell hardly works.' },
@@ -44,7 +44,7 @@ export const idealV = (left, right) => METALS[right].E - METALS[left].E;
 
 /**
  * One cell's EMF (V, + means the right strip is positive) and internal resistance (Ω), or null if it
- * can't work (missing a strip, no electrolyte, no salt bridge). wear: 0 (fresh) … 1 (worn out).
+ * cannot work (missing a strip, no electrolyte, no salt bridge). wear: 0 (fresh) … 1 (worn out).
  */
 export function cellEMF(cell, level, wear = 0) {
   const { left, right } = cell;
@@ -138,10 +138,10 @@ export const QUESTIONS = [
 export const ANSWERS = {
   how: 'Two different metals, joined by a wire and dipped in an electrolyte. The more reactive metal loses electrons more easily. Those electrons flow through the wire to the other metal, where ions in the solution pick them up. That flow of electrons is an electric current.',
   which: 'The more reactive metal, the one higher in the reactivity series. It gives up electrons, so electrons leave from it into the wire: it is the negative terminal. If your voltmeter shows a minus sign, its leads are on the other way round.',
-  electrolyte: 'It completes the circuit inside the cell. Electrons can’t travel through water, but ions can: as electrons flow one way through the wire, ions drift through the electrolyte, keeping each side from building up charge.',
+  electrolyte: 'It completes the circuit inside the cell. Electrons cannot travel through water, but ions can: as electrons flow one way through the wire, ions drift through the electrolyte, keeping each side from building up charge.',
   bridge: 'In a two-beaker cell, the salt bridge (paper soaked in potassium nitrate) lets ions move between the beakers without the two solutions mixing. Without it, charge builds up in each beaker and the current stops at once.',
   redox: 'Oxidation is losing electrons (zinc atoms become zinc ions). Reduction is gaining electrons (copper ions become copper atoms). They always happen together: “OIL RIG”, oxidation is loss, reduction is gain.',
   flat: 'The reacting chemicals get used up: the zinc wears away and the ions on the other side run out. Rechargeable batteries can push the reaction backwards when you charge them.',
-  series: 'Joining cells in series (+ of one to − of the next) adds their voltages: four 1.1 V cells give about 4.4 V. Each cell also adds its own resistance, so the current doesn’t go up the same way.',
+  series: 'Joining cells in series (+ of one to − of the next) adds their voltages: four 1.1 V cells give about 4.4 V. Each cell also adds its own resistance, so the current does not go up the same way.',
   volta: 'Alessandro Volta, in 1800: a stack of zinc and copper discs separated by cardboard soaked in salt water, the “voltaic pile”. The unit of voltage, the volt, is named after him.',
 };
