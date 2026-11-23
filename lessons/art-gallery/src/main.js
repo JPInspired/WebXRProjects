@@ -35,7 +35,7 @@ class App extends LessonApp {
   initLesson() {
     this.lab.remove(this.explainPanel.mesh);
     this.explainPanel = new CanvasPanel({ width: 0.62, height: 0.22, name: 'card' });
-    this.explainPanel.mesh.position.set(0, 0.58, -0.16);
+    this.explainPanel.mesh.position.set(0, 0.6, 0.12);
     this.explainPanel.mesh.rotation.x = 0.18;
     this.lab.add(this.explainPanel.mesh);
     this.panels = [this.controlPanel, this.infoPanel, this.explainPanel];
