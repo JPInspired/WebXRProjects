@@ -144,7 +144,7 @@ export const GUIDES = [
     id: 'art-gallery', title: 'Art Gallery', subject: 'art', mins: 40, ages: 'Ages 7–18 · KS2–KS5', mode: 'Mixed reality · seated',
     intro: 'Twelve famous paintings arrive on an easel at each desk, at their real size wherever they fit.',
     aims: ['Recognise twelve famous paintings and their artists', 'Describe details of technique and meaning in a painting', 'Place works of art in their historical context', 'Compare the scale of paintings with their reproductions'],
-    steps: [['Gallery', 'Students choose a painting, look closer at its glowing details and read its story and its place on the timeline.'], ['True Size', 'Large paintings, such as The Night Watch, can be seen at their real size behind the desk.'], ['Guess the Painting', 'A small detail slowly zooms out; the sooner a student recognises the painting, the more points they score.']],
+    steps: [['Gallery', 'Students choose a painting, look closer at its glowing details and read its story and its place on the timeline.'], ['True Size', 'Large paintings, such as The Night Watch, can be seen at their real size behind the desk.'], ['Guess the Painting', 'A small detail slowly zooms out; the sooner a student recognises the painting, the more points they score.'], ['Quiz', 'Eight questions on what students saw, how the paintings were made and when, closing with a discussion question.']],
     tips: ['Use Show Everyone to bring the whole class to one painting and discuss it together.', 'Ask students which painting surprised them most at its real size.', 'The Birth of Venus shows a nude figure, as is common in classical art: prepare younger classes, or skip it.'],
   },
   {

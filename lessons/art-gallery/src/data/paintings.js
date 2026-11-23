@@ -129,3 +129,15 @@ export const EVENTS = [
 ];
 
 export const TIME = [1470, 1915]; // the timeline's ends
+
+/** The closing quiz: looking, technique and history, from the paintings' stories and details. */
+export const QUIZ = [
+  { q: 'Which painting is the smallest of the twelve?', options: ['The Night Watch', 'Girl with a Pearl Earring', 'The Kiss', 'The Birth of Venus'], answer: 1, why: 'Girl with a Pearl Earring is only 39 × 44.5 cm. The Night Watch is more than ten times as wide.' },
+  { q: 'Seurat built A Sunday on La Grande Jatte from tiny dots of pure colour. What is this method called?', options: ['Impasto', 'Sfumato', 'Pointillism', 'Gold leaf'], answer: 2, why: 'Pointillism: from a distance our eyes blend the dots, making the colours brighter than mixed paint.' },
+  { q: 'Why is The Night Watch so dark?', options: ['It shows the night', 'Dark varnish built up over the years', 'Rembrandt ran out of paint', 'It was painted by candlelight'], answer: 1, why: 'It is not a night scene at all: dark varnish made it look like one, and gave it its name.' },
+  { q: 'The Great Wave is a woodblock print. What did that make possible?', options: ['Thousands of copies, sold cheaply', 'It could be hung outside', 'It would never fade', 'It could only be made once'], answer: 0, why: 'A carved block for each colour meant thousands of copies, and prints like it reached Europe and changed painting there.' },
+  { q: 'What does The Fighting Temeraire show changing?', options: ['Summer turning to winter', 'The age of sail giving way to steam', 'War turning to peace', 'London becoming a city'], answer: 1, why: 'A great sailing warship is towed to the scrapyard by a small steam tug: one age ends, another begins.' },
+  { q: 'In The Third of May 1808, why can we not see the soldiers’ faces?', options: ['Goya ran out of time', 'They are wearing masks', 'Goya made them faceless on purpose', 'The painting is damaged'], answer: 2, why: 'A faceless line of rifles makes the soldiers seem like a machine, and puts all our attention on the victims.' },
+  { q: 'Which painting was made in the same year that photography was invented?', options: ['The Fighting Temeraire', 'Mona Lisa', 'The Starry Night', 'Water Lilies'], answer: 0, why: 'Both date from 1839: check the timeline.' },
+  { q: 'Klimt used real gold in The Kiss. Where else was gold leaf used, long before?', options: ['In Japanese woodblock prints', 'In medieval religious paintings', 'In Impressionist landscapes', 'Nowhere: Klimt invented it'], answer: 1, why: 'Gold leaf shone in medieval religious paintings. Klimt, the son of a gold engraver, brought it into modern art.' },
+];

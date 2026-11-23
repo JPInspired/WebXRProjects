@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
-import { PAINTINGS } from './data/paintings.js';
+import { PAINTINGS, QUIZ } from './data/paintings.js';
 import { Gallery } from './model/Gallery.js';
 import { drawControls, drawInfo, drawCard, MODES } from './ui/panels.js';
 
@@ -22,6 +22,7 @@ class App extends LessonApp {
       mode: 'gallery',
       painting: 'starry',
       trueSize: false,
+      quiz: { i: 0, picked: null, score: 0 },
       game: { round: 0, id: null, options: [], answer: null, score: 0, played: 0, points: 0, t: 0, seen: [] },
       explain: {
         title: 'Welcome to the Art Gallery',
@@ -59,6 +60,9 @@ class App extends LessonApp {
     if (mode === 'guess') {
       this.explain({ title: 'Guess the Painting', text: 'A tiny part of a painting appears on the easel and slowly zooms out. Pick its name on the right as soon as you recognise it.' });
       this.newRound();
+    } else if (mode === 'quiz') {
+      this.gallery.zoom = 1;
+      this.explain({ title: 'Quiz', text: 'Eight questions about the paintings: what you saw, how they were made and when. Answer on the right.' });
     } else {
       this.gallery.zoom = 1;
       this.explain({ title: 'The Gallery', text: 'Pick a painting on the left. Look for the glowing rings on it, and read its story and its place in history on the right.' });
@@ -127,6 +131,32 @@ class App extends LessonApp {
       sound.correct();
     } else sound.wrong();
     this.gallery.zoom = 1;
+    this.refresh();
+  }
+
+  // ───────────── quiz ─────────────
+
+  answer(i) {
+    const q = this.state.quiz;
+    if (q.picked != null) return;
+    q.picked = i;
+    const right = i === QUIZ[q.i].answer;
+    if (right) q.score++;
+    sound[right ? 'correct' : 'wrong']();
+    this.refresh();
+  }
+
+  nextQuestion() {
+    const q = this.state.quiz;
+    q.i++;
+    q.picked = null;
+    if (q.i >= QUIZ.length) this.explain({ title: `Quiz Done: ${q.score} of ${QUIZ.length}`, text: 'Which painting would you most like to see in a real gallery, and why?' });
+    this.refresh();
+  }
+
+  restartQuiz() {
+    this.state.quiz = { i: 0, picked: null, score: 0 };
+    this.set({ explain: null });
     this.refresh();
   }
 
@@ -199,6 +229,7 @@ class App extends LessonApp {
       this.gallery.applyZoom();
     }
     this.gallery.update(dt);
+    this.gallery.desk.visible = !this.presenting; // in the headset, the student's real desk takes its place
     if (this.isAdmin) {
       const json = JSON.stringify(this.adminLessonState());
       if (json !== this.lastAdminJson) {

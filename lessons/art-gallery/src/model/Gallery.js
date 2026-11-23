@@ -47,6 +47,17 @@ export class Gallery {
     this.app = app;
     this.group = new THREE.Group();
     app.lab.add(this.group);
+    // a wooden desk under the easel (on a computer only: in the headset the student's own desk is there)
+    this.desk = new THREE.Group();
+    const deskTop = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.035, 0.75), wood);
+    deskTop.position.set(0, TOP - 0.0175, -0.15);
+    this.desk.add(deskTop);
+    for (const [x, z] of [[-0.6, -0.48], [0.6, -0.48], [-0.6, 0.18], [0.6, 0.18]]) {
+      const l = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.865, 0.045), wood);
+      l.position.set(x, TOP - 0.035 - 0.4325, z);
+      this.desk.add(l);
+    }
+    this.group.add(this.desk);
     // a small table easel: two front legs, a back leg and a ledge
     const leg = (x, z, rx, rz) => {
       const m = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.95, 0.03), wood);

@@ -1,9 +1,10 @@
-import { PAINTINGS, EVENTS, TIME } from '../data/paintings.js';
+import { PAINTINGS, EVENTS, TIME, QUIZ } from '../data/paintings.js';
 import { THEME, font, roundRect } from '../../../../shared/ui/CanvasPanel.js';
 
-export const MODES = [['gallery', 'Gallery'], ['guess', 'Guess the Painting']];
+export const MODES = [['gallery', 'Gallery'], ['guess', 'Guess the Painting'], ['quiz', 'Quiz']];
 const GOOD = '#7ee2a8';
 const BAD = '#ff8a8a';
+const WARN = '#ffc36b';
 const short = (t) => t.replace('A Sunday on ', '').replace(' off Kanagawa', '').replace('Girl with a ', '').replace('The Third of May 1808', 'The Third of May');
 
 // ───────────────────────── Left: the gallery and the game ─────────────────────────
@@ -28,6 +29,8 @@ export function drawControls(ui, app) {
     ui.heading('The paintings', { size: 22 });
     ui.buttons(PAINTINGS.map((x) => ({ id: `p-${x.id}`, label: short(x.title), active: x.id === p.id, onClick: () => app.choose(x.id) })), { cols: 2, height: 42, size: 17, gap: 6 });
     ui.text(`${app.presenting ? 'Pinch' : 'Click'} a glowing ring on the painting to look closer.`, { size: 19, color: THEME.dim });
+  } else if (s.mode === 'quiz') {
+    ui.text('Answer the questions on the right. The stories and the timeline in the Gallery hold every answer.', { size: 20, color: THEME.dim });
   } else {
     const g = app.state.game;
     ui.text(`Score: ${g.score} of ${g.played}`, { size: 28, weight: 700 });
@@ -40,6 +43,7 @@ export function drawControls(ui, app) {
 
 export function drawInfo(ui, app) {
   if (app.state.mode === 'guess' && !app.teacherShow) return drawGuess(ui, app);
+  if (app.state.mode === 'quiz' && !app.teacherShow) return drawQuiz(ui, app);
   const p = app.painting;
   ui.title(p.title, { size: 32 });
   ui.text(`${p.artist} · ${p.yearText}`, { size: 22, weight: 700, color: THEME.accent });
@@ -114,6 +118,28 @@ function drawGuess(ui, app) {
   ui.text(right ? `Correct: ${g.points} points` : 'Not this time', { size: 28, weight: 700, color: right ? GOOD : BAD });
   ui.text(`It is ${p.title}, by ${p.artist} (${p.yearText}).`, { size: 21 });
   ui.text(p.story, { size: 19, color: THEME.dim });
+}
+
+function drawQuiz(ui, app) {
+  const q = app.state.quiz;
+  if (q.i >= QUIZ.length) {
+    ui.title(`Score: ${q.score} of ${QUIZ.length}`, { size: 34 });
+    ui.buttons([{ id: 'quiz-again', label: 'Try the Quiz Again', onClick: () => app.restartQuiz() }], { height: 50, size: 21 });
+    return;
+  }
+  const cur = QUIZ[q.i];
+  ui.text(`QUESTION ${q.i + 1} OF ${QUIZ.length}  ·  score ${q.score}`, { size: 20, weight: 700, color: THEME.accent });
+  ui.title(cur.q, { size: 25 });
+  ui.gap(4);
+  cur.options.forEach((o, i) => {
+    const picked = q.picked === i;
+    const right = q.picked != null && i === cur.answer;
+    ui.buttons([{ id: `quiz-${i}`, label: `${'ABCD'[i]}   ${o}`, active: right, color: picked && !right ? '#5a2f3a' : null, disabled: q.picked != null && !picked && !right, onClick: () => app.answer(i) }], { height: 50, size: 17, gap: 8 });
+  });
+  if (q.picked != null) {
+    ui.box(`${q.picked === cur.answer ? '✓ Right. ' : '✗ Not quite. '}${cur.why}`, { size: 19, color: q.picked === cur.answer ? GOOD : WARN });
+    ui.buttons([{ id: 'quiz-next', label: q.i + 1 < QUIZ.length ? 'Next Question' : 'See My Score', onClick: () => app.nextQuestion() }], { height: 50, size: 21 });
+  }
 }
 
 // ───────────────────────── The card above the easel ─────────────────────────
