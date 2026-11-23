@@ -12,22 +12,27 @@ const loader = new THREE.TextureLoader();
 
 const wood = new THREE.MeshStandardMaterial({ color: 0x7a5232, roughness: 0.7 });
 const frameMat = new THREE.MeshStandardMaterial({ color: 0xb8913f, metalness: 0.55, roughness: 0.35 });
+const backMat = new THREE.MeshStandardMaterial({ color: 0x6b5338, roughness: 0.9 }); // the board behind the canvas
 
 /** A painting in its gilt frame: a group whose painting mesh is w by h metres. */
 function framed() {
   const g = new THREE.Group();
   const canvas = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85 }));
   g.add(canvas);
+  const back = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), backMat);
+  g.add(back);
   const bars = [0, 1, 2, 3].map(() => {
     const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), frameMat);
     g.add(m);
     return m;
   });
-  return { g, canvas, bars };
+  return { g, canvas, bars, back };
 }
 
 function sizeFrame(f, w, h) {
   f.canvas.scale.set(w, h, 1);
+  f.back.scale.set(w, h, 0.02);
+  f.back.position.z = -0.011; // just behind the canvas, so it is solid from behind
   const t = Math.max(0.025, Math.min(w, h) * 0.06); // frame width
   const d = t * 0.6;
   const [top, bottom, left, right] = f.bars;
@@ -49,9 +54,9 @@ export class Gallery {
       m.rotation.set(rx, 0, rz);
       this.group.add(m);
     };
-    leg(-0.2, -0.15, 0.08, 0.1);
-    leg(0.2, -0.15, 0.08, -0.1);
-    leg(0, -0.33, -0.32, 0);
+    leg(-0.2, -0.15, -0.08, -0.1); // front legs: wider at the floor, leaning back
+    leg(0.2, -0.15, -0.08, 0.1);
+    leg(0, -0.33, 0.32, 0); // back leg: foot behind, top meeting the front legs
     this.ledge = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.03, 0.08), wood);
     this.ledge.position.set(0, AT.y - 0.03, AT.z + 0.02);
     this.group.add(this.ledge);
