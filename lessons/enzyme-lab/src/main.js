@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { lookInside } from '../../../shared/ui/LookInside.js';
 import { addContactShadows } from '../../../shared/util/contactShadows.js';
 import { studioReflections } from '../../../shared/util/reflections.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
@@ -55,6 +56,8 @@ class App extends LessonApp {
 
     this.bench = new Bench(this);
     this.molecules = new Molecules(this); // inside the flask: the molecules, magnified (model/Molecules.js)
+    // a glowing "Look Inside" button beside the apparatus (shared/ui/LookInside.js)
+    this.lookBtn = lookInside(this, { at: new THREE.Vector3(-0.22, -0.08, -0.06), isOn: () => this.molecules.mode !== 'off', onClick: () => this.setMolecules(this.molecules.mode === 'off' ? 'bubble' : 'off') });
 
     addContactShadows(this, this.bench.group, -0.3); // soft shadows under things on the bench (bench top at y = -0.3)
     this.board = new Board();
@@ -426,6 +429,7 @@ class App extends LessonApp {
     this.lastNow = now;
     this.bench.update(real);
     this.molecules.update(real);
+    this.lookBtn.update(dt);
 
     // the stopwatch on the panel
     const sec = Math.floor(this.bench.t);

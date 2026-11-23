@@ -17,6 +17,10 @@ export function drawControls(ui, app) {
   } else {
     ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { cols: 2, height: 56, size: 23, gap: 8 });
   }
+  // see inside, magnified (also the glowing Look Inside button beside the apparatus)
+  ui.heading('Inside a solution', { size: 22 });
+  ui.buttons([{ id: 'ions', label: app.ions.on ? 'Ions: Shown (Tap to Hide)' : 'See the Ions', active: app.ions.on, onClick: () => app.toggleIons() }], { height: 52, size: 21 });
+  ui.text('See the ions in a solution, ten million times bigger.', { size: 19, color: THEME.dim });
   ui.gap(6);
 
   if (s.mode === 'scale') {
@@ -46,10 +50,6 @@ export function drawControls(ui, app) {
     ui.buttons([{ id: 'check', label: s.checked ? 'Hide the Answers' : 'Check My Results', active: s.checked, onClick: () => app.toggleCheck() }], { height: 58, size: 25 });
     ui.text('See how close each method got to the real pH, then decide: which would you trust, and when?', { size: 21, color: THEME.dim });
   }
-
-  // inside a solution: its ions as dots, magnified (model/Ions.js)
-  ui.heading('Inside a solution', { size: 22 });
-  ui.buttons([{ id: 'ions', label: app.ions.on ? 'Ions: Shown (Tap to Hide)' : 'See the Ions', active: app.ions.on, onClick: () => app.toggleIons() }], { height: 52, size: 21 });
 
   if (app.soloTeacher) drawTeacher(ui, app);
 }

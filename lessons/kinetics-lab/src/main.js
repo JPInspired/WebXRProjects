@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { lookInside } from '../../../shared/ui/LookInside.js';
 import { addContactShadows } from '../../../shared/util/contactShadows.js';
 import { studioReflections } from '../../../shared/util/reflections.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
@@ -53,6 +54,8 @@ class App extends LessonApp {
     this.panels = [this.controlPanel, this.infoPanel, this.explainPanel];
     this.bench = new Bench(this);
     this.collisions = new Collisions(this); // collision theory, magnified (model/Collisions.js)
+    // a glowing "Look Inside" button beside the apparatus (shared/ui/LookInside.js)
+    this.lookBtn = lookInside(this, { at: new THREE.Vector3(-0.36, -0.14, -0.04), isOn: () => this.collisions.on, onClick: () => this.toggleCollisions() });
     addContactShadows(this, this.bench.group, -0.3); // soft shadows under things on the bench (bench top at y = -0.3)
     this.bench.setFactor(this.state.factor);
     this.board = new Board();
@@ -422,6 +425,7 @@ class App extends LessonApp {
     this.lastNow = now;
     this.bench.update(real);
     this.collisions.update(real);
+    this.lookBtn.update(dt);
     // the live graph of the gas syringe on the info panel
     this.liveClock = (this.liveClock ?? 0) + dt;
     if (this.bench.gas && this.liveClock > 0.5) {

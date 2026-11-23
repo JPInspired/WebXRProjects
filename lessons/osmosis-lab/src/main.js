@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { lookInside } from '../../../shared/ui/LookInside.js';
 import { addContactShadows } from '../../../shared/util/contactShadows.js';
 import { studioReflections } from '../../../shared/util/reflections.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
@@ -56,6 +57,8 @@ class App extends LessonApp {
 
     this.bench = new Bench(this);
     this.membrane = new Membrane(this); // osmosis, magnified (model/Membrane.js)
+    // a glowing "Look Inside" button beside the apparatus (shared/ui/LookInside.js)
+    this.lookBtn = lookInside(this, { at: new THREE.Vector3(-0.36, -0.14, -0.04), isOn: () => this.membrane.on, onClick: () => this.toggleMembrane() });
 
     addContactShadows(this, this.bench.group, -0.3); // soft shadows under things on the bench (bench top at y = -0.3)
     this.board = new Board();
@@ -440,6 +443,7 @@ class App extends LessonApp {
     this.lastNow = now;
     this.bench.update(real);
     this.membrane.update(real);
+    this.lookBtn.update(dt);
 
     this.liveClock = (this.liveClock ?? 0) + dt;
     if (this.liveClock > 0.2) {

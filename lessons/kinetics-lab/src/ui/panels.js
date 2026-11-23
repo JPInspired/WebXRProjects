@@ -18,6 +18,10 @@ export function drawControls(ui, app) {
   } else {
     ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 52, size: 20, gap: 8 });
   }
+  // see inside, magnified (also the glowing Look Inside button beside the apparatus)
+  ui.heading('Inside the reaction', { size: 22 });
+  ui.buttons([{ id: 'collisions', label: app.collisions.on ? 'Collisions: Shown (Tap to Hide)' : 'See the Collisions', active: app.collisions.on, onClick: () => app.toggleCollisions() }], { height: 52, size: 21 });
+  ui.text('See the particles colliding, ten million times bigger.', { size: 19, color: THEME.dim });
 
   if (s.mode === 'predict') {
     if (app.soloTeacher) {
@@ -42,10 +46,6 @@ export function drawControls(ui, app) {
   } else {
     ui.text('Fill in the summary table on the right: how did each factor change the rate, and why?', { size: 21, color: THEME.dim });
   }
-
-  // collision theory, magnified (model/Collisions.js)
-  ui.heading('Inside the reaction', { size: 22 });
-  ui.buttons([{ id: 'collisions', label: app.collisions.on ? 'Collisions: Shown (Tap to Hide)' : 'See the Collisions', active: app.collisions.on, onClick: () => app.toggleCollisions() }], { height: 52, size: 21 });
 
   if (app.soloTeacher) drawTeacher(ui, app);
 }

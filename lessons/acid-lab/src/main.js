@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { lookInside } from '../../../shared/ui/LookInside.js';
 import { addContactShadows } from '../../../shared/util/contactShadows.js';
 import { studioReflections } from '../../../shared/util/reflections.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
@@ -59,6 +60,8 @@ class App extends LessonApp {
     addContactShadows(this, this.bench.group, -0.3); // soft shadows under things on the bench (bench top at y = -0.3)
     this.sorter = new Sorter(this);
     this.ions = new Ions(this); // inside a solution: its ions as dots (model/Ions.js)
+    // a glowing "Look Inside" button beside the apparatus (shared/ui/LookInside.js)
+    this.lookBtn = lookInside(this, { at: new THREE.Vector3(-0.5, -0.24, 0.14), isOn: () => this.ions.on, onClick: () => this.toggleIons() });
     this.board = new Board();
     this.boardStage = new THREE.Group();
     this.boardStage.add(this.board.group);
@@ -515,6 +518,7 @@ class App extends LessonApp {
   update(dt) {
     this.bench.update(dt);
     this.ions.update(dt);
+    this.lookBtn.update(dt);
 
     // the class board
     const d = this.demo;

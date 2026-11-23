@@ -19,6 +19,10 @@ export function drawControls(ui, app) {
   } else {
     ui.tabs(MODES.map(([id, label]) => ({ id: `mode-${id}`, label, active: s.mode === id, onClick: () => app.setMode(id) })), { height: 52, size: 21, gap: 8 });
   }
+  // see inside, magnified (also the glowing Look Inside button beside the apparatus)
+  ui.heading('Inside the potato', { size: 22 });
+  ui.buttons([{ id: 'membrane', label: app.membrane.on ? 'Membrane: Shown (Tap to Hide)' : 'See the Membrane', active: app.membrane.on, onClick: () => app.toggleMembrane() }], { height: 52, size: 21 });
+  ui.text('See water crossing the potato’s membrane, ten million times bigger.', { size: 19, color: THEME.dim });
 
   if (s.mode === 'predict') {
     if (app.soloTeacher) {
@@ -43,10 +47,6 @@ export function drawControls(ui, app) {
   } else {
     ui.text('The class graph is on the board. Where does it cross zero? What is special about that concentration?', { size: 21, color: THEME.dim });
   }
-
-  // osmosis, magnified (model/Membrane.js)
-  ui.heading('Inside the potato', { size: 22 });
-  ui.buttons([{ id: 'membrane', label: app.membrane.on ? 'Membrane: Shown (Tap to Hide)' : 'See the Membrane', active: app.membrane.on, onClick: () => app.toggleMembrane() }], { height: 52, size: 21 });
 
 }
 
