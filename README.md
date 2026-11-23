@@ -113,7 +113,7 @@ Every lesson can be opened **solo** or in a **shared session**:
 
    How the code finds the lesson (`shared/net/lobby.js`): the teacher's lesson (the one that started the session) also waits in a small lobby named after the code, on the same network-only connection as the lessons. A student's page joins that lobby, receives the lesson's name, and leaves. So the teacher's lesson must be open for students to join this way; if nobody answers within 20 seconds the page says so.
 
-**Players panel:** under the info panel (mirroring the session panel under the controls) a **Players** button opens a list of everyone in the session: who is the admin and, in the same room, whether each headset has found the room.
+**In the Class list:** under the info panel (mirroring the session panel under the controls) an **In the Class** button opens a list of everyone in the session: who is the admin and, in the same room, whether each headset has found the room.
 
 Each person has **their own models**. Everyone else's work appears beside you at their own desk as a live copy: you can see their PC being built part by part, their atom or molecule, or their cell with its knock-outs. Desks sit side by side in the same order for everyone, so if you see someone on your right, they see you on their left. There are **no avatars**: the lessons are mixed reality, so you see the real people.
 
@@ -121,7 +121,7 @@ Each person has **their own models**. Everyone else's work appears beside you at
 
 - **Before class, once per headset:** scan the classroom with Quest **Settings › Physical space › Space Setup** (about 2 minutes; mark the walls, door, windows and tables). If the browser asks to use spatial data, allow it.
 - In the lesson, each headset finds the room by itself from its scan (`shared/net/RoomAlign.js`): the room's walls give the directions, and the middle of the room, on the floor, is the shared origin. Which way round is settled by the door, windows, tables and other fittings, which every headset matches against the admin's headset. It checks again every second, so a headset that recentres or loses tracking puts itself right. In a simulation with realistic scan noise, headsets agreed to within about 5 cm and never got the room the wrong way round.
-- The session panel and the Players list show each headset's room status: **in place ✓**, **needs Space Setup**, or **unsure which way round** (a very symmetric room with nothing in it to tell the ends apart: add the door and some furniture in Space Setup).
+- The session panel and the In the Class list show each headset's room status: **in place ✓**, **needs Space Setup**, or **unsure which way round** (a very symmetric room with nothing in it to tell the ends apart: add the door and some furniture in Space Setup).
 
 **Admin:** whoever starts the session (usually the teacher) is the admin and gets an **Admin** menu to the left of the controls:
 
@@ -169,7 +169,7 @@ Only the person who started the session is ever admin. If their headset drops ou
 - A headset that cannot line up says why: **This Headset Has Not Scanned the Room** (with where to do Space Setup), or **Not Sure Which Way Round**.
 - **Floor marks** (Teacher menu → Students → Room Line-Up → Floor Marks): put two pieces of tape on the floor about two metres apart, A and B. Every headset is asked to point at A and pinch (or pull the trigger), then at B. The room frame is then A on the floor, facing B: the same for everyone, with no room scan needed. **Re-find room (all)** asks everyone to point at the marks again; **Automatic** goes back to the room scans.
 
-**Reconnecting by itself** (`autoReconnect` in `shared/net/config.js`; `false` turns it off). Every device sends a small "still here" every 2 seconds, from a timer that keeps running when the page is not drawing. Someone not heard from for 7 seconds is marked **not responding** in the Players list. A device that has lost touch rejoins the same session on its own, with the same id, so its desk and work come straight back for everyone:
+**Reconnecting by itself** (`autoReconnect` in `shared/net/config.js`; `false` turns it off). Every device sends a small "still here" every 2 seconds, from a timer that keeps running when the page is not drawing. Someone not heard from for 7 seconds is marked **not responding** in the In the Class list. A device that has lost touch rejoins the same session on its own, with the same id, so its desk and work come straight back for everyone:
 
 - **It slept or the page was in the background** (no timer ticks for 5 seconds, or the page was hidden for 4): it checks whether anyone still answers and, if nobody does within 4.5 seconds, rejoins.
 - **The Wi-Fi came back** (the browser reports it is online again): it rejoins at once.
@@ -629,9 +629,9 @@ The site is static (no server of our own, no accounts, no passwords, no data sto
 - **Nothing personal leaves the school network.** A name typed on the lessons page stays on the device and is shared only with the other headsets in the class.
 - **No secrets in the code.** The optional AI expert (Atomic Models) is off; if it is ever set up, its key belongs on that server, never here.
 
-- **Remove means removed** (Teacher menu › Players › Remove, pressed twice; \`shared/net/removed.js\`). The student's headset leaves the session, and for 12 hours it will not join that code again: the lesson opens on its own with a note, and the join box on the lessons page says the teacher removed it. Every other headset also stops listening to it (the teacher's list of removed headsets goes out with the class settings), so even a headset that refuses to leave disappears for the class.
+- **Remove means removed** (In the Class › Remove, pressed twice; `shared/net/removed.js`). The student's headset leaves the session, and for 12 hours it will not join that code again: the lesson opens on its own with a note, and the join box on the lessons page says the teacher removed it. Every other headset also stops listening to it (the teacher's list of removed headsets goes out with the class settings), so even a headset that refuses to leave disappears for the class.
 
-Limits worth knowing: with peer-to-peer sessions there is no central server, so no headset can switch another off. A student who clears the browser's stored data gets a new identity and could rejoin with the code; they would then show up again in the teacher's Players list. If that happens, ask for the headset back, or close the session and start a new one (a new code). On headsets without depth sensing (such as Quest 2), **Hands in front** hides itself after the first time it is tried.
+Limits worth knowing: with peer-to-peer sessions there is no central server, so no headset can switch another off. A student who clears the browser's stored data gets a new identity and could rejoin with the code; they would then show up again in the teacher's In the Class list. If that happens, ask for the headset back, or close the session and start a new one (a new code). On headsets without depth sensing (such as Quest 2), **Hands in front** hides itself after the first time it is tried.
 
 ## Smooth on a headset (frame rate)
 

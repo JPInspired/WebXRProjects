@@ -123,6 +123,13 @@ button:disabled { background: var(--bg-2); color: var(--ink-3); border-color: tr
   padding: 10px 12px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink);
 }
 .session-box input:not([type="checkbox"]):focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+.session-box .label { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 6px; }
+.session-box .join-label { margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line); }
+.session-box .note { font-size: 14px; color: var(--ink-2); }
+.session-box .bigcode { font: 800 44px ui-monospace, Menlo, monospace; letter-spacing: 0.22em; color: var(--ink); background: var(--bg-2); border-radius: 12px; padding: 6px 0 6px 0.22em; text-align: center; margin: 0 0 12px; }
+.session-box .steps { margin: 0 0 10px; padding-left: 20px; font-size: 14px; color: var(--ink-2); }
+.session-box .steps li { margin-bottom: 4px; }
+.session-box .who { font-size: 14px; font-weight: 600; color: var(--brand); }
 button.link { background: none; border: 0; padding: 0; color: var(--brand); text-decoration: underline; font: inherit; box-shadow: none; transform: none; }
 .same-room { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 14px; color: var(--ink-2); cursor: pointer; }
 .same-room input { width: 16px; height: 16px; margin: 0; accent-color: var(--brand); }

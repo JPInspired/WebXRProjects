@@ -313,7 +313,7 @@
     <section class="how" id="how" aria-label="How it works">
       <div class="wrap">
         <div class="step"><span class="n">1</span><h3>Open on Any Headset</h3><p>Visit this page in the Meta Quest browser or on any WebXR headset. There is nothing to install, and every lesson also works on a computer screen.</p></div>
-        <div class="step"><span class="n">2</span><h3>Bring the Class Together</h3><p>Choose a lesson and start a shared session. Students enter its four-character code at the top of this page and, in the same room, every lab aligns with the real classroom.</p></div>
+        <div class="step"><span class="n">2</span><h3>Bring the Class Together</h3><p>Choose a lesson and start a class session. Students enter its four-character code at the top of this page and, in the same room, every lab aligns with the real classroom.</p></div>
         <div class="step"><span class="n">3</span><h3>Lead From the Teacher Menu</h3><p>Set the activity and level for everyone, gather predictions on the class board and reveal the answers, while each student works at their own bench.</p></div>
       </div>
     </section>
@@ -583,14 +583,14 @@
     <h2 id="lesson-title">Lesson</h2>
     <p>How would you like to open it?</p>
     <a class="guide-link" id="guide-link" href="guide/">Read the Teacher Guide</a>
-    <label class="field">Your name (shown to others in shared sessions)<input id="name" maxlength="24" placeholder="e.g. Alex" autocomplete="nickname"></label>
+    <label class="field">Your name (shown to others in a class session)<input id="name" maxlength="24" placeholder="e.g. Alex" autocomplete="nickname"></label>
     <div class="choices">
       <button class="big primary" id="solo">Open Independently<small>Just you</small></button>
-      <button class="big" id="create">Start a Shared Session<small>Receive a code that a colleague or class can join. Everyone works on their own model and sees each other.</small></button>
-      <label class="same"><input type="checkbox" id="same-room"> We are in the same room<small>Everyone sees the same things in the same places in the room. Each headset lines itself up from its scan of the room (Space Setup), with nothing to press.</small></label>
+      <button class="big" id="create">Start a Class Session<small>Receive a code that a colleague or class can join. Everyone works on their own model and sees each other.</small></button>
+      <label class="same"><input type="checkbox" id="same-room"> Everyone is in this room<small>Everyone sees the same things in the same places in the room. Each headset lines itself up from its scan of the room (Space Setup), with nothing to press.</small></label>
       <form class="join" id="join">
-        <input id="code" maxlength="8" placeholder="CODE" autocomplete="off" aria-label="Session code">
-        <button class="big">Join With Code</button>
+        <input id="code" maxlength="8" placeholder="CODE" autocomplete="off" aria-label="Class code">
+        <button class="big">Join a Class</button>
       </form>
       <p class="error" id="error"></p>
     </div>
@@ -793,10 +793,14 @@
       e.preventDefault();
       const code = document.getElementById('code').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
       if (code.length < 4) {
-        document.getElementById('error').textContent = 'Enter the 4-letter code your colleague sees in their lesson.';
+        document.getElementById('error').textContent = 'Enter the four-character code your teacher shows.';
         return;
       }
-      go(code);
+      // one way to join: the box at the top of the page (it finds the class and its real teacher)
+      dialog.close();
+      document.getElementById('class-code').value = code.slice(0, 4);
+      document.getElementById('class-go').click();
+      scrollTo({ top: 0, behavior: 'smooth' });
     };
     document.getElementById('cancel').onclick = () => dialog.close();
 

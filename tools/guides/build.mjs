@@ -161,7 +161,7 @@ const CLASS = `
       <div>
         <h2>Running It With a Class</h2>
         <ol class="steps">
-          <li><b>Start the Session</b>Open the lesson, choose Start a Shared Session and tick We are in the same room. The lesson shows a four-character code.</li>
+          <li><b>Start the Class Session</b>Open the lesson, tick Everyone is in this room and choose Start a Class Session. The lesson shows a four-character class code and who has joined.</li>
           <li><b>Students Join With the Code</b>Students type the code and their name into Joining a Class? at the top of the lessons page. They are taken straight into this lesson, lined up with the room.</li>
           <li><b>Lead From the Teacher Menu</b>The Lesson tab sets the activity for everyone, the Students tab shows progress and the Class tab holds the class tools.</li>
         </ol>
@@ -221,7 +221,7 @@ ${g.tips.map((t) => `          <li>${esc(t)}</li>`).join('\n')}
       <ol class="steps">
 ${g.steps.map(([n, t]) => `        <li><b>${esc(n)}</b>${esc(t)}</li>`).join('\n')}
       </ol>
-      <p style="color:var(--ink-3);font-size:14px;margin:16px 0 0">In a shared session, the teacher chooses the activity and level for the whole class from the Teacher Menu.</p>
+      <p style="color:var(--ink-3);font-size:14px;margin:16px 0 0">In a class session, the teacher chooses the activity and level for the whole class from the Teacher Menu.</p>
     </section>
 ${/virtual reality/i.test(g.mode) ? '' : CLASS}
     <nav class="pager" aria-label="Other guides">

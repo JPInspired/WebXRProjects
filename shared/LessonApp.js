@@ -449,26 +449,28 @@ export class LessonApp {
     const pr = this.presence;
     if (pr.status === 'failed') {
       const secs = pr.retryAt ? Math.max(1, Math.ceil((pr.retryAt - performance.now()) / 1000)) : 0;
-      return { text: pr.retryAt ? ' · trying again…' : ' · could not connect', help: (pr.error ?? 'Couldn’t start the shared session.') + (pr.retryAt ? ` Trying again by itself (in about ${secs} s).` : ''), bad: true };
+      return { text: pr.retryAt ? ' · trying again…' : ' · could not connect', help: (pr.error ?? 'Could not connect to the class.') + (pr.retryAt ? ` Trying again by itself (in about ${secs} s).` : ''), bad: true };
     }
     if (pr.status === 'reconnecting') return { text: ' · reconnecting…', help: 'Lost touch with the class for a moment. Reconnecting by itself: your work stays as it is.' };
     if (pr.status !== 'connected') return { text: ' · connecting…', help: null };
     if (pr.peers.size) return { text: '', help: this.adminHere ? null : 'Your teacher isn’t connected right now. Everything carries on as they left it.' };
+    const waiting = this.isAdmin ? ' · waiting for students' : ' · waiting for your teacher';
     if (pr.everJoined) {
-      return { text: ' · waiting for others', help: this.isAdmin ? 'Everyone else has left. They can rejoin with the same code.' : 'Your teacher isn’t connected right now. Everything carries on as they left it.' };
+      return { text: waiting, help: this.isAdmin ? 'Everyone else has left. They can rejoin with the same code.' : 'Your teacher isn’t connected right now. Everything carries on as they left it.' };
     }
     const long = performance.now() - (pr.connectedAt ?? 0) > 20000;
-    const help = pr.problem ?? (!long ? null : this.isAdmin
-      ? 'Students join with this code, on the same Wi-Fi as you.'
-      : 'Nobody found yet. Check the code, and that you’re on the same Wi-Fi as your teacher.');
-    return { text: ' · waiting for others', help };
+    // the teacher is told straight away what students do; a student only after a while (it usually just works)
+    const help = pr.problem ?? (this.isAdmin
+      ? `Students type ${pr.code} at the top of the lessons page, on the same Wi-Fi as you.`
+      : !long ? null : 'Your teacher has not been found yet. Check the code, and that you are on the same Wi-Fi as your teacher.');
+    return { text: waiting, help };
   }
 
   drawSession(ui) {
     const pr = this.presence;
     ui.y = 18;
     const st = this.sessionStatus();
-    ui.text(`SESSION ${pr.code}${st.text}`, { size: 24, weight: 700, color: st.bad ? '#ff6b6b' : THEME.accent });
+    ui.text(`CLASS ${pr.code}${st.text}`, { size: 24, weight: 700, color: st.bad ? '#ff6b6b' : THEME.accent });
     if (st.help) {
       ui.text(st.help, { size: 21, color: st.bad ? '#ff9a9a' : '#ffd166' });
       return;
@@ -520,7 +522,7 @@ export class LessonApp {
     this.playersPanel = add(new CanvasPanel({ width: 0.5, height: 0.07, name: 'players' }), -0.36 - 0.02 - 0.035);
     this.playersPanel.setBuilder((ui) => {
       const n = this.presence.people.length;
-      ui.button({ id: 'players', label: `Players (${n}) ${this.playersOpen ? '▴' : '▾'}`, active: this.playersOpen, onClick: () => this.togglePlayerList() }, 10, 10, ui.W - 20, ui.H - 20, 34);
+      ui.button({ id: 'players', label: `In the Class (${n}) ${this.playersOpen ? '▴' : '▾'}`, active: this.playersOpen, onClick: () => this.togglePlayerList() }, 10, 10, ui.W - 20, ui.H - 20, 34);
     });
     this.playersListPanel = add(new CanvasPanel({ width: 0.5, height: 0.34, name: 'players-list' }), -0.465 - 0.01 - 0.17);
     this.playersListPanel.setBuilder((ui) => this.drawPlayerList(ui));
@@ -585,7 +587,7 @@ export class LessonApp {
     const pr = this.presence;
     ui.y = 22;
     const st = this.sessionStatus();
-    ui.text(`SESSION ${pr.code}${st.text}`, { size: 24, weight: 700, color: st.bad ? '#ff6b6b' : THEME.accent });
+    ui.text(`CLASS ${pr.code}${st.text}`, { size: 24, weight: 700, color: st.bad ? '#ff6b6b' : THEME.accent });
     if (st.help) ui.text(st.help, { size: 21, color: st.bad ? '#ff9a9a' : '#ffd166' });
     ui.y += 6;
     for (const person of pr.people) {
@@ -809,7 +811,7 @@ export class LessonApp {
     this.leavingRemoved = true;
     markRemoved(this.presence.code); // (and not straight back in with the code)
     this.presence.leave();
-    this.explain({ title: 'You have left the session', text: 'Your teacher removed you from the shared session. Going back to the lessons…' });
+    this.explain({ title: 'You Have Left the Class', text: 'Your teacher removed you from the class. Going back to the lessons…' });
     const go = () => { location.href = this.lessonsURL(); };
     setTimeout(() => {
       const session = this.renderer.xr.getSession();
@@ -907,8 +909,19 @@ export class LessonApp {
       url.searchParams.delete('host'); // the shared link makes others join, not host
       // …and tells them which teacher to trust (shared/net/teacherKey.js)
       this.presence?.keyReady.then(() => { if (this.presence.key) url.searchParams.set('teacher', this.presence.key.fp); });
-      box.innerHTML = `<p><strong>Shared session <span class="code">${session.code}</span></strong> · ${session.sameRoom ? 'same room' : 'different rooms'}<br>Students join at the top of the lessons page with this code, or with this link.${session.sameRoom ? ' Each headset lines itself up with the room automatically (it needs to have scanned the room once: Quest Settings › Physical space › Space Setup).' : ''}</p>
-        <div class="buttons"><button class="secondary" id="copy-link">Copy link</button><button class="secondary" id="leave-session">Leave session</button></div>`;
+      // what a first-time teacher needs: the code, big; what students do; who has joined (updated live)
+      const where = session.sameRoom ? 'Everyone is in this room: the lessons line up with the classroom.' : 'Students may be in different rooms.';
+      box.innerHTML = session.host
+        ? `<p class="label">Your Class Code</p>
+        <div class="bigcode" aria-label="Class code">${session.code}</div>
+        <ol class="steps"><li>Students open the WebXR Library, type <b>${session.code}</b> at the top and press <b>Join the Class</b>.</li><li>Everyone presses <b>Enter Mixed Reality</b>.</li></ol>
+        <p class="who" id="session-who" role="status">Waiting for students to join…</p>
+        <p class="note">${where}${session.sameRoom ? ' Each headset needs to have scanned the room once (Quest Settings › Physical Space › Space Setup).' : ''}</p>
+        <div class="buttons"><button class="secondary" id="copy-link">Copy the Link for Students</button><button class="secondary" id="leave-session">End the Class Session</button></div>`
+        : `<p class="label">You Are in Class <span class="code">${session.code}</span></p>
+        <p class="who" id="session-who" role="status">Connecting to the class…</p>
+        <p class="note">${where} Press <b>Enter Mixed Reality</b> to begin.</p>
+        <div class="buttons"><button class="secondary" id="copy-link">Copy the Link</button><button class="secondary" id="leave-session">Leave the Class</button></div>`;
       box.querySelector('#copy-link').onclick = (e) => {
         navigator.clipboard?.writeText(url.toString()).then(() => { e.target.textContent = 'Link copied'; }).catch(() => prompt('Copy this link:', url.toString()));
       };
@@ -918,9 +931,12 @@ export class LessonApp {
         location.href = url.toString();
       };
     } else {
-      box.innerHTML = `<p>Working with someone? <button class="link" id="start-session">Start a shared session</button> or join one:</p>
-        <form class="buttons" id="join-form"><input id="join-code" maxlength="8" placeholder="Code" autocomplete="off" aria-label="Session code"><button class="secondary">Join</button></form>
-        <label class="same-room"><input type="checkbox" id="same-room"> We’re in the same room</label>`;
+      box.innerHTML = `<p class="label">Teaching a Class?</p>
+        <p class="note">Start a class session, then share its code: every student joins your lesson and you lead it from the Teacher menu.</p>
+        <label class="same-room"><input type="checkbox" id="same-room"> Everyone is in this room (the lessons line up with the classroom)</label>
+        <div class="buttons"><button id="start-session">Start a Class Session</button></div>
+        <p class="label join-label">Joining a Class?</p>
+        <form class="buttons" id="join-form"><input id="join-code" maxlength="8" placeholder="CODE" autocomplete="off" aria-label="Class code"><button class="secondary">Join the Class</button></form>`;
       const sameRoom = () => {
         if (box.querySelector('#same-room').checked) url.searchParams.set('room', 'same');
       };
@@ -953,6 +969,25 @@ export class LessonApp {
       };
     }
     overlay.appendChild(box);
+  }
+
+  /** The start screen's line about who is in the class (the teacher sees students arrive). */
+  updateSessionWho() {
+    const el = document.getElementById('session-who');
+    const pr = this.presence;
+    if (!el || !pr) return;
+    const others = pr.people.filter((p) => !p.you).map((p) => p.plain);
+    let text;
+    if (pr.status === 'failed' || pr.error) text = pr.error ?? 'Could not connect. Check the Wi-Fi, then reload the page.';
+    else if (pr.status !== 'connected') text = 'Connecting to the class…';
+    else if (!others.length) text = pr.host ? 'Waiting for students to join… Nobody has joined yet.' : 'Connected. Waiting for your teacher…';
+    else if (pr.host) text = `${others.length} ${others.length === 1 ? 'student has' : 'students have'} joined: ${others.slice(0, 8).join(', ')}${others.length > 8 ? ' and more' : ''}.`;
+    else {
+      // (the teacher shows as 'your teacher', whatever name their headset has)
+      const names = pr.people.filter((p) => !p.you).map((p) => (p.host ? 'your teacher' : p.plain));
+      text = `In the class with ${names.slice(0, 8).join(', ')}${names.length > 8 ? ' and more' : ''}.`;
+    }
+    if (el.textContent !== text) el.textContent = text;
   }
 
   // ───────────── WebXR ─────────────
@@ -1031,6 +1066,14 @@ export class LessonApp {
     this.perf?.start();
     this.loading?.enterXR();
     this.onXRStart?.(session, isAR);
+    if (this.isAdmin) {
+      let seen = null;
+      try { seen = localStorage.getItem('webxr-classes:teacher-hint'); } catch {}
+      if (!seen) {
+        try { localStorage.setItem('webxr-classes:teacher-hint', '1'); } catch {}
+        this.explain({ title: 'Your Teacher Menu', text: 'The Teacher menu is on your left. Use it to choose the activity for everyone, pause the class, start a timer and see who has joined.' });
+      }
+    }
     // recentring (or lost tracking) moves the headset's coordinates: the room line-up must be redone
     this.renderer.xr.getReferenceSpace()?.addEventListener?.('reset', () => this.onTrackingReset());
 
@@ -1135,6 +1178,7 @@ export class LessonApp {
         this.sessionRedraw = 0;
         this.sessionPanel.redraw();
         this.refreshPlayerList();
+        this.updateSessionWho();
       }
       if (this.presence.sameRoom && !this.presenting && this.presence.roomStatus !== 'screen') {
         this.presence.clearRoom('screen');
