@@ -32,7 +32,7 @@ export function drawControls(ui, app) {
     // inside the flask: the molecules, magnified (two ways to look, to compare)
     ui.heading('Inside the Flask', { size: 24 });
     const mol = app.molecules.mode;
-    ui.tabs([['off', 'Off'], ['bubble', 'Bubble'], ['around', 'All Around']].map(([id, label]) => ({ id: `mol-${id}`, label, active: mol === id, onClick: () => app.setMolecules(id) })), { height: 52, size: 21, gap: 8 });
+    ui.buttons([{ id: 'mol', label: mol === 'off' ? 'See the Molecules' : 'Molecules: Shown (Tap to Hide)', active: mol !== 'off', onClick: () => app.setMolecules(mol === 'off' ? 'bubble' : 'off') }], { height: 52, size: 21 });
   } else if (s.mode === 'results') {
     ui.text('The class graph is on the board. Where is the peak? Why does the oxygen fall away on both sides?', { size: 21, color: THEME.dim });
   } else {

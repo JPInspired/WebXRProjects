@@ -224,7 +224,7 @@ class App extends LessonApp {
     this.explain({ title: 'Fresh Flask', text: `New hydrogen peroxide and a refilled cylinder. ${this.bench.whole.visible ? 'Here is a new piece of liver to cut.' : 'Use the other half of the liver.'} Choose the temperature, then start.` });
   }
 
-  /** Inside the flask: 'off', 'bubble' (a magnified bubble above the flask) or 'around' (all around you). */
+  /** Inside the flask: 'off' or 'bubble' (the molecules in a magnified bubble above the flask). */
   setMolecules(mode) {
     this.molecules.setMode(mode);
     sound.click();

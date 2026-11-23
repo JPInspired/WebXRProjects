@@ -13,17 +13,15 @@ import { TOP } from './Bench.js';
 //  • Too hot (above about 45 °C), the enzyme loses its shape: the active site falls apart, the peroxide no
 //    longer fits, and nothing happens (denatured).
 //  • The peroxide runs out as the reaction goes on, in step with the oxygen in the measuring cylinder.
-// Two ways to look (to compare; one will be kept): 'bubble' (a magnified glass bubble above the flask) and
-// 'around' (the molecules fill the space around you, the enzyme in front of you).
+// Shown in a magnified glass bubble above the flask. (An 'all around you' view was tried on 23 November 2026;
+// the bubble was kept as cleaner and tidier.)
 
 const N = 26; // peroxide molecules when the flask is fresh
 const ENZYMES = 1;
 const R_ATOM = { O: 0.034, H: 0.022 };
 const COL = { O: 0xe5484d, H: 0xf4f6fb };
-const UP = new THREE.Vector3(0, 1, 0);
 const BUBBLE_AT = new THREE.Vector3(-0.07, TOP + 0.38, -0.04); // above the flask (lab space)
 const BUBBLE_R = 0.17; // m
-const AROUND_R = 1.5; // m
 
 const atomGeo = new THREE.SphereGeometry(1, 16, 12);
 const bondGeo = new THREE.CylinderGeometry(1, 1, 1, 8).translate(0, 0.5, 0).rotateX(Math.PI / 2); // along +z
@@ -119,7 +117,7 @@ class Enzyme {
 export class Molecules {
   constructor(app) {
     this.app = app;
-    this.mode = 'off'; // 'off' | 'bubble' | 'around'
+    this.mode = 'off'; // 'off' | 'bubble'
     this.root = new THREE.Group(); // unit space: everything happens inside a sphere of radius 1
     this.root.visible = false;
 
@@ -167,7 +165,7 @@ export class Molecules {
     this.made = 0;
   }
 
-  /** 'off' | 'bubble' | 'around' */
+  /** 'off' | 'bubble' */
   setMode(mode) {
     if (mode === this.mode) return;
     this.mode = mode;
@@ -186,21 +184,6 @@ export class Molecules {
       this.root.quaternion.identity();
       this.caption.mesh.position.set(BUBBLE_AT.x + 0.33, BUBBLE_AT.y + 0.08, BUBBLE_AT.z);
       this.caption.mesh.rotation.set(0, -0.35, 0);
-    } else if (mode === 'around') {
-      // in the room, around you: the enzyme a little in front of you at eye height
-      const cam = app.viewCamera();
-      const eye = cam.getWorldPosition(new THREE.Vector3());
-      const dir = cam.getWorldDirection(new THREE.Vector3()).setY(0);
-      if (dir.lengthSq() < 1e-6) dir.set(0, 0, -1);
-      dir.normalize();
-      const centre = eye.clone().addScaledVector(dir, 0.9).add(new THREE.Vector3(0, -0.1, 0));
-      app.scene.add(this.root, this.caption.mesh);
-      this.root.position.copy(centre);
-      this.root.scale.setScalar(AROUND_R * 0.55); // the enzyme ends up about half a metre across
-      this.root.quaternion.setFromAxisAngle(UP, Math.atan2(-dir.x, -dir.z));
-      this.eyeLocal = this.root.worldToLocal(eye.clone()); // keep the molecules out of your face
-      this.caption.mesh.position.copy(eye).addScaledVector(dir, 0.75).add(new THREE.Vector3(0, 0.32, 0));
-      this.caption.mesh.lookAt(eye);
     }
     this.caption.redraw();
   }
@@ -216,7 +199,6 @@ export class Molecules {
     const d = THREE.MathUtils.smoothstep(T, 47, 63); // how far the enzyme has lost its shape
     this.enzyme.group.visible = enzymeIn;
     this.enzyme.denature(d);
-    if (this.mode === 'around' && this.app.presenting) this.eyeLocal = this.root.worldToLocal(this.app.viewCamera().getWorldPosition(new THREE.Vector3()));
 
     // how many peroxide molecules are left: in step with the reaction in the flask
     const want = Math.round(N * (1 - used));
@@ -308,10 +290,6 @@ export class Molecules {
   keepInside(m) {
     const p = m.g.position;
     if (p.length() > 0.93) { p.setLength(0.93); m.v.reflect(p.clone().normalize()).multiplyScalar(0.8); }
-    if (this.mode === 'around' && this.eyeLocal) {
-      const off = p.clone().sub(this.eyeLocal);
-      if (off.length() < 0.3) p.copy(this.eyeLocal).addScaledVector(off.normalize(), 0.3);
-    }
   }
 
   drawCaption(ui) {
