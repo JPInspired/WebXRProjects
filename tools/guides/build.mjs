@@ -130,7 +130,7 @@ function page({ title, description, up, current, body }) {
         <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="10" width="28" height="15" rx="6" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="10.5" cy="17.5" r="3.2" fill="currentColor"/><circle cx="21.5" cy="17.5" r="3.2" fill="currentColor"/><path d="M13.5 25c1-2.3 4-2.3 5 0" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M16 2 28 6.5 16 11 4 6.5z" fill="var(--brand)"/></svg>
         WebXR Library
       </a>
-      <nav aria-label="Site"><a href="${up}#lessons">Lessons</a><a href="${up}guide/"${current ? ' aria-current="page"' : ''}>Teacher Guides</a><a href="${up}checklist/">Testing Checklist</a></nav>
+      <nav aria-label="Site"><a href="${up}#lessons">Lessons</a><a href="${up}guide/"${current ? ' aria-current="page"' : ''}>Teacher Guides</a></nav>
       <button class="theme" id="theme" type="button" aria-label="Switch between light and dark">
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
         <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
@@ -174,7 +174,6 @@ const CLASS = `
           <li><b>Timer</b> counts down one, two, five or ten minutes near the top of everyone’s view, with a chime at the end.</li>
           <li>A headset that sleeps or loses the Wi-Fi rejoins by itself and keeps its work. Students who join late receive the current settings, pause and timer at once.</li>
           <li>Students can use their hands instead of controllers: pinch or close a hand to pick things up and touch a button to press it. Turning a palm towards the face shows two buttons for hiding the menus and moving the lab.</li>
-          <li>Before the first shared lesson in a new room, run the <a href="../../network/">Network Check</a> on the school Wi-Fi.</li>
         </ul>
       </div>
     </section>
@@ -194,7 +193,6 @@ GUIDES.forEach((g, i) => {
         ${meta(g)}
         <div class="btns">
           <a class="btn primary" href="../../lessons/${g.id}/">Open Lesson</a>
-          <a class="btn" href="../../checklist/#each">Test It on a Headset</a>
         </div>
       </div>
       <img src="../../assets/lessons/${g.id}.webp" alt="The ${esc(g.title)} lesson" width="960" height="600">
@@ -256,8 +254,7 @@ const index = `    <div style="padding:52px 0 30px">
       <div>
         <h2>Before a Shared Lesson</h2>
         <ul class="tips">
-          <li>Run the <a href="../network/">Network Check</a> once on the school Wi-Fi, ideally with two headsets, and send the report to the IT team if anything needs attention.</li>
-          <li>Try the lesson on a headset with the <a href="../checklist/">Testing Checklist</a>.</li>
+          <li>Open the lesson once on a headset before class, so you know where everything is.</li>
           <li>Charge the headsets and switch them on before the lesson.</li>
         </ul>
       </div>

@@ -645,7 +645,7 @@ Limits worth knowing: with peer-to-peer sessions there is no central server, so 
 
 **Light for a whole class:** in a shared session, **Teacher menu → Students → Effects → Light** gives every device the lighter look from the start (no reflections or gloss), for older or slower headsets; **Full (automatic)** goes back. Anyone can also open a lesson with `?light` in its address.
 
-**Testing checklist:** `checklist/` (linked from the top of the lessons page) is a page for trying every lesson on a headset before a class: an *Open with frame counter* link, things to try and tick boxes for each lesson, kept on that device, and a **Copy results** button that turns them into a short report to email. Add a lesson to its `LESSONS` list when you add one to the site.
+**Testing checklist and Network Check:** removed from the website on 23 November 2026 (they were for whoever runs the project, not for teachers). Both pages are in the history up to restore point `v2.3`: `git checkout v2.3 -- checklist network` brings them back.
 
 ## Running it
 
@@ -694,7 +694,6 @@ shared/                            used by every lesson
   fx/Classroom.js                  the subject rooms (one switch at the top turns them off)
   ui/HoverGlow.js                  the glow on whatever you are about to grab
 guide/                             a teacher guide for every lesson (made by tools/guides/build.mjs from tools/guides/lessons.mjs)
-checklist/                         the testing checklist
 lessons/acid-lab/
   src/data/acid.js                 substances and pH values, paper colours, the unknown sets, method comparison, answers
   src/model/                       Bench (beakers, papers, pH meter), Sorter (pH scale), Board (class board)
