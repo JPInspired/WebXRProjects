@@ -38,6 +38,7 @@ class App extends LessonApp {
       },
     };
     this.initLesson();
+    this.classCopy = false; // (one reef round each student, no bench to copy: shared/net/LabMirror.js)
     this.start();
   }
 

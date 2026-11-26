@@ -4,16 +4,17 @@ import { NET_CONFIG } from './config.js';
 import { openLobby } from './lobby.js';
 import { teacherKey, prove, check, pinned, pin, keysSupported, FP_RE } from './teacherKey.js';
 
-// Shared sessions: everyone keeps their own models, and sees everyone else working beside them.
+// Shared sessions: everyone keeps their own lab, placed in front of them; the teacher's bench is copied behind
+// every student's own (LabMirror.js).
 //
-//  • Each person's lab is a "desk". Other people's desks appear side by side next to yours
-//    (if you see someone on your right, they see you on their left).
-//  • On each desk you see a live copy of that person's work, built by the lesson from the state they
-//    share (lesson.netState / lesson.createReplica). There are no avatars: in mixed reality you see the
-//    real people.
+//  • Each person's lab is a "desk". What each desk shares (lesson.netState / lesson.createReplica) still reaches
+//    everyone, for class results and progress, but classmates' desks are not drawn (since 26 November 2026):
+//    each student sees only their own bench and the teacher's copy. There are no avatars: in mixed reality you
+//    see the real people.
 //  • Everything is sent relative to the sender's own lab, so it lines up whatever room they are in.
-//  • Same-room sessions (?room=same): every headset lines itself up with the room from its room scan
-//    (RoomAlign.js), so each desk appears where that person really is.
+//  • Same-room sessions (?room=same, only when NET_CONFIG.sameRoom is true; off since 26 November 2026): every
+//    headset lines itself up with the room from its room scan (RoomAlign.js), so each desk appears where that
+//    person really is.
 //  • Reconnecting (NET_CONFIG.autoReconnect): if this headset loses touch (it slept, the Wi-Fi dropped,
 //    nobody has been heard from for a while) it leaves and joins again by itself, with the same id, so
 //    its desk and work come straight back for everyone. A start that fails is retried (5, 10, 20, 30 s…).
@@ -29,7 +30,7 @@ export function sessionFromURL() {
   const p = new URLSearchParams(location.search);
   const code = p.get('session');
   const teacher = p.get('teacher');
-  return code ? { code: code.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8), net: p.get('net') || 'p2p', sameRoom: p.get('room') === 'same', host: p.get('host') === '1', teacher: FP_RE.test(teacher ?? '') ? teacher : null } : null;
+  return code ? { code: code.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8), net: p.get('net') || 'p2p', sameRoom: NET_CONFIG.sameRoom === true && p.get('room') === 'same', host: p.get('host') === '1', teacher: FP_RE.test(teacher ?? '') ? teacher : null } : null;
 }
 
 export function myName() {
@@ -244,6 +245,16 @@ export class Presence {
     this.roomCh.onMessage((d, id) => {
       if (id === this.hostId && this.peers.get(id)?.host && !this.isHost) this.roomRef = d;
     });
+    // The teacher's bench, copied behind every student's (LabMirror.js): whoever is on the board sends ('mirror',
+    // 'mirimg'); anyone may ask them for everything ('mirreq'). The copy itself checks who it listens to.
+    this.mirrorCh = t.channel('mirror');
+    this.mirrorImgCh = t.channel('mirimg');
+    this.mirrorReqCh = t.channel('mirreq');
+    this.mirrorCh.onMessage((d, id) => this.app.mirror?.apply(d, id));
+    this.mirrorImgCh.onMessage((d, id) => this.app.mirror?.applyImage(d, id));
+    this.mirrorReqCh.onMessage((d, id) => {
+      if (this.app.mirror?.sourceId === this.selfId && this.peers.has(id)) this.app.mirror.sendFull(id);
+    });
     this.beatCh = t.channel('beat');
     this.beatCh.onMessage((d, id) => this.heard(id));
     t.onPeerJoin((id) => {
@@ -257,6 +268,7 @@ export class Presence {
         this.app.onPeerJoinedAdmin?.(id);
       }, 300);
       this.sendState(true, id);
+      this.app.mirror?.peerJoined(id);
       this.app.refresh();
     });
     t.onPeerLeave((id) => {
@@ -341,7 +353,9 @@ export class Presence {
   ensure(id) {
     if (this.peers.has(id)) return this.peers.get(id);
     const color = hashColor(id);
-    const root = new THREE.Group(); // their desk, placed beside yours
+    const root = new THREE.Group(); // their desk: kept (their lesson's replica still works), but not drawn
+    root.visible = false;
+    root.userData.noMirror = true; // (not part of the bench copied for others: LabMirror.js)
     this.app.lab.add(root);
     const p = { id, name: 'Guest', color, root, pose: null, seen: performance.now() };
     this.everJoined = true; // (so "waiting" can tell "nobody yet" from "everyone dropped out")
@@ -547,9 +561,9 @@ export class Presence {
     }
   }
 
-  /** Where a colleague's head is, in world space (or null). */
+  /** Where a colleague's head is, in world space (or null): only known when both are lined up with the room. */
   headOf(p) {
-    if (!p.pose?.h) return null;
+    if (!p.pose?.h || !this.aligned(p)) return null;
     return p.root.localToWorld(new THREE.Vector3(p.pose.h[0], p.pose.h[1], p.pose.h[2]));
   }
 

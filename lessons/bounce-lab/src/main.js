@@ -46,6 +46,7 @@ class App extends LessonApp {
       },
     };
     this.initLesson();
+    this.classCopy = false; // (the drops happen on the real floor round each student, not on a bench: shared/net/LabMirror.js)
     this.start();
     this.recenter();
   }

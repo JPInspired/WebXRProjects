@@ -223,11 +223,14 @@ class ClassTools {
     }
   }
 
-  /** Where the teacher's head is in this student's world (or null). */
+  /**
+   * Where to look: the teacher's head when the room is lined up (same room, off by default), otherwise the copy
+   * of the teacher's bench behind the student's own (shared/net/LabMirror.js), or nothing (just the message).
+   */
   teacherHead() {
     const pr = this.app.presence;
     const t = pr && [...pr.peers.values()].find((p) => p.host);
-    return t ? pr.headOf(t) : null;
+    return (t ? pr.headOf(t) : null) ?? this.app.mirror?.where() ?? null;
   }
 
   paint(l) {

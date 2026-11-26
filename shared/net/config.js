@@ -15,6 +15,13 @@
 //  • device-to-device traffic on the Wi-Fi ("client isolation" off for the headsets' network).
 
 export const NET_CONFIG = {
+  // Same-room sessions: every headset lines itself up with the real classroom from its room scan (RoomAlign.js,
+  // RoomLineUp.js, the floor marks, a lesson address with &room=same). Switched off on 26 November 2026: it
+  // needed Space Setup on every headset and was not reliable enough for a class. Instead each headset places the
+  // lesson in front of its own wearer and shows the teacher's bench behind the student's own (LabMirror.js).
+  // true = allow &room=same again (the code is all still there).
+  sameRoom: false,
+
   // If a headset loses touch with the class (it slept, the Wi-Fi dropped, the network changed), it
   // reconnects by itself and keeps its work. false = the old behaviour: rejoin by reloading the page.
   autoReconnect: true,

@@ -71,6 +71,7 @@ class App extends LessonApp {
     this.walker.teleportDesk(START.pos, START.look, false);
     this.state.explain = { title: ERA.before[this.state.lang].title, text: ERA.before[this.state.lang].text };
     this.ready = true;
+    this.classCopy = false; // (a place to stand in, no bench: the teacher shares a moment with Show Everyone: shared/net/LabMirror.js)
     this.start();
   }
 

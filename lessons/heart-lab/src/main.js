@@ -561,7 +561,8 @@ class App extends LessonApp {
 
     // the class heart
     const d = this.demo;
-    this.bigStage.visible = d.big !== false;
+    // (in a class session the live copy of the teacher's bench, behind yours, shows the teacher's heart instead: shared/net/LabMirror.js)
+    this.bigStage.visible = d.big !== false && !this.mirror?.stage.visible;
     if (this.bigStage.visible) {
       this.placeBig();
       const bcond = this.applyTo(this.big, this.bigBlood, d, d.hl);

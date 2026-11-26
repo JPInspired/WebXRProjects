@@ -96,7 +96,7 @@ export const GUIDES = [
     intro: 'A beating human heart on every desk, with a larger one for the whole class that the teacher controls.',
     aims: ['Name the chambers, valves and blood vessels of the heart', 'Describe the path of blood through the heart', 'Relate the cardiac cycle to an ECG', 'Explain how exercise and disease affect the heart'],
     steps: [['Explore', 'Students turn and open their own heart and read about each part.'], ['Blood Flow', 'Blood is followed through the chambers and valves.'], ['Cardiac Cycle', 'Each stage of a heartbeat is shown alongside a live ECG.'], ['Exercise and Conditions', 'Students see how exercise and heart disease change the heart’s work.'], ['Label It', 'Every part is labelled as a closing check.']],
-    tips: ['Use the class heart to demonstrate before students explore their own.', 'Freeze the cardiac cycle at each stage and ask which valves are open.', 'In a same-room session, place the class heart in the middle of the room.'],
+    tips: ['Use the class heart to demonstrate before students explore their own.', 'Freeze the cardiac cycle at each stage and ask which valves are open.', 'In a class session, students see your heart live behind their own: hold it up to show each part.'],
   },
   {
     id: 'enzyme-lab', title: 'Enzyme Lab', subject: 'biology', mins: 45, ages: 'Ages 14–16 · KS4', mode: 'Mixed reality · class board',

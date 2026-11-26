@@ -18,6 +18,7 @@ import { makeClassTools } from './ui/ClassTools.js';
 import { makeRoomLineUp } from './net/RoomLineUp.js';
 import { makeRealRoom } from './fx/RealRoom.js';
 import { makeGrounding } from './fx/Grounding.js';
+import { makeLabMirror, CLASS_COPY } from './net/LabMirror.js';
 
 // Everything every WebXR lesson needs, so each lesson only adds its own content:
 //  • three.js scene, desktop camera + orbit controls, lights, floor grid
@@ -34,10 +35,13 @@ import { makeGrounding } from './fx/Grounding.js';
 //   onLite(level)        the headset is struggling: 1–2 = switch off more of the lesson's heavy effects, 0 = back to full
 //                        (shared/util/PerfGuard.js already turns off reflections, clear coat and sheen)
 //
-// Shared sessions (?session=CODE in the URL): everyone keeps their own models and sees the others' work
-// beside them (no avatars: in mixed reality you see the real people). A lesson takes part by providing:
+// Shared sessions (?session=CODE in the URL): everyone keeps their own lab, in front of them, and sees a live copy
+// of the teacher's bench behind their own (shared/net/LabMirror.js; no room alignment, no avatars: in mixed
+// reality you see the real people). A lesson takes part by providing:
 //   netState()           a small JSON snapshot of what it shows (sent to the others when it changes)
-//   createReplica()      → { group, apply(snapshot), update(dt)? } to show someone else's work
+//   createReplica()      → { group, apply(snapshot), update(dt)? } that keeps someone else's state (for class
+//                        results and progress; classmates' benches are not drawn)
+//   classCopy = false    (set before start()) for a lesson with no bench to copy (Reef Dive, Hiroshima)
 
 // Where the side panels sit (lab coordinates): far enough out to the sides, and high enough, to stay clear of
 // the bench and anything on it (benches are up to about 0.92 m wide).
@@ -94,6 +98,8 @@ export class LessonApp {
       this.panels.push(this.sessionPanel);
       this.initPlayerList();
       this.initAdmin();
+      this.showWork = null; // { id, name }: the student whose work the teacher is showing on every board
+      this.mirror = makeLabMirror(this); // the teacher's bench behind yours (shared/net/LabMirror.js)
     }
     // house style: the explanation card fits round its words (shared/ui/CanvasPanel.js STYLE)
     if (STYLE.enabled) this.explainPanel?.setFit(0.1);
@@ -476,6 +482,7 @@ export class LessonApp {
       ui.text(st.help, { size: 21, color: st.bad ? '#ff9a9a' : '#ffd166' });
       return;
     }
+    if (this.showWork && this.showWork.id === pr.selfId) ui.text('Your work is on the board.', { size: 22, color: '#7ee2a8' });
     if (pr.sameRoom) {
       const r = pr.roomStatus ?? 'waiting';
       const text = {
@@ -738,9 +745,16 @@ export class LessonApp {
     ], { height: 52, size: 21, gap: 8 });
     ui.text('Light: no reflections or gloss, for older or slower headsets. Full still lightens any headset that struggles.', { size: 19, color: THEME.dim });
     if (!students.length) ui.text('Nobody else has joined yet.', { size: 21, color: THEME.dim });
+    else if (this.mirror) {
+      ui.heading('Show One Student’s Work', { size: 22 });
+      ui.text(this.showWork ? `${this.showWork.name}’s bench is on every board, in place of yours.` : 'Show puts that student’s bench on every board, in place of yours, until you stop.', { size: 19, color: THEME.dim });
+      if (this.showWork) ui.buttons([{ id: 'show-stop', label: 'Stop Showing (Back to My Bench)', active: true, onClick: () => this.setShowWork(null) }], { height: 52, size: 21 });
+    }
     for (const person of students) {
       const armed = this.kickArmed?.id === person.id && performance.now() - this.kickArmed.t < 3000;
-      this.drawPerson(ui, person, ui.right - 160);
+      const shown = this.showWork?.id === person.id;
+      this.drawPerson(ui, person, ui.right - (this.mirror ? 300 : 160));
+      if (this.mirror) ui.button({ id: `show-${person.id}`, label: shown ? 'Showing' : 'Show', active: shown, onClick: () => this.setShowWork(shown ? null : person) }, ui.right - 290, ui.y + 6, 130, 50, 21);
       ui.button({ id: `kick-${person.id}`, label: armed ? 'Sure?' : 'Remove', active: armed, color: '#5a2f3a', onClick: () => this.kick(person.id) }, ui.right - 150, ui.y + 6, 150, 50, 21);
       ui.y += 66;
     }
@@ -766,7 +780,7 @@ export class LessonApp {
 
   /** Everything the admin has set, sent to everyone now and then (and to anyone who joins). */
   broadcastAdmin(to) {
-    if (this.isAdmin) this.adminSend({ k: 'state', lock: this.admin.lock, effects: this.admin.effects, lesson: this.adminLessonState?.() ?? null, tools: this.classTools?.snapshot() ?? null, lineup: this.roomLineUp?.adminMode, removed: this.admin.removed ?? [] }, to);
+    if (this.isAdmin) this.adminSend({ k: 'state', lock: this.admin.lock, effects: this.admin.effects, lesson: this.adminLessonState?.() ?? null, tools: this.classTools?.snapshot() ?? null, lineup: this.roomLineUp?.adminMode, removed: this.admin.removed ?? [], show: this.showWork }, to);
   }
 
   onPeerJoinedAdmin(id) {
@@ -788,6 +802,24 @@ export class LessonApp {
     this.refresh();
   }
 
+  /** Teacher: put one student's bench on every board (null: back to the teacher's own). */
+  setShowWork(person) {
+    this.showWork = person ? { id: person.id, name: String(person.plain ?? person.name ?? 'A student').slice(0, 24) } : null;
+    this.broadcastAdmin();
+    this.refresh();
+  }
+
+  /** Student: the teacher's choice of whose work is on the board (checked: an id and a name, or nothing). */
+  applyShowWork(show) {
+    const ok = show && typeof show === 'object' && typeof show.id === 'string' && show.id.length <= 40;
+    const next = ok ? { id: show.id, name: typeof show.name === 'string' ? show.name.slice(0, 24) : 'A student' } : null;
+    const was = this.showWork?.id ?? null;
+    this.showWork = next;
+    const mine = next?.id === this.presence?.selfId;
+    if (mine && was !== next.id) this.explain({ title: 'Your Work Is on the Board', text: 'Your teacher is showing your bench to the class. Carry on as normal: everyone sees what you do.' });
+    if (was !== (next?.id ?? null)) this.refresh();
+  }
+
   /** Remove someone from the session (press twice). */
   kick(id) {
     const armed = this.kickArmed?.id === id && performance.now() - this.kickArmed.t < 3000;
@@ -798,6 +830,7 @@ export class LessonApp {
       return;
     }
     this.kickArmed = null;
+    if (this.showWork?.id === id) this.showWork = null;
     this.adminSend({ k: 'kick' }, id);
     // everyone else stops listening to them too (the list goes out with the class settings)
     this.admin.removed = [...(this.admin.removed ?? []), id].slice(-60);
@@ -837,6 +870,7 @@ export class LessonApp {
       this.presence?.block(d.removed);
       if (Array.isArray(d.removed) && d.removed.includes(this.presence?.selfId)) this.removedByTeacher(); // (in case the one-off message was missed)
       this.onAdminLesson?.(d.lesson);
+      this.applyShowWork(d.show);
     } else if (d.k === 'kick') {
       this.removedByTeacher();
     } else if (d.k === 'refind' && this.roomLineUp) {
@@ -862,6 +896,15 @@ export class LessonApp {
       this.broadcastAdmin(); // in case a message was lost, or the admin changed
       if (this.roomRefOut) this.presence.roomCh?.send(this.roomRefOut);
     }
+  }
+
+  /** While the teacher's bench is copied behind yours, the class board moves up to sit above the copy. */
+  liftBoard() {
+    const b = this.boardStage;
+    if (!b || !this.mirror.stage.visible) return;
+    if (this.boardLifted && b.position.equals(this.boardLifted)) return; // (the lesson has not moved it since)
+    b.position.y += CLASS_COPY.boardLift;
+    (this.boardLifted ??= new THREE.Vector3()).copy(b.position);
   }
 
   // ───────────── B (right controller): hide / show all menus ─────────────
@@ -911,17 +954,17 @@ export class LessonApp {
       // …and tells them which teacher to trust (shared/net/teacherKey.js)
       this.presence?.keyReady.then(() => { if (this.presence.key) url.searchParams.set('teacher', this.presence.key.fp); });
       // what a first-time teacher needs: the code, big; what students do; who has joined (updated live)
-      const where = session.sameRoom ? 'Everyone is in this room: the lessons line up with the classroom.' : 'Students may be in different rooms.';
+      const where = session.sameRoom ? 'Everyone is in this room: the lessons line up with the classroom.' : this.mirror ? 'Each student’s lesson appears in front of them, with a live copy of your bench behind their own.' : 'Each student’s lesson appears around them, and your settings reach everyone.';
       box.innerHTML = session.host
         ? `<p class="label">Your Class Code</p>
         <div class="bigcode" aria-label="Class code">${session.code}</div>
-        <ol class="steps"><li>Students open the WebXR Library, type <b>${session.code}</b> at the top and press <b>Join the Class</b>.</li><li>Everyone presses <b>Enter Mixed Reality</b>.</li></ol>
+        <ol class="steps"><li>Students open the WebXR Library, type <b>${session.code}</b> at the top and press <b>Join the Class</b>.</li><li>Everyone presses <b>Enter</b>. Nothing needs lining up.</li></ol>
         <p class="who" id="session-who" role="status">Waiting for students to join…</p>
         <p class="note">${where}${session.sameRoom ? ' Each headset needs to have scanned the room once (Quest Settings › Physical Space › Space Setup).' : ''}</p>
         <div class="buttons"><button class="secondary" id="copy-link">Copy the Link for Students</button><button class="secondary" id="leave-session">End the Class Session</button></div>`
         : `<p class="label">You Are in Class <span class="code">${session.code}</span></p>
         <p class="who" id="session-who" role="status">Connecting to the class…</p>
-        <p class="note">${where} Press <b>Enter Mixed Reality</b> to begin.</p>
+        <p class="note">${this.mirror ? 'Your lesson appears in front of you, with your teacher’s bench behind it.' : 'Your lesson appears around you.'} Press the big <b>Enter</b> button to begin.</p>
         <div class="buttons"><button class="secondary" id="copy-link">Copy the Link</button><button class="secondary" id="leave-session">Leave the Class</button></div>`;
       box.querySelector('#copy-link').onclick = (e) => {
         navigator.clipboard?.writeText(url.toString()).then(() => { e.target.textContent = 'Link Copied'; }).catch(() => prompt('Copy this link:', url.toString()));
@@ -1005,21 +1048,33 @@ export class LessonApp {
       navigator.xr.isSessionSupported('immersive-ar').catch(() => false),
       navigator.xr.isSessionSupported('immersive-vr').catch(() => false),
     ]);
+    // One big Enter button: mixed reality where the device has it, otherwise virtual reality, otherwise the screen
+    // (a class session works the same on all three: the same board, the same teacher's bench).
     if (ar) {
       arBtn.disabled = false;
       arBtn.textContent = 'Enter Mixed Reality';
       arBtn.onclick = () => this.startSession('immersive-ar');
+      if (vr) {
+        vrBtn.hidden = false;
+        vrBtn.onclick = () => this.startSession('immersive-vr');
+      }
+    } else if (vr) {
+      arBtn.disabled = false;
+      arBtn.textContent = 'Enter Virtual Reality';
+      arBtn.onclick = () => this.startSession('immersive-vr');
+    } else if (this.presence) {
+      arBtn.disabled = false;
+      arBtn.textContent = 'Enter on Screen';
+      arBtn.onclick = () => document.getElementById('overlay')?.setMini?.(true);
+      document.getElementById('btn-screen')?.remove();
     } else {
       arBtn.textContent = 'Mixed Reality Not Supported Here';
       arBtn.classList.add('unavailable');
     }
-    if (vr) {
-      vrBtn.hidden = false;
-      vrBtn.onclick = () => this.startSession('immersive-vr');
-    }
     hint.textContent = ar
       ? 'Put on your headset and press “Enter Mixed Reality”. The lab appears in front of you.'
-      : 'Explore on screen, or open this page on a mixed reality headset.';
+      : vr ? 'Put on your headset and press “Enter Virtual Reality”. The lab appears in front of you.'
+        : 'Explore on screen, or open this page on a mixed reality headset.';
   }
 
   async startSession(type) {
@@ -1166,6 +1221,10 @@ export class LessonApp {
     this.loading?.update(dt);
     panelFrame();
     this.update(dt, frame);
+    if (this.mirror) {
+      this.mirror.update(dt);
+      this.liftBoard();
+    }
     this.realRoom?.update(); // after the lesson has placed its board
     this.grounding?.update(dt);
     if (this.presence) {
