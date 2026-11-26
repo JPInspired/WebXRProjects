@@ -4,6 +4,17 @@ import { rng } from './layout.js';
 // Pictures drawn once in code (no image files): house fronts, roof tiles, concrete facades, the hall's walls,
 // stone, and soft puffs for smoke and cloud.
 
+/** A photo texture from lessons/hiroshima/textures/ (CC0, Poly Haven: see CREDITS.md), repeating. */
+const loader = new THREE.TextureLoader();
+export function photo(name, rx = 1, ry = rx) {
+  const t = loader.load(new URL(`../../textures/${name}.jpg`, import.meta.url).toString());
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(rx, ry);
+  t.anisotropy = 8;
+  return t;
+}
+
 function canvas(w, h) {
   const c = document.createElement('canvas');
   c.width = w;
@@ -93,6 +104,18 @@ export function houseTexture(burnt = false) {
   board(768, 256, 200, 56, wood);
   lattice(820, 150, 70, 80, 4, 10, woodLight);
   grain(g, W, H, burnt ? 0.2 : 0.12, r);
+  const t0 = tex(c);
+  // real weathered wood (CC0, Poly Haven) laid over the boarded parts, once it has loaded
+  const img = new Image();
+  img.onload = () => {
+    g.save();
+    g.globalCompositeOperation = 'overlay';
+    g.globalAlpha = burnt ? 0.35 : 0.7;
+    for (const [x, y, w, h] of [[0, 94, 256, 162], [256, 80, 256, 176], [512, 120, 256, 136], [768, 200, 256, 56]]) g.drawImage(img, 0, 0, img.width * (w / 256), img.height * (h / 256) * 0.5, x, y, w, h);
+    g.restore();
+    t0.needsUpdate = true;
+  };
+  img.src = new URL('../../textures/dark_wooden_planks.jpg', import.meta.url).toString();
   if (burnt) {
     // soot streaks rising from the openings
     for (let i = 0; i < 60; i++) {
@@ -104,7 +127,7 @@ export function houseTexture(burnt = false) {
       g.fillRect(x, 0, 10 + r() * 30, H);
     }
   }
-  return tex(c);
+  return t0;
 }
 
 /** Grey-blue roof tiles (kawara) in rows; 1 tile row ≈ 1/16 of the texture. */

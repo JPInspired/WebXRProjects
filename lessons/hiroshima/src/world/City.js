@@ -4,7 +4,7 @@ import {
   WATER_Y, FORK_Z, OTA, MOTOYASU, HONKAWA, ISLAND, BRIDGE, HALL, HYPO, PARK, AIOI_ST, EAST_STREETS, ISLAND_STREETS,
   BOUNDS, inWater, onStreet, rng, WalkMap,
 } from './layout.js';
-import { houseTexture, roofTexture, facadeTexture, stoneTexture, barkTexture, leafTexture } from './textures.js';
+import { houseTexture, facadeTexture, barkTexture, leafTexture, photo } from './textures.js';
 import { hallIntact, hallRuin, hallFootprint } from './Hall.js';
 
 // The city around the hall, built in code, once per moment:
@@ -24,7 +24,7 @@ const HYPO_SITE = { x0: 98, x1: 126, z0: 94, z1: 117 }; // Shima Hospital's plot
 let M = null;
 function mats() {
   if (M) return M;
-  const roof = roofTexture();
+  const roof = photo('grey_roof_tiles', 3, 2); // (real tiles: CC0, Poly Haven)
   M = {
     house: new THREE.MeshLambertMaterial({ map: houseTexture(false) }),
     roof: new THREE.MeshLambertMaterial({ map: roof }),
@@ -38,7 +38,7 @@ function mats() {
     bark: new THREE.MeshLambertMaterial({ map: barkTexture(false) }),
     barkBurnt: new THREE.MeshLambertMaterial({ map: barkTexture(true) }),
     leaves: new THREE.MeshLambertMaterial({ map: leafTexture('#4f7a3c') }),
-    stone: new THREE.MeshLambertMaterial({ map: stoneTexture() }),
+    stone: new THREE.MeshLambertMaterial({ map: photo('japanese_stone_wall') }),
     deck: new THREE.MeshLambertMaterial({ color: 0x8f8a80 }),
     rail: new THREE.MeshLambertMaterial({ color: 0xbdb7aa }),
     pole: new THREE.MeshLambertMaterial({ color: 0x4a443e }),
@@ -768,6 +768,8 @@ function ground(era) {
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       near: { value: near },
+      detail: { value: photo(era === 'after' ? 'burned_ground_01' : 'dirt') },
+      detailK: { value: { before: 0.6, blast: 0.6, after: 0.75, rebuilt: 0.35, today: 0.2 }[era] },
       region: { value: new THREE.Vector4(R.x0, R.z0, R.x1 - R.x0, R.z1 - R.z0) },
       farColor: { value: new THREE.Color(...far) },
       fieldColor: { value: new THREE.Color(era === 'after' ? 0x3d3a30 : 0x5d7040) },
@@ -777,7 +779,7 @@ function ground(era) {
     },
     vertexShader: `varying vec3 vW; varying float vD;
       void main(){ vec4 w = modelMatrix * vec4(position,1.0); vW = w.xyz; vec4 mv = viewMatrix * w; vD = -mv.z; gl_Position = projectionMatrix * mv; }`,
-    fragmentShader: `uniform sampler2D near; uniform vec4 region; uniform vec3 farColor; uniform vec3 fieldColor; uniform vec3 light;
+    fragmentShader: `uniform sampler2D near; uniform sampler2D detail; uniform float detailK; uniform vec4 region; uniform vec3 farColor; uniform vec3 fieldColor; uniform vec3 light;
       uniform vec3 fogColor; uniform float fogDensity; varying vec3 vW; varying float vD;
       float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
       float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
@@ -794,6 +796,10 @@ function ground(era) {
         col = mix(col, texture2D(near, uv).rgb, edge);
         float n = vnoise(vW.xz * 1.7) * 0.4 + vnoise(vW.xz * 0.35) * 0.4 + vnoise(vW.xz * 0.06) * 0.2;
         col *= 0.9 + 0.2 * n;
+        // real ground close by (a photo, one repeat every 4 m), fading out with distance
+        vec3 dt = texture2D(detail, vW.xz / 4.0).rgb;
+        float dk = detailK * (1.0 - smoothstep(40.0, 220.0, vD));
+        col = mix(col, col * dt * 2.2, dk);
         col *= light;
         float f = 1.0 - exp(-fogDensity * fogDensity * vD * vD);
         gl_FragColor = vec4(mix(col, fogColor, f), 1.0);

@@ -679,7 +679,7 @@ class App extends LessonApp {
     }
   }
 
-  /** The panels: a heads-up display on a screen; in the headset they follow you lazily (as in Hintze Hall). */
+  /** The panels: a heads-up display on a screen; in the headset they follow you lazily. */
   updatePanels(dt) {
     const lab = this.lab;
     lab.visible = this.state.panels;

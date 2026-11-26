@@ -14,3 +14,10 @@ written for this project and should be checked by a Greek speaker before use.
 
 The lesson was asked for to accompany *The Flowers of Hiroshima* by Edita Morris (1959). It quotes nothing from the
 novel; the discussion questions only refer to its setting and themes.
+
+## Photo textures (26 Nov 2026)
+
+Five colour maps from [Poly Haven](https://polyhaven.com), **CC0** (public domain, no attribution needed), 1k JPG,
+in `textures/`: `grey_roof_tiles` (roofs), `dark_wooden_planks` (laid over the drawn house fronts),
+`japanese_stone_wall` (river embankments), `dirt` (the ground in 1945, 1958 and today) and `burned_ground_01`
+(the ground after the bomb). The drawn versions are still used for everything else.

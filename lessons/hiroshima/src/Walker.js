@@ -4,7 +4,7 @@ import * as THREE from 'three';
 // walking only asks the moment's walk map (src/world/layout.js WalkMap) whether a spot is free: streets, paths,
 // the park and the bridge are; buildings, rubble heaps and the rivers are not. Walking slides along anything in
 // the way. Teleporting jumps to any free ground you point at.
-// In the headset we never move the city: we move you, by offsetting the WebXR reference space (as Hintze Hall does).
+// In the headset we never move the city: we move you, by offsetting the WebXR reference space.
 
 const EYE = 1.6; // eye height on a screen (m)
 const yawOf = (dir) => Math.atan2(-dir.x, -dir.z); // rotation about y that turns −z (forward) towards dir

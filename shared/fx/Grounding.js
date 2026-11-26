@@ -8,10 +8,10 @@ import { sound } from '../util/sound.js';
 //  • Arriving: when the lab appears or lands, it grows into place over a moment, and a ring of light spreads
 //    out across the surface it has landed on.
 // Part of "Real room" in ⚙ Settings (off there: no shadow and no arrival, as before).
-// One switch turns it off everywhere: GROUNDING.enabled = false. Hintze Hall and Reef Dive are left out.
+// One switch turns it off everywhere: GROUNDING.enabled = false. Reef Dive and Hiroshima are left out.
 
 export const GROUNDING = { enabled: true };
-const SKIP = ['hintze-hall', 'reef-dive', 'hiroshima'];
+const SKIP = ['reef-dive', 'hiroshima'];
 const SURFACE_Y = -0.3; // the lab's bottom, in its own space (it is placed 0.3 m above the surface it is on)
 const ARRIVE_S = 0.55; // how long arriving takes
 const RING_S = 0.9; // how long the ring takes to spread and fade

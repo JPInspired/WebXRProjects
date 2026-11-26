@@ -10,10 +10,10 @@ import * as THREE from 'three';
 // Each headset can turn this off in ⚙ Settings › This headset › Real room (remembered on the headset).
 // Also here: Hands in front (Settings › Hands in front, off unless chosen): on Quest 3, real hands and things
 // between you and the lab hide the parts behind them (the headset's depth sensing, from the next time you enter).
-// One switch turns it off everywhere: REAL_ROOM.enabled = false. Hintze Hall and Reef Dive are left out.
+// One switch turns it off everywhere: REAL_ROOM.enabled = false. Reef Dive and Hiroshima are left out.
 
 export const REAL_ROOM = { enabled: true };
-const SKIP = ['hintze-hall', 'reef-dive', 'hiroshima'];
+const SKIP = ['reef-dive', 'hiroshima'];
 const KEY = 'webxr-classes:realroom';
 const HANDS_KEY = 'webxr-classes:handsinfront';
 const NO_DEPTH_KEY = 'webxr-classes:nodepth'; // this headset has no depth sensing (e.g. Quest 2): hide the setting

@@ -5,12 +5,12 @@ import * as THREE from 'three';
 //    pictures (everything loaded through three.js), then fades away; the 3D view behind fades in once it is ready.
 //  • Entering the headset view, the lesson fades in from dark (a small ring turns while anything is still loading).
 //  • Leaving for the lessons page, it fades out first.
-// Hintze Hall and Reef Dive keep their own starts (they are left out of polish work).
+// Reef Dive keeps its own start.
 //
 // One switch turns all of this off: LOADING.enabled = false (or ?nofade in a lesson's address).
 
 export const LOADING = { enabled: true };
-const SKIP = ['hintze-hall', 'reef-dive'];
+const SKIP = ['reef-dive'];
 const MAX_WAIT_MS = 20000; // never hold anything back longer than this
 
 export function makeLoading(app) {

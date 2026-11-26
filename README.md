@@ -25,9 +25,8 @@ Mixed reality lessons built with [WebXR](https://immersiveweb.dev/) and [three.j
 | **Reef Dive** | Biology (IB) | [`lessons/reef-dive/`](lessons/reef-dive/) |
 | **Art Gallery** | Art | [`lessons/art-gallery/`](lessons/art-gallery/) |
 | **Hiroshima, 6 August 1945** | Humanities (VR) | [`lessons/hiroshima/`](lessons/hiroshima/) |
-| **Hintze Hall** | Museum visit (VR) | [`lessons/hintze-hall/`](lessons/hintze-hall/) |
 
-**The lessons page** (`index.html`, titled *WebXR Library*) groups the lessons into subject sections (Chemistry, Physics, Biology, Computer Science, Art, Humanities, Museum visits), with a row of subject buttons that show one section at a time. To add a lesson, copy a `<button class="card">` block inside the right `<section>`; to add a subject, copy a whole `<section>` and give it a new `data-subject` (its button and counts appear by themselves; its colour is one line in the page’s styles).
+**The lessons page** (`index.html`, titled *WebXR Library*) groups the lessons into subject sections (Chemistry, Physics, Biology, Computer Science, Art, Humanities), with a row of subject buttons that show one section at a time. To add a lesson, copy a `<button class="card">` block inside the right `<section>`; to add a subject, copy a whole `<section>` and give it a new `data-subject` (its button and counts appear by themselves; its colour is one line in the page’s styles).
 
 **Getting around:** every lesson has a **← Lessons** button in its control panel (press it twice, so nobody leaves by accident) and an *All lessons* link on its start screen. Panels that hold more than fits get a scrollbar: use its ▲ ▼ buttons, the thumbstick while pointing at the panel, or pinch / pull the trigger on the panel and drag (mouse wheel or drag on a computer).
 
@@ -76,7 +75,7 @@ The switch: `HANDS.enabled` in `shared/ui/Hands.js` (or `?nohands` in a lesson's
 - The start box eases in. Under its buttons, a thin bar says **Preparing the Lesson** while the lesson is built and its models and pictures load (it counts them when there are files to load, and glides when the models are built in code). It says **Ready** and fades away when everything is in place, and the 3D view behind it fades in at the same moment.
 - Entering the headset view, the lesson fades in from dark. If anything is still loading, a small ring turns until it is ready (at most 20 seconds).
 - Leaving for the lessons page, the lesson fades out first; opening a lesson from the lessons page fades that page out for a moment.
-- Hintze Hall and Reef Dive keep their own starts.
+- Reef Dive and Hiroshima keep their own starts.
 
 The switch: `LOADING.enabled` in `shared/fx/Loading.js` (or `?nofade` in a lesson's address).
 
@@ -86,9 +85,9 @@ The switch: `LOADING.enabled` in `shared/fx/Loading.js` (or `?nofade` in a lesso
 
 - **The lab sits on a real table.** When the scan shows a table or desk in front of you at a working height (between 10 and 75 cm below your eyes: a desk when seated, a bench when standing), the lab is placed on its top when the lesson starts. A lab you have moved yourself stays where you put it.
 - **The class board goes on a real wall.** When the board stands behind your bench (on your own, or in different rooms), it moves flat against the real wall in that direction, between 1 and 4.5 m away. Same-room sessions keep the board where the teacher put it, so everyone shares it.
-- **The toggle:** ⚙ Settings › This headset › **Real room: on / off**, remembered on each headset. `REAL_ROOM.enabled = false` turns it off everywhere. Hintze Hall and Reef Dive are left out.
+- **The toggle:** ⚙ Settings › This headset › **Real room: on / off**, remembered on each headset. `REAL_ROOM.enabled = false` turns it off everywhere. Reef Dive and Hiroshima are left out.
 - **Resting on the surface** (`shared/fx/Grounding.js`): when the lab stands on a real surface (Place on surface, or a desk found by the real room) it casts a soft shadow onto it. When the lab appears, it grows into place over half a second, and when it lands a ring of light spreads across the surface, with a soft sound. It floats without a shadow when it is in front of you or in your hand. Part of Real room; `GROUNDING.enabled = false` turns it off everywhere.
-- **Hands in front** (Quest 3): ⚙ Settings › **Hands in front: on / off**, off unless chosen. When on, the headset's depth sensing is used, so your real hands (and anything real) in front of the lab hide the parts behind them, as real objects would. It takes effect the next time you enter mixed reality. This uses three.js 0.161 (the lessons' version since 19 November 2026; Hintze Hall and Reef Dive stay on 0.160).
+- **Hands in front** (Quest 3): ⚙ Settings › **Hands in front: on / off**, off unless chosen. When on, the headset's depth sensing is used, so your real hands (and anything real) in front of the lab hide the parts behind them, as real objects would. It takes effect the next time you enter mixed reality. This uses three.js 0.161 (the lessons' version since 19 November 2026; Reef Dive and Hiroshima stay on 0.160).
 
 ## The house style (panels and sound)
 
@@ -98,7 +97,7 @@ Sounds come from `shared/util/sound.js`, made in code (no audio files): one soft
 
 ## Subject rooms
 
-Each lesson stands in a light, simple classroom for its subject (`shared/fx/Classroom.js`): a chemistry lab with a fume cupboard and a periodic table, a physics lab with a wooden floor and a solar system poster, a biology lab with plants and a fish tank, and a computer room with desks and monitors. Windows, a whiteboard with the subject's equations, posters, a clock and a door are painted onto the walls. The rooms show on a computer screen and in full virtual reality; in mixed reality the real classroom shows instead, so they hide. Hintze Hall and Reef Dive have places of their own and keep them.
+Each lesson stands in a light, simple classroom for its subject (`shared/fx/Classroom.js`): a chemistry lab with a fume cupboard and a periodic table, a physics lab with a wooden floor and a solar system poster, a biology lab with plants and a fish tank, and a computer room with desks and monitors. Windows, a whiteboard with the subject's equations, posters, a clock and a door are painted onto the walls. The rooms show on a computer screen and in full virtual reality; in mixed reality the real classroom shows instead, so they hide. Reef Dive and Hiroshima have places of their own and keep them.
 
 They are built to stay light on a headset: the walls, floor and ceiling are pictures drawn once when the lesson opens, all the furniture is one merged shape, and nothing is lit in real time (the shading is painted in), so a room costs about eight draw calls.
 
@@ -619,24 +618,11 @@ The reef runs on a transparent monthly model in `src/model/Ecosystem.js`, using 
 
 **3D models:** the animals and coral colonies are realistic 3D models in `lessons/reef-dive/models/`, listed in `manifest.json`. They are optimised for Quest 3 (about 5 MB in total, compressed with meshopt and WebP). Each animal moves with a vertex-shader motion suited to it: a travelling tail wave for the fish and shark, wing-like flipper strokes for the turtle, curling arms for the octopus, sideways-stepping legs for the crab, a pulsing bell for the jellyfish and waves of contraction for the sea cucumber. Coral models still bleach white and die grey-brown in the reef lab. Any model that fails to load falls back to a shape the lesson draws itself. Sources and licences are in [`models/CREDITS.md`](lessons/reef-dive/models/CREDITS.md); how to add or replace a model is in the README there.
 
-## Hintze Hall
-
-A virtual-reality visit to the great central hall of the Natural History Museum, London, built from a 3D scan (“Hintze Hall” by artfletch, CC BY 4.0). Unlike the other lessons it is **VR, not mixed reality**: the hall replaces your room. It is a solo visit (no shared sessions).
-
-**Getting around**
-- **Headset:** left thumbstick to walk (it follows the floor up and down the stairs, and stops at walls, balustrades and balcony edges); right thumbstick to turn (snap 30° or 45°, or smooth). Point at any floor and pull the trigger or pinch to **teleport** there. The panels follow you; **B / Y** hides or shows them.
-- **Screen:** W A S D or the arrow keys to walk, drag to look, click a floor to go there, **H** hides the panels.
-- **Floors:** the ground floor, the main staircase up to Darwin’s landing, its two side flights to the **west and east first-floor balconies**, the bridge over the entrance, and the second floor with the giant sequoia. The panel’s *Floors* buttons jump straight to each.
-
-**Exhibits** (point at one, or at its ⓘ marker, for its story; the *Exhibits* buttons take you there): Hope the blue whale, the Charles Darwin statue, the giant sequoia slice, the painted ceiling, the building itself, the American mastodon, the giraffes, the Turbinaria coral, the Atlantic blue marlin and a meteorite. Facts come from the Museum’s own pages (see `lessons/hintze-hall/models/CREDITS.md`).
-
-**The model:** the 2-million-triangle scan with 8K textures is reduced to 1M triangles and keeps its full 8K textures, GPU-compressed as KTX2 (ETC1S, about 45 MB of GPU memory each), so it runs on a Quest 3 (about 40 MB download). It is drawn unlit because its lighting is baked into the textures. Walking and teleporting use the scan itself as floor and walls, via fast raycasts ([three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh), MIT, loaded from jsDelivr).
-
 ## Hiroshima, 6 August 1945
 
 A virtual-reality visit to the streets round the Industrial Promotion Hall (today the Atomic Bomb Dome) in
 Hiroshima, made for a Greek school's literature classes reading *The Flowers of Hiroshima* by Edita Morris (1959).
-Like Hintze Hall it is **VR, not mixed reality**, but it takes part in class sessions. Everything is made in code
+It is **VR, not mixed reality** (the city replaces your room), and it takes part in class sessions. Everything is made in code
 (no models, pictures or sound files): see its [`CREDITS.md`](lessons/hiroshima/CREDITS.md).
 
 **Five moments, one place** (the *Moments* tab): the morning of 6 August 1945 (the wooden city, trams over the

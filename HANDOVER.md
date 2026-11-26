@@ -82,7 +82,7 @@ The project's own code has **no licence file yet**: the owner should choose one 
 | Part | Licence | Commercial use |
 | --- | --- | --- |
 | three.js, three-mesh-bvh, Trystero (`shared/vendor/TRYSTERO-LICENSE`) | MIT | yes, keep the licence notices |
-| Hintze Hall scan, most Reef Dive models | CC BY 4.0 | yes, keep the credits in the `CREDITS.md` files |
+| Most Reef Dive models | CC BY 4.0 | yes, keep the credits in the `CREDITS.md` files |
 | Some Reef Dive models | CC0 | yes |
 | **Heart Lab heart model** (`lessons/heart-lab/models/heart.glb`, `heart.json`) | CC BY-SA 2.1 Japan (BodyParts3D) | yes, keep the credit in its `CREDITS.md`; changes to these two files stay under the same licence |
 | **Identifying Organs skeleton and organs** (`lessons/organs-lab/models/body.glb`) | CC BY-SA 2.1 Japan (BodyParts3D) | yes, keep the credit in its `CREDITS.md`; changes to this file stay under the same licence |
@@ -102,14 +102,14 @@ The project's own code has **no licence file yet**: the owner should choose one 
 | Osmosis Lab (everything) | made in code for this project, following the original Inspired Education EngageVR lesson | yes (it is the project’s own) |
 | **Art Gallery paintings** (`lessons/art-gallery/paintings/`) | public domain (photographs of old paintings, from Wikimedia Commons; sources in its `CREDITS.md`) | yes |
 | Art Gallery (everything else) | made in code for this project, following the Inspired Education "Seated Art Gallery" lesson plan | yes (it is the project’s own) |
-| Hiroshima, 6 August 1945 (everything) | made in code for this project (city, buildings, sky, textures and sounds) | yes (it is the project’s own) |
+| Hiroshima, 6 August 1945 | made in code for this project, plus five CC0 photo textures from Poly Haven (`lessons/hiroshima/textures/`, see its `CREDITS.md`) | yes |
 | Heart Lab sounds, blood flow, ECG, backup heart | made in code for this project | yes (it is the project’s own) |
 | **Reef Dive hammerhead** (`hammer.glb`) | CC BY-NC 4.0 | **no**: replace it before any commercial use |
 | Lessons page pictures and link previews (`assets/lessons/`, `assets/share/`) | screenshots of the lessons; those showing third-party models carry their licences (see `assets/lessons/CREDITS.md`) | yes, except `reef-dive*` (shows the non-commercial hammerhead): re-capture it once the hammerhead is replaced |
 | **Reef Dive manta ray** (`manta.glb`) | CC BY-NC-SA 4.0 | **no**: replace it before any commercial use |
 | **Reef Dive parrotfish** (`parrotfish.glb`) | Sketchfab Standard, used with the owner's permission | get that permission confirmed for the new owner, or replace it |
 
-Full sources: `lessons/reef-dive/models/CREDITS.md` and `lessons/hintze-hall/models/CREDITS.md`.
+Full sources: `lessons/reef-dive/models/CREDITS.md`.
 
 ## Rule for all future changes
 

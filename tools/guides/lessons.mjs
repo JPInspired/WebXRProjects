@@ -3,7 +3,7 @@
 // Writing style: British spelling, Title Case headings, calm and confident, no contractions or exclamation marks.
 
 export const SUBJECTS = {
-  chemistry: 'Chemistry', physics: 'Physics', biology: 'Biology', computing: 'Computer Science', art: 'Art', humanities: 'Humanities', museum: 'Museum Visits',
+  chemistry: 'Chemistry', physics: 'Physics', biology: 'Biology', computing: 'Computer Science', art: 'Art', humanities: 'Humanities',
 };
 
 export const GUIDES = [
@@ -153,12 +153,5 @@ export const GUIDES = [
     aims: ['Describe the city of Hiroshima before and after the atomic bomb', 'Explain why the Industrial Promotion Hall survived and why it was kept', 'Connect the history of the survivors to the setting and themes of The Flowers of Hiroshima', 'Reflect on how a city remembers and works for peace'],
     steps: [['Morning, 1945', 'Students walk the wooden city, cross the Aioi Bridge and discover the hall, the trams and the rivers through the ⓘ markers.'], ['8:15', 'The explosion, the blast wave and the cloud seen from the hills, with short captions: about a minute, with no people shown.'], ['After the Bomb', 'The ruins that afternoon: why the hall still stands, the cost, fire and black rain, and the first signs of recovery.'], ['Rebuilt, 1958', 'The city of the novel: the Peace Memorial Park, the Cenotaph, the Children’s Peace Monument and the lives of the survivors.'], ['Today', 'The Atomic Bomb Dome, the Flame of Peace and the Peace Bell; students leave a paper crane, then discuss the questions on the text and take the quiz.']],
     tips: ['Prepare the class before 8:15: it has a bright flash and loud sounds. Bright flash: soft (Moving tab) makes it gentler, and students may look away or take the headset off at any time.', 'Use Show Everyone to keep the class in the same moment, and to start 8:15 for everyone together.', 'Every text has an English and a Greek version (the ΕΛ button). The Greek should be checked by a Greek speaker before the first lesson.', 'The questions in The Text tab link the visit to the novel without giving away its plot: give students time to discuss them with a partner.'],
-  },
-  {
-    id: 'hintze-hall', title: 'Hintze Hall', subject: 'museum', mins: 25, ages: 'All ages', mode: 'Virtual reality · on your own',
-    intro: 'A visit to the great hall of the Natural History Museum in London, without leaving the classroom.',
-    aims: ['Explore the exhibits of a world-famous museum', 'Learn the stories behind key specimens', 'Connect museum exhibits to ideas in science and history'],
-    steps: [['Explore', 'Students walk all three floors, teleporting wherever they point.'], ['Discover', 'Pointing at an exhibit or its marker reveals its story.']],
-    tips: ['Set students a short list of exhibits to find and report back on.', 'Seated use is comfortable: teleporting avoids the need to walk around the room.', 'This lesson is one of the most demanding on a headset: test it first with the checklist.'],
   },
 ];

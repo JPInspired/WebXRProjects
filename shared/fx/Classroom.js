@@ -14,7 +14,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 // └──────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 export const ROOMS = { enabled: true };
 
-// Which room each lesson gets. A lesson that is not listed (Hintze Hall, Reef Dive: they have their own places)
+// Which room each lesson gets. A lesson that is not listed (Reef Dive, Hiroshima: they have their own places)
 // keeps the grid.
 const SUBJECT = {
   'atomic-models': 'chemistry', 'acid-lab': 'chemistry', 'lithium-lab': 'chemistry', 'kinetics-lab': 'chemistry', 'voltaic-lab': 'chemistry',
