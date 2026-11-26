@@ -402,7 +402,7 @@ export class City {
       if (big) {
         const storeys = today ? 4 + Math.floor(r() * r() * 12) : 3 + Math.floor(r() * 2);
         const w = p.far ? 17 : 7 + r() * 0.8, d = p.far ? 19 : 8.6 + r() * 0.6, h = storeys * 3.4;
-        blocks.push({ x: p.x, z: p.z, sx: w, sy: h, sz: d, ry: p.facing, c: today ? new THREE.Color().setHSL(0.6, 0.05, 0.75 + r() * 0.2) : new THREE.Color().setHSL(0.1, 0.1, 0.78 + r() * 0.15) });
+        blocks.push({ x: p.x, z: p.z, sx: w, sy: h, sz: d, ry: p.facing, c: today ? new THREE.Color().setHSL([0.08, 0.1, 0.58, 0.0][Math.floor(r() * 4)], 0.08 + r() * 0.12, 0.62 + r() * 0.3) : new THREE.Color().setHSL(0.1, 0.1, 0.78 + r() * 0.15) });
         flat.push({ x: p.x, y: h, z: p.z, sx: w + 0.3, sy: 0.3, sz: d + 0.3, ry: p.facing });
         if (!p.far) walk.block(p.x - (turned ? d : w) / 2, p.z - (turned ? w : d) / 2, p.x + (turned ? d : w) / 2, p.z + (turned ? w : d) / 2);
         continue;
@@ -697,8 +697,8 @@ function ground(era) {
   const k = S / (R.x1 - R.x0);
   const X = (x) => (x - R.x0) * k, Z = (z) => (z - R.z0) * k;
   const r = rng(era.length + 3);
-  const base = { before: '#9c8e78', blast: '#9c8e78', after: '#5a514a', rebuilt: '#9a9184', today: '#8e8c88' }[era];
-  const street = { before: '#b4a68c', blast: '#b4a68c', after: '#6e655c', rebuilt: '#7b7a76', today: '#5f6064' }[era];
+  const base = { before: '#8d8576', blast: '#8d8576', after: '#5a514a', rebuilt: '#8f8a80', today: '#8a8984' }[era];
+  const street = { before: '#a79a84', blast: '#a79a84', after: '#6e655c', rebuilt: '#76756f', today: '#57595e' }[era];
   g.fillStyle = base;
   g.fillRect(0, 0, S, S);
   // streets

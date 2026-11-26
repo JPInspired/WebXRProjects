@@ -289,7 +289,7 @@ export function barkTexture(burnt = false) {
 }
 
 /** Leaves (a canopy's speckled light and shade). */
-export function leafTexture(tint = '#3f6b34') {
+export function leafTexture(tint = '#4a6b3c') {
   const [c, g] = canvas(128, 128);
   const r = rng(41);
   g.fillStyle = tint;
