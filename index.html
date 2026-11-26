@@ -49,6 +49,7 @@
       --computing: #1d4ed8;
       --museum: #7c3aed;
       --art: #a21caf;
+      --humanities: #475569;
       --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Noto Serif", Georgia, serif;
       --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
@@ -72,6 +73,7 @@
       --computing: #7aa2ff;
       --museum: #c4a1ff;
       --art: #e879f9;
+      --humanities: #a5b4cb;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -178,6 +180,7 @@
     section[data-subject="computing"] { --accent: var(--computing); }
     section[data-subject="museum"] { --accent: var(--museum); }
     section[data-subject="art"] { --accent: var(--art); }
+    section[data-subject="humanities"] { --accent: var(--humanities); }
     .subject > header { display: flex; align-items: baseline; gap: 14px; padding-bottom: 14px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
     .subject > header h3 { font: 500 28px/1.1 var(--serif); margin: 0; letter-spacing: -0.01em; }
     .subject > header h3::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin-right: 12px; vertical-align: 4px; }
@@ -563,6 +566,21 @@
                 <h4>Art Gallery</h4>
                 <p>Twelve famous paintings arrive on an easel at each desk, at their real size wherever they fit. Students look closer at glowing details, place each work on a timeline of world events and play Guess the Painting.</p>
                 <span class="do"><b>Students</b> look closely, compare and guess</span>
+                <span class="open">Open Lesson</span>
+              </span>
+            </button>
+          </div>
+        </section>
+        <section class="subject" data-subject="humanities" id="humanities">
+          <header><h3>Humanities</h3><p>Literature and history, in the places where they happened.</p></header>
+          <div class="grid">
+            <button class="card" data-lesson="hiroshima" data-keywords="hiroshima history literature flowers of hiroshima edita morris atomic bomb dome peace park japan second world war 1945 greek ελληνικά">
+              <span class="media"><img src="assets/lessons/hiroshima.webp" data-loop="assets/lessons/hiroshima-loop.webp" alt="" loading="lazy" width="960" height="600"><span class="play">Live from the lesson</span></span>
+              <span class="body">
+                <span class="tags"><span class="tag subject">Humanities</span><span class="tag">VR</span><span class="tag">English and Greek</span></span>
+                <h4>Hiroshima, 6 August 1945</h4>
+                <p>The streets around the Industrial Promotion Hall in five moments: the morning of 6 August 1945, 8:15, that afternoon, the rebuilt city of 1958 and today. Made for reading The Flowers of Hiroshima, with questions on the text, a quiz and paper cranes for the Children’s Peace Monument.</p>
+                <span class="do"><b>Students</b> walk the city, read its history and reflect on the text</span>
                 <span class="open">Open Lesson</span>
               </span>
             </button>

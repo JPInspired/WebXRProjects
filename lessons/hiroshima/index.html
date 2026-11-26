@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+  <title>Hiroshima, 6 August 1945</title>
+  <link rel="icon" href="../../assets/icon.svg" type="image/svg+xml">
+  <meta name="description" content="Walk the streets of Hiroshima in virtual reality on the morning of 6 August 1945, at 8:15, that afternoon, in the rebuilt city of 1958 and today. Made for reading The Flowers of Hiroshima, in English and Greek.">
+  <!-- link preview: written by tools/lesson-images/share-picture.mjs (run it again if the site moves) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="WebXR Library">
+  <meta property="og:title" content="Hiroshima, 6 August 1945 · WebXR Library">
+  <meta property="og:description" content="Walk the streets of Hiroshima in virtual reality on the morning of 6 August 1945, at 8:15, that afternoon, in the rebuilt city of 1958 and today. Made for reading The Flowers of Hiroshima, in English and Greek.">
+  <meta property="og:url" content="https://jpinspired.github.io/WebXRProjects/lessons/hiroshima/">
+  <meta property="og:image" content="https://jpinspired.github.io/WebXRProjects/assets/share/hiroshima.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Hiroshima, 6 August 1945: a picture from the lesson">
+  <meta name="twitter:card" content="summary_large_image">
+  <!-- /link preview -->
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="overlay">
+    <figure class="shot"><img src="../../assets/lessons/hiroshima.webp" data-loop="../../assets/lessons/hiroshima-loop.webp" alt="" width="960" height="600"></figure>
+    <span class="eyebrow" data-subject="humanities">Humanities</span>
+    <h1>Hiroshima, 6 August 1945</h1>
+    <p>Walk the same streets in five moments: the morning of 6 August 1945, 8:15, that afternoon, the rebuilt city of 1958 and today. Made for reading The Flowers of Hiroshima, in English and Greek.</p>
+    <p class="hint lang-line" lang="el">Χιροσίμα, 6 Αυγούστου 1945: μια επίσκεψη σε εικονική πραγματικότητα, στα αγγλικά και στα ελληνικά.</p>
+    <div class="buttons">
+      <button id="btn-ar" disabled>Checking for VR…</button>
+      <button id="btn-vr" class="secondary" hidden>Enter VR</button>
+    </div>
+    <p class="hint" id="hint"></p>
+    <p class="hint">8:15 shows the explosion with a bright flash and loud sounds; ⚙ › Moving › Bright flash makes it gentler. No people are shown.</p>
+  </div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

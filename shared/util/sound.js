@@ -111,6 +111,12 @@ const wrong = () => { tone(220, 0.16, { type: 'triangle', gain: 0.08, to: 180 })
 export const sound = {
   get stamp() { return stamp; },
 
+  /** For a lesson's own longer sounds (e.g. Hiroshima's city and blast): the audio context and the shared output, so Sound: off silences them too. */
+  bus() {
+    const a = ac();
+    return a ? { ctx: a, out } : null;
+  },
+
   /** Sound switched off on this headset (Settings › Sound). */
   get muted() { return muted; },
   set muted(m) {

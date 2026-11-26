@@ -24,9 +24,10 @@ Mixed reality lessons built with [WebXR](https://immersiveweb.dev/) and [three.j
 | **Identifying Organs** | Biology | [`lessons/organs-lab/`](lessons/organs-lab/) |
 | **Reef Dive** | Biology (IB) | [`lessons/reef-dive/`](lessons/reef-dive/) |
 | **Art Gallery** | Art | [`lessons/art-gallery/`](lessons/art-gallery/) |
+| **Hiroshima, 6 August 1945** | Humanities (VR) | [`lessons/hiroshima/`](lessons/hiroshima/) |
 | **Hintze Hall** | Museum visit (VR) | [`lessons/hintze-hall/`](lessons/hintze-hall/) |
 
-**The lessons page** (`index.html`, titled *WebXR Library*) groups the lessons into subject sections (Chemistry, Physics, Biology, Computer Science, Art, Museum visits), with a row of subject buttons that show one section at a time. To add a lesson, copy a `<button class="card">` block inside the right `<section>`; to add a subject, copy a whole `<section>` and give it a new `data-subject` (its button and counts appear by themselves; its colour is one line in the page’s styles).
+**The lessons page** (`index.html`, titled *WebXR Library*) groups the lessons into subject sections (Chemistry, Physics, Biology, Computer Science, Art, Humanities, Museum visits), with a row of subject buttons that show one section at a time. To add a lesson, copy a `<button class="card">` block inside the right `<section>`; to add a subject, copy a whole `<section>` and give it a new `data-subject` (its button and counts appear by themselves; its colour is one line in the page’s styles).
 
 **Getting around:** every lesson has a **← Lessons** button in its control panel (press it twice, so nobody leaves by accident) and an *All lessons* link on its start screen. Panels that hold more than fits get a scrollbar: use its ▲ ▼ buttons, the thumbstick while pointing at the panel, or pinch / pull the trigger on the panel and drag (mouse wheel or drag on a computer).
 
@@ -630,6 +631,38 @@ A virtual-reality visit to the great central hall of the Natural History Museum,
 **Exhibits** (point at one, or at its ⓘ marker, for its story; the *Exhibits* buttons take you there): Hope the blue whale, the Charles Darwin statue, the giant sequoia slice, the painted ceiling, the building itself, the American mastodon, the giraffes, the Turbinaria coral, the Atlantic blue marlin and a meteorite. Facts come from the Museum’s own pages (see `lessons/hintze-hall/models/CREDITS.md`).
 
 **The model:** the 2-million-triangle scan with 8K textures is reduced to 1M triangles and keeps its full 8K textures, GPU-compressed as KTX2 (ETC1S, about 45 MB of GPU memory each), so it runs on a Quest 3 (about 40 MB download). It is drawn unlit because its lighting is baked into the textures. Walking and teleporting use the scan itself as floor and walls, via fast raycasts ([three-mesh-bvh](https://github.com/gkjohnson/three-mesh-bvh), MIT, loaded from jsDelivr).
+
+## Hiroshima, 6 August 1945
+
+A virtual-reality visit to the streets round the Industrial Promotion Hall (today the Atomic Bomb Dome) in
+Hiroshima, made for a Greek school's literature classes reading *The Flowers of Hiroshima* by Edita Morris (1959).
+Like Hintze Hall it is **VR, not mixed reality**, but it takes part in class sessions. Everything is made in code
+(no models, pictures or sound files): see its [`CREDITS.md`](lessons/hiroshima/CREDITS.md).
+
+**Five moments, one place** (the *Moments* tab): the morning of 6 August 1945 (the wooden city, trams over the
+T-shaped Aioi Bridge, the hall with its green dome); **8:15**; the same afternoon (rubble, gutted buildings, burnt
+trees, fires and smoke, the hall's bare dome frame); **Rebuilt, 1958** (the world of the novel: new low houses, the
+Peace Memorial Park with its museum, the Cenotaph and the Children's Peace Monument); and **Today** (a modern city,
+the park grown, the Flame of Peace and the Peace Bell, which students can ring). The rivers, the bridge, the hall,
+Shima Hospital (the hypocentre) and the park's axis are where they are, at about their real distances
+(`src/world/layout.js`); the houses are generated, about 2,700 near you and larger blocks further out, all
+instanced, so a moment costs about 50–100 draw calls and 100,000–200,000 triangles.
+
+**8:15** (`src/world/Blast.js`), from wherever the student stands, about a minute: the bomber's trail; the
+explosion 600 m above Shima Hospital, a white flash and the fireball; the blast wave spreading out (slowed a little
+so it can be seen), houses falling as it passes, trees stripped, the hall's dome torn away, with a boom, a buzz in
+the controllers and a wall of dust; darkness and fires; then a fade to the hills north-east of the city to watch the
+cloud rise and spread; then back, in the afternoon. Captions explain each step. **No people are shown.**
+*⚙ › Moving › Bright flash: soft* makes the flash and the boom gentler.
+
+**Language:** every word is in English and in Greek (`src/data/text.js`); the **ΕΛ / EN** button switches, and
+`?lang=el` opens a lesson in Greek. The Greek was written for this project: a Greek speaker should check it.
+
+**Also:** ⓘ markers in each moment (*Places* lists them and takes you there); *The Text*, four discussion questions
+that link the visit to the novel without quoting it or giving away its plot; an eight-question *Quiz*; and paper
+cranes: *Leave a Paper Crane* hangs one at the Children's Peace Monument, and in a class session everyone sees
+everyone's cranes. **Teacher:** *Show Everyone* brings the class to the teacher's moment; starting 8:15 while
+showing starts it for everyone, and a student who joins part-way through catches up.
 
 ## Security and safeguarding
 

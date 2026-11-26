@@ -13,7 +13,7 @@ import * as THREE from 'three';
 // One switch turns it off everywhere: REAL_ROOM.enabled = false. Hintze Hall and Reef Dive are left out.
 
 export const REAL_ROOM = { enabled: true };
-const SKIP = ['hintze-hall', 'reef-dive'];
+const SKIP = ['hintze-hall', 'reef-dive', 'hiroshima'];
 const KEY = 'webxr-classes:realroom';
 const HANDS_KEY = 'webxr-classes:handsinfront';
 const NO_DEPTH_KEY = 'webxr-classes:nodepth'; // this headset has no depth sensing (e.g. Quest 2): hide the setting

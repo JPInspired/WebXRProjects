@@ -19,6 +19,7 @@
   --art: #a21caf;
   --computing: #1d4ed8;
   --museum: #7c3aed;
+  --humanities: #475569;
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", "Noto Serif", Georgia, serif;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
@@ -41,6 +42,7 @@
   --art: #e879f9;
   --computing: #7aa2ff;
   --museum: #c4a1ff;
+  --humanities: #a5b4cb;
 }
 
 html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1020; font-family: var(--sans); color: var(--ink); }
@@ -98,6 +100,7 @@ body.in-xr #overlay { display: none; }
 #overlay .eyebrow[data-subject="computing"] { --accent: var(--computing); }
 #overlay .eyebrow[data-subject="museum"] { --accent: var(--museum); }
 #overlay .eyebrow[data-subject="art"] { --accent: var(--art); }
+#overlay .eyebrow[data-subject="humanities"] { --accent: var(--humanities); }
 
 #overlay h1 { margin: 0 0 8px; font: 500 30px/1.1 var(--serif); letter-spacing: -0.01em; color: var(--ink); }
 #overlay p { margin: 0 0 14px; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); }

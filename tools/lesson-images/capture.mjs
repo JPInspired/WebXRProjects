@@ -32,6 +32,8 @@ const SETUP = {
   'reef-dive': { js: ``, cam: null, keepBg: true },
   'pc-builder': { js: ``, cam: [0.4, 1.32, 0.78], tgt: [0, 1.04, 0] },
   'hintze-hall': { js: ``, cam: null, keepBg: true },
+  // (the walking camera is held still, so the loop's gentle sway turns round the hall)
+  'hiroshima': { js: `app.state.panels = false; app.set({ explain: null }); app.state.markers = false; app.walker.teleportDesk([-12, 0, -50], [5, 11, 4], false); app.walker.placeCamera(app.camera); app.updateDesk = () => {}; app.controls.target.set(6, 9, 4);`, cam: null, keepBg: true, wait: 2500 },
   'art-gallery': { js: `app.choose('starry');`, cam: [0.32, 1.42, 1.05], tgt: [0, 1.22, -0.1], keepBg: true },
 };
 const LESSONS = list && list !== 'all' ? list.split(',') : Object.keys(SETUP);

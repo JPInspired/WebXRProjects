@@ -19,7 +19,7 @@ let SITE = process.argv[3] ?? home.match(/<meta property="og:url" content="([^"]
 if (!root || !SITE) throw new Error('usage: node share-picture.mjs <served project> <site address>');
 if (!SITE.endsWith('/')) SITE += '/';
 
-const SUBJECT = { chemistry: ['Chemistry', '#b45309'], physics: ['Physics', '#be185d'], biology: ['Biology', '#047857'], computing: ['Computing', '#1d4ed8'], art: ['Art', '#a21caf'], museum: ['Museum visit', '#7c3aed'] };
+const SUBJECT = { chemistry: ['Chemistry', '#b45309'], physics: ['Physics', '#be185d'], biology: ['Biology', '#047857'], computing: ['Computing', '#1d4ed8'], art: ['Art', '#a21caf'], museum: ['Museum visit', '#7c3aed'], humanities: ['Humanities', '#475569'] };
 const brand = fs.readFileSync(file('assets/icon.svg'), 'utf8');
 const esc = (t) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const BASE = `body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: radial-gradient(120% 90% at 78% 45%, #ffffff 0%, #f6f5f1 55%, #ecebe5 100%); font-family: "Segoe UI", system-ui, sans-serif; color: #15171c; position: relative; }
