@@ -49,7 +49,9 @@ function grain(g, w, h, amount = 0.08, rand = Math.random, size = 2) {
  */
 export function houseTexture(burnt = false) {
   const W = 1024, H = 256;
-  const [c, g] = canvas(W, H);
+  // drawn at twice the size (sharper up close), in the same 1024 × 256 layout
+  const [c, g] = canvas(W * 2, H * 2);
+  g.scale(2, 2);
   const r = rng(burnt ? 7 : 3);
   const board = (x, w, y, h, base) => {
     g.fillStyle = base;
@@ -103,6 +105,56 @@ export function houseTexture(burnt = false) {
   g.fillRect(768, 0, 256, H);
   board(768, 256, 200, 56, wood);
   lattice(820, 150, 70, 80, 4, 10, woodLight);
+  // the timber frame showing through the plaster: posts at the corners and a beam under each plaster band
+  const post = burnt ? '#141110' : '#3b2b20';
+  g.fillStyle = post;
+  for (const [x, y, w, h] of [[0, 0, 7, H], [249, 0, 7, H], [256, 0, 7, H], [505, 0, 7, H], [512, 0, 7, H], [761, 0, 7, H], [768, 0, 7, H], [1017, 0, 7, H], [0, 66, 256, 6], [256, 76, 256, 6], [512, 116, 256, 6], [768, 196, 256, 6], [884, 0, 6, 200]]) g.fillRect(x, y, w, h);
+  // a small paper-screen window (shoji) high in the side wall
+  g.fillStyle = burnt ? '#1a1513' : '#4a3628';
+  g.fillRect(588, 28, 104, 62);
+  g.fillStyle = burnt ? '#2b2420' : '#ebe4d2';
+  g.fillRect(594, 34, 92, 50);
+  g.fillStyle = burnt ? '#1a1513' : '#6b5040';
+  for (let i = 1; i < 4; i++) g.fillRect(594 + i * 23, 34, 2, 50);
+  g.fillRect(594, 58, 92, 2);
+  if (!burnt) {
+    // a paper lantern (chochin) by the shop's doorway, and a potted plant by the home's door
+    const lg = g.createRadialGradient(128, 112, 2, 128, 112, 16);
+    lg.addColorStop(0, '#f4e3b8');
+    lg.addColorStop(1, '#c9452f');
+    g.fillStyle = lg;
+    g.beginPath();
+    g.ellipse(128, 114, 11, 16, 0, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = '#2a1d16';
+    g.fillRect(122, 96, 12, 4);
+    g.fillRect(122, 128, 12, 4);
+    g.fillStyle = '#6f4a32';
+    g.fillRect(374, 228, 20, 22);
+    g.fillStyle = '#3f5a2f';
+    g.beginPath();
+    g.ellipse(384, 220, 16, 12, 0, 0, Math.PI * 2);
+    g.fill();
+  }
+  // shade under the eaves at the top, and the splash of dust and mud along the foot of every wall
+  for (const x of [0, 256, 512, 768]) {
+    const top = g.createLinearGradient(0, 0, 0, 34);
+    top.addColorStop(0, 'rgba(20,14,10,0.45)');
+    top.addColorStop(1, 'rgba(20,14,10,0)');
+    g.fillStyle = top;
+    g.fillRect(x, 0, 256, 34);
+    const foot = g.createLinearGradient(0, H - 26, 0, H);
+    foot.addColorStop(0, 'rgba(70,55,40,0)');
+    foot.addColorStop(1, burnt ? 'rgba(10,8,7,0.6)' : 'rgba(70,55,40,0.55)');
+    g.fillStyle = foot;
+    g.fillRect(x, H - 26, 256, 26);
+  }
+  // faint rain streaks down the plaster
+  for (let i = 0; i < 40; i++) {
+    const x = r() * W;
+    g.fillStyle = `rgba(60,50,40,${0.04 + r() * 0.06})`;
+    g.fillRect(x, r() * 40, 1 + r() * 2, 30 + r() * 80);
+  }
   grain(g, W, H, burnt ? 0.2 : 0.12, r);
   const t0 = tex(c);
   // real weathered wood (CC0, Poly Haven) laid over the boarded parts, once it has loaded

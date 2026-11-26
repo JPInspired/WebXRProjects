@@ -80,6 +80,17 @@ export class MushroomCloud {
     this.cap = Array.from({ length: 120 }, () => ({ th: r() * Math.PI * 2, ph: r() * Math.PI * 2, rr: Math.sqrt(r()), s: 0.6 + r() * 0.45, top: r() < 0.28 }));
     this.stem = Array.from({ length: 70 }, () => ({ h: r(), th: r() * Math.PI * 2, rr: r(), s: 0.8 + r() * 0.6 }));
     this.skirt = Array.from({ length: 40 }, () => ({ th: r() * Math.PI * 2, rr: 0.5 + r() * 0.6, s: 0.7 + r() * 0.6 }));
+    // the fire under the cap: uneven tongues and pockets of glow, bunched in places and missing in others (not a
+    // neat ring), each flickering at its own pace, some deep red, some orange, a few yellow-white where it is hottest
+    this.flames = [];
+    let th = r() * Math.PI * 2;
+    while (this.flames.length < 36) {
+      th += 0.05 + r() * r() * 0.9; // mostly close together, now and then a gap
+      const n = 1 + Math.floor(r() * 3);
+      for (let k = 0; k < n && this.flames.length < 36; k++) {
+        this.flames.push({ th: th + (r() - 0.5) * 0.25, rr: 0.18 + r() * 0.62, dy: (r() - 0.6) * 0.32, s: 0.25 + r() * r() * 0.75, heat: r(), f: 2 + r() * 5, ph: r() * 6, drift: (r() - 0.5) * 0.4 });
+      }
+    }
     this.visible = false;
   }
 
@@ -139,10 +150,14 @@ export class MushroomCloud {
       const c = fire(hot * (0.35 + 0.65 * under), [light, light * (0.96 - under * 0.08), light * (0.9 - under * 0.15)]);
       P.add(x, y, z, Rc * 0.75 * p.s, c, 0.5, p.th);
     }
-    // the fire glowing in the underside of the cap while it is young
-    if (hot > 0) for (let i = 0; i < 28; i++) {
-      const t = (i / 28) * Math.PI * 2 + roll * 0.5;
-      G.add(x0 + Math.cos(t) * Rc * 0.62, Hc - Rc * 0.15, z0 + Math.sin(t) * Rc * 0.62, Rc * 0.6, [1, 0.5, 0.18], 0.45 * hot, t);
+    // the fire glowing in the underside of the cap while it is young: irregular, flickering, turning with the roll
+    if (hot > 0) for (const f of this.flames) {
+      const t = f.th + roll * (0.35 + f.drift);
+      const flick = 0.6 + 0.4 * Math.sin(age * f.f + f.ph) * Math.sin(age * f.f * 0.37 + f.ph * 2);
+      const rad = Rc * (f.rr + 0.06 * Math.sin(age * 0.7 + f.ph));
+      const heat = Math.min(1, f.heat * (0.6 + 0.6 * hot));
+      const col = heat > 0.92 ? [1, 0.74, 0.42] : heat > 0.45 ? [1, 0.45 + heat * 0.15, 0.12] : [0.85, 0.22 + heat * 0.3, 0.07];
+      G.add(x0 + Math.cos(t) * rad, Hc - Rc * (0.12 - f.dy), z0 + Math.sin(t) * rad, Rc * f.s * (0.85 + 0.3 * flick), col, 0.42 * hot * flick, t * 3 + f.ph);
     }
     P.commit();
     G.commit();

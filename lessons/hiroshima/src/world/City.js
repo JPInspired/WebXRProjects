@@ -561,7 +561,14 @@ export class City {
         continue;
       }
       trunks.push({ x: t.x, z: t.z, sx: 0.25 * s, sy: h * 0.7, sz: 0.25 * s, ry: r() * 6 });
-      const tone = () => new THREE.Color().setHSL(t.kind === 'pine' ? 0.3 : t.kind === 'willow' ? 0.2 : 0.26, 0.28 + r() * 0.1, (era === 'today' ? 0.3 : 0.27) + r() * 0.12);
+      // Leaf tones: darker than they look on paper (strong sun on flat-shaded leaves bleaches them), each tree its own
+      // shade (deep blue-green camphor and pine, olive, a few fresher greens; willows lighter), each clump a little
+      // lighter or darker than its tree.
+      const base = t.kind === 'pine' ? [0.34 + r() * 0.06, 0.32 + r() * 0.12, 0.12 + r() * 0.06]
+        : t.kind === 'willow' ? [0.21 + r() * 0.04, 0.34 + r() * 0.12, 0.22 + r() * 0.07]
+          : [0.23 + r() * 0.12, 0.3 + r() * 0.2, 0.13 + r() * 0.09];
+      if (era === 'today') base[2] += 0.02;
+      const tone = () => new THREE.Color().setHSL(base[0] + (r() - 0.5) * 0.025, base[1], Math.max(0.07, base[2] + (r() - 0.5) * 0.07));
       const clumps = t.kind === 'pine' ? 5 : 6;
       for (let k = 0; k < clumps; k++) {
         const a = r() * Math.PI * 2, o = (k === 0 ? 0 : 0.9 + r() * 0.5) * s;
