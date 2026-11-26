@@ -37,7 +37,7 @@ function mats() {
     char: new THREE.MeshLambertMaterial({ color: 0x1c1816 }),
     bark: new THREE.MeshLambertMaterial({ map: barkTexture(false) }),
     barkBurnt: new THREE.MeshLambertMaterial({ map: barkTexture(true) }),
-    leaves: new THREE.MeshLambertMaterial({ map: leafTexture('#4f7a3c') }),
+    leaves: new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true }),
     stone: new THREE.MeshLambertMaterial({ map: photo('japanese_stone_wall') }),
     deck: new THREE.MeshLambertMaterial({ color: 0x8f8a80 }),
     rail: new THREE.MeshLambertMaterial({ color: 0xbdb7aa }),
@@ -205,7 +205,7 @@ export class City {
       box: new THREE.BoxGeometry(1, 1, 1).translate(0, 0.5, 0),
       heap: rubbleHeap(),
       trunk: new THREE.CylinderGeometry(0.6, 1, 1, 7, 1).translate(0, 0.5, 0),
-      canopy: new THREE.IcosahedronGeometry(1, 1),
+      canopy: new THREE.IcosahedronGeometry(1, 0),
     };
     this.buildStatic();
     this.eras = {};
@@ -561,13 +561,13 @@ export class City {
         continue;
       }
       trunks.push({ x: t.x, z: t.z, sx: 0.25 * s, sy: h * 0.7, sz: 0.25 * s, ry: r() * 6 });
-      const tone = () => new THREE.Color().setHSL(t.kind === 'pine' ? 0.3 : t.kind === 'willow' ? 0.2 : 0.26, 0.28 + r() * 0.1, (era === 'today' ? 0.42 : 0.38) + r() * 0.14);
-      const clumps = t.kind === 'pine' ? 4 : 3;
+      const tone = () => new THREE.Color().setHSL(t.kind === 'pine' ? 0.3 : t.kind === 'willow' ? 0.2 : 0.26, 0.28 + r() * 0.1, (era === 'today' ? 0.3 : 0.27) + r() * 0.12);
+      const clumps = t.kind === 'pine' ? 5 : 6;
       for (let k = 0; k < clumps; k++) {
         const a = r() * Math.PI * 2, o = (k === 0 ? 0 : 0.9 + r() * 0.5) * s;
         if (t.kind === 'willow') crowns.push({ x: t.x + Math.cos(a) * o, y: h * (0.45 + r() * 0.2), z: t.z + Math.sin(a) * o, sx: 1.8 * s, sy: 2.6 * s, sz: 1.8 * s, ry: r() * 6, c: tone() });
         else if (t.kind === 'pine') crowns.push({ x: t.x + Math.cos(a) * o * 1.6, y: h * (0.62 + k * 0.1), z: t.z + Math.sin(a) * o * 1.6, sx: 1.7 * s, sy: 0.7 * s, sz: 1.5 * s, ry: r() * 6, c: tone() });
-        else crowns.push({ x: t.x + Math.cos(a) * o, y: h * (0.68 + r() * 0.15), z: t.z + Math.sin(a) * o, sx: 2.3 * s, sy: 1.9 * s, sz: 2.3 * s, ry: r() * 6, c: tone() });
+        else crowns.push({ x: t.x + Math.cos(a) * o * 1.2, y: h * (0.62 + r() * 0.3), z: t.z + Math.sin(a) * o * 1.2, sx: 1.7 * s, sy: 1.4 * s, sz: 1.7 * s, ry: r() * 6, c: tone() });
       }
       e.walk.block(t.x - 0.3, t.z - 0.3, t.x + 0.3, t.z + 0.3, 0.1);
     }

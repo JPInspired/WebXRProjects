@@ -73,11 +73,11 @@ export class Fires {
  */
 export class MushroomCloud {
   constructor(scene) {
-    this.puffs = new Puffs(240, { fog: false });
+    this.puffs = new Puffs(260, { fog: false });
     this.glow = new Puffs(40, { additive: true, fog: false });
     scene.add(this.puffs.mesh, this.glow.mesh);
     const r = mulberry(17);
-    this.cap = Array.from({ length: 120 }, () => ({ th: r() * Math.PI * 2, ph: r() * Math.PI * 2, rr: 0.35 + r() * 0.35, s: 0.6 + r() * 0.5, top: r() < 0.3 }));
+    this.cap = Array.from({ length: 120 }, () => ({ th: r() * Math.PI * 2, ph: r() * Math.PI * 2, rr: Math.sqrt(r()), s: 0.6 + r() * 0.45, top: r() < 0.28 }));
     this.stem = Array.from({ length: 70 }, () => ({ h: r(), th: r() * Math.PI * 2, rr: r(), s: 0.8 + r() * 0.6 }));
     this.skirt = Array.from({ length: 40 }, () => ({ th: r() * Math.PI * 2, rr: 0.5 + r() * 0.6, s: 0.7 + r() * 0.6 }));
     this.visible = false;
@@ -88,55 +88,61 @@ export class MushroomCloud {
   }
 
   update(age) {
+    // The classic mushroom: a slim column rising into a wide, rolling cap (a doughnut turning over on itself, a
+    // dome on top), a ring of cloud round the stem, a dust skirt at its foot. Fire glows under the cap at first.
     const P = this.puffs, G = this.glow;
     P.clear();
     G.clear();
-    const Hc = 1600 + 10000 * (1 - Math.exp(-age / 16)); // the cap's height (m)
-    const Rc = 500 + 2600 * (1 - Math.exp(-age / 20)); // its radius
-    const hot = Math.max(0, 1 - age / 22); // the glow inside fades
-    const roll = age * 0.35;
+    const Hc = 1500 + 6200 * (1 - Math.exp(-age / 15)); // the cap's height (m)
+    const Rc = 700 + 2300 * (1 - Math.exp(-age / 18)); // its radius
+    const hot = Math.max(0, 1 - age / 40);
+    const roll = age * 0.45;
     const x0 = HYPO.x, z0 = HYPO.z;
-    // the stem: narrow, brown, from the ground to under the cap
+    const fire = (k, c) => [c[0] * (1 - k) + 1.0 * k, c[1] * (1 - k) + 0.5 * k, c[2] * (1 - k) + 0.2 * k];
+    // the stem: slim, brown below, paler and wider where it feeds the cap
     for (const p of this.stem) {
-      const y = p.h * (Hc - Rc * 0.35);
-      const w = (250 + 350 * (1 - p.h)) * (0.4 + 0.6 * Math.min(1, age / 10));
-      const a = p.th + roll * 0.6;
-      const c = 0.45 + 0.15 * p.h;
-      P.add(x0 + Math.cos(a) * w * p.rr, y, z0 + Math.sin(a) * w * p.rr, w * 2.3 * p.s, [c * 1.02, c * 0.92, c * 0.8], 0.4, a);
+      const y = p.h * (Hc - Rc * 0.2);
+      const w = (180 + 260 * p.h ** 3 + 120 * (1 - p.h)) * (0.5 + 0.5 * Math.min(1, age / 8));
+      const a = p.th + roll * 0.8;
+      const c = 0.42 + 0.3 * p.h;
+      P.add(x0 + Math.cos(a) * w * p.rr * 0.7, y, z0 + Math.sin(a) * w * p.rr * 0.7, w * 2.0 * p.s, fire(hot * 0.5 * p.h, [c * 1.05, c * 0.93, c * 0.8]), 0.5, a);
     }
-    // the dust skirt round its foot
+    // the collar: a thin white ring of condensed cloud round the stem
+    const yc = Hc * 0.72;
+    for (let i = 0; i < 18; i++) {
+      const t = (i / 18) * Math.PI * 2 + roll * 0.2;
+      P.add(x0 + Math.cos(t) * Rc * (0.42 + 0.08 * Math.sin(t * 3)), yc + Rc * 0.06 * Math.cos(t * 5), z0 + Math.sin(t) * Rc * (0.42 + 0.08 * Math.sin(t * 3)), Rc * 0.7, [0.92, 0.92, 0.9], 0.14 * Math.min(1, age / 12), t);
+    }
+    // the dust skirt
     for (const p of this.skirt) {
-      const rad = (300 + Rc * 0.9) * p.rr;
-      P.add(x0 + Math.cos(p.th) * rad, 150 * p.s, z0 + Math.sin(p.th) * rad, 700 * p.s + age * 14, [0.42, 0.37, 0.31], 0.32, p.th);
+      const rad = (400 + Rc * 1.1) * p.rr;
+      P.add(x0 + Math.cos(p.th) * rad, 160 * p.s, z0 + Math.sin(p.th) * rad, 800 * p.s + age * 14, [0.45, 0.39, 0.32], 0.3, p.th);
     }
-    // the cap: a ring rolling outwards and upwards, with a dome on top
+    // the cap: the rolling doughnut, then the dome over it
     for (const p of this.cap) {
-      const ph = p.ph + roll;
-      const rr = Rc * p.rr;
-      let x, y, z;
+      let x, y, z, light;
       if (p.top) {
-        x = x0 + Math.cos(p.th) * Rc * 0.55 * p.rr;
-        z = z0 + Math.sin(p.th) * Rc * 0.55 * p.rr;
-        y = Hc + Rc * 0.35 + Rc * 0.25 * Math.cos(p.th * 3) * p.rr;
+        const r = Rc * 0.62 * p.rr;
+        x = x0 + Math.cos(p.th) * r;
+        z = z0 + Math.sin(p.th) * r;
+        y = Hc + Rc * 0.45 + Rc * 0.18 * (1 - p.rr);
+        light = 1.0;
       } else {
-        const ring = Rc * 0.55 + rr * Math.cos(ph);
+        const ph = p.ph + roll;
+        const ring = Rc * 0.62 + Rc * 0.36 * Math.cos(ph);
         x = x0 + Math.cos(p.th) * ring;
         z = z0 + Math.sin(p.th) * ring;
-        y = Hc + rr * 0.7 * Math.sin(ph);
+        y = Hc + Rc * 0.36 * Math.sin(ph);
+        light = 0.72 + 0.28 * Math.max(0, Math.sin(ph)); // sunlit on top, shadowed underneath
       }
-      // lit from above, shadowed underneath (the cap's underside is brown with dust)
-      const under = Math.max(0, (Hc - y) / (Rc * 0.7));
-      const light = 0.8 + 0.12 * Math.sin(ph) + (p.top ? 0.12 : 0) - under * 0.35;
-      const c = [light, light * (0.97 - under * 0.06), light * (0.93 - under * 0.12)];
-      c[0] = c[0] * (1 - hot) + 1.0 * hot;
-      c[1] = c[1] * (1 - hot) + 0.55 * hot;
-      c[2] = c[2] * (1 - hot) + 0.35 * hot;
-      P.add(x, y, z, Rc * 1.15 * p.s, c, 0.42, p.th + ph * 0.2);
+      const under = Math.max(0, Math.min(1, (Hc - y) / (Rc * 0.36)));
+      const c = fire(hot * (0.35 + 0.65 * under), [light, light * (0.96 - under * 0.08), light * (0.9 - under * 0.15)]);
+      P.add(x, y, z, Rc * 0.75 * p.s, c, 0.5, p.th);
     }
-    // the fire glowing inside the cap while it is young
-    if (hot > 0) for (let i = 0; i < 24; i++) {
-      const a = (i / 24) * Math.PI * 2;
-      G.add(x0 + Math.cos(a) * Rc * 0.4, Hc + Math.sin(a * 2) * Rc * 0.15, z0 + Math.sin(a) * Rc * 0.4, Rc * 0.9, [1, 0.55, 0.25], 0.35 * hot, a);
+    // the fire glowing in the underside of the cap while it is young
+    if (hot > 0) for (let i = 0; i < 28; i++) {
+      const t = (i / 28) * Math.PI * 2 + roll * 0.5;
+      G.add(x0 + Math.cos(t) * Rc * 0.62, Hc - Rc * 0.15, z0 + Math.sin(t) * Rc * 0.62, Rc * 0.6, [1, 0.5, 0.18], 0.45 * hot, t);
     }
     P.commit();
     G.commit();
