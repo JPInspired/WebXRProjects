@@ -24,7 +24,7 @@ const HYPO_SITE = { x0: 98, x1: 126, z0: 94, z1: 117 }; // Shima Hospital's plot
 let M = null;
 function mats() {
   if (M) return M;
-  const roof = photo('grey_roof_tiles', 3, 2); // (real tiles: CC0, Poly Haven)
+  const roof = photo('grey_roof_tiles', 5, 3); // (real tiles: CC0, Poly Haven)
   M = {
     house: new THREE.MeshLambertMaterial({ map: houseTexture(false) }),
     roof: new THREE.MeshLambertMaterial({ map: roof }),
@@ -316,7 +316,7 @@ export class City {
       const shop = !p.far && (onStreet(p.x, p.z + 7) || onStreet(p.x, p.z - 7) || onStreet(p.x + 7, p.z) || onStreet(p.x - 7, p.z)) && r() < 0.6;
       const tone = new THREE.Color().setHSL(0.07 + r() * 0.03, 0.18 + r() * 0.12, 0.62 + r() * 0.25);
       bodies[(shop ? 0 : 2) + (st - 1)].push({ x: p.x, z: p.z, sx: w, sy: h, sz: d, ry: p.facing, c: tone, dist: Math.hypot(p.x - HYPO.x, p.z - HYPO.z) });
-      const rt = new THREE.Color().setHSL(0.6, 0.06 + r() * 0.06, 0.55 + r() * 0.25);
+      const rt = new THREE.Color().setHSL(0.6, 0.06 + r() * 0.06, 0.34 + r() * 0.2);
       roofs.push({ x: p.x, y: h, z: p.z, sx: w + 0.7, sy: 1.6 + d * 0.12, sz: d + 0.9, ry: p.facing, c: rt, dist: Math.hypot(p.x - HYPO.x, p.z - HYPO.z) });
       if (st === 2 && !p.far) {
         const off = new THREE.Vector3(0, 0, d / 2 + 0.35).applyAxisAngle(UP, p.facing);
@@ -412,7 +412,7 @@ export class City {
       const h = st === 2 ? 5.8 : 3.3;
       const tone = new THREE.Color().setHSL(0.08, 0.15, today ? 0.85 : 0.75 + r() * 0.2);
       bodies[(r() < 0.4 ? 0 : 2) + (st - 1)].push({ x: p.x, z: p.z, sx: w, sy: h, sz: d, ry: p.facing, c: tone });
-      roofs.push({ x: p.x, y: h, z: p.z, sx: w + 0.6, sy: 1.5 + d * 0.1, sz: d + 0.8, ry: p.facing, c: new THREE.Color().setHSL(0.6, 0.1, today ? 0.5 : 0.62 + r() * 0.2) });
+      roofs.push({ x: p.x, y: h, z: p.z, sx: w + 0.6, sy: 1.5 + d * 0.1, sz: d + 0.8, ry: p.facing, c: new THREE.Color().setHSL(0.6, 0.1, today ? 0.4 : 0.4 + r() * 0.18) });
       if (!p.far) walk.block(p.x - (turned ? d : w) / 2, p.z - (turned ? w : d) / 2, p.x + (turned ? d : w) / 2, p.z + (turned ? w : d) / 2);
     }
     bodies.forEach((b, i) => { if (b.length) group.add(instanced(this.geo.body[i], M.house, b)); });
