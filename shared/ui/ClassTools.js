@@ -5,7 +5,11 @@ import { sound } from '../util/sound.js';
 // The teacher's class tools (Teacher menu → Class), for shared sessions:
 //  • Pause the Class: every student's view dims, a message asks them to look towards the teacher, and their
 //    controls do nothing until the teacher resumes (the teacher's own view is not paused).
-//  • Look Here: for 8 seconds every student sees an arrow towards the teacher and a ring above the teacher's head.
+//  • Watch My Bench (lessons with a copy of the teacher's bench, shared/net/LabMirror.js): every student's own bench
+//    and menus step aside and the teacher's bench glides into their place, at real size, until the teacher stops.
+//    While a student's work is being shown it reads Watch This Bench, and everyone watches that bench instead.
+//    (Lessons with no bench to copy, such as Reef Dive, Hiroshima and Bounce Lab, have no attention button.)
+//    The older Look Here (an arrow and a ring for 8 seconds) is kept in the code below but no longer offered.
 //  • Timer: 1, 2, 5 or 10 minutes, counting down near the top of everyone's view, with a chime at the end.
 // They travel with the rest of the teacher's settings (LessonApp.broadcastAdmin → onAdmin), so anyone who joins
 // late or reconnects gets them at once.
@@ -33,6 +37,7 @@ class ClassTools {
     this.timerTotal = 0;
     this.timeUp = 0; // when "Time is up" started showing
     this.lookEnd = 0;
+    this.watch = false; // Watch My Bench is on
 
     // a small display that follows your view (near the top), drawn on a canvas
     this.canvas = document.createElement('canvas');
@@ -69,7 +74,7 @@ class ClassTools {
 
   /** A student, while the teacher has paused the class: their controls do nothing. */
   get blocked() {
-    return this.paused && !this.app.isAdmin;
+    return (this.paused && !this.app.isAdmin) || this.app.watchingCopy; // (watching: their own bench is put away)
   }
 
   // ───────────── the teacher ─────────────
@@ -94,6 +99,12 @@ class ClassTools {
     this.send();
   }
 
+  setWatch(on) {
+    this.watch = on;
+    if (on) sound.attention();
+    this.send();
+  }
+
   look() {
     this.lookEnd = performance.now() + LOOK_MS;
     sound.attention();
@@ -113,6 +124,7 @@ class ClassTools {
       timerLeft: this.timerEnd ? Math.max(0, this.timerEnd - now) : null,
       timerTotal: this.timerTotal,
       lookLeft: Math.max(0, this.lookEnd - now),
+      watch: this.watch,
     };
   }
 
@@ -131,6 +143,11 @@ class ClassTools {
       if (!this.timerEnd || Math.abs(end - this.timerEnd) > 1500) this.timerEnd = end; // (ignore small delays)
       this.timerTotal = t.timerTotal;
     }
+    if (!!t.watch !== this.watch) {
+      this.watch = !!t.watch;
+      if (this.watch) sound.attention();
+      this.app.refresh();
+    }
     if (t.lookLeft > 0 && this.lookEnd < now) sound.attention();
     this.lookEnd = t.lookLeft > 0 ? now + t.lookLeft : 0;
   }
@@ -140,10 +157,14 @@ class ClassTools {
     ui.heading('Pause', { size: 22 });
     ui.buttons([{ id: 'class-pause', label: this.paused ? 'Resume the Class' : 'Pause the Class', active: this.paused, onClick: () => this.setPaused(!this.paused) }], { height: 54, size: 21 });
     ui.text(this.paused ? 'Every student’s view is dimmed and their controls are paused.' : 'Dims every student’s view and asks them to look towards you.', { size: 19, color: THEME.dim });
-    ui.heading('Attention', { size: 22 });
-    const looking = this.lookEnd > performance.now();
-    ui.buttons([{ id: 'class-look', label: looking ? 'Pointing to You…' : 'Look Here', active: looking, onClick: () => this.look() }], { height: 54, size: 21 });
-    ui.text('Shows every student an arrow towards you, and a ring above you, for 8 seconds.', { size: 19, color: THEME.dim });
+    if (this.app.mirror) {
+      const what = this.app.showWork ? 'This Bench' : 'My Bench';
+      ui.heading('Attention', { size: 22 });
+      ui.buttons([{ id: 'class-watch', label: this.watch ? 'Watching (Tap to Stop)' : `Watch ${what}`, active: this.watch, onClick: () => this.setWatch(!this.watch) }], { height: 54, size: 21 });
+      ui.text(this.watch
+        ? (this.app.showWork ? `Every student’s own bench is put away; they are watching ${this.app.showWork.name}’s bench, in front of them.` : 'Every student’s own bench is put away; they are watching your bench, in front of them.')
+        : 'Puts every student’s own bench and menus away and brings the bench on the copy to the front, until you stop.', { size: 19, color: THEME.dim });
+    }
     ui.heading('Timer', { size: 22 });
     ui.buttons(TIMERS.map((m) => ({ id: `class-timer-${m}`, label: `${m} min`, onClick: () => this.startTimer(m) })), { cols: 4, height: 50, size: 20, gap: 8 });
     if (this.timerEnd) {
@@ -173,6 +194,7 @@ class ClassTools {
       app.adminPanel?.redraw(); // the countdown on the Stop button
     }
     const looking = this.lookEnd > now;
+    const watching = this.watch && !!app.mirror;
     const student = !app.isAdmin;
     // what the display says
     let lines = null;
@@ -182,6 +204,7 @@ class ClassTools {
     else if (this.timeUp && now - this.timeUp < 6000) lines = { title: 'Time Is Up', text: 'The timer has finished.', color: THEME.good };
     else if (this.paused) lines = { title: 'Class Paused', text: 'Only you can use the controls.', color: '#ffd36b' };
     else if (looking) lines = { title: 'Students Are Looking at You', text: '', color: '#ffd36b' };
+    else if (watching && !student) lines = { title: app.showWork ? 'Students Are Watching This Bench' : 'Students Are Watching Your Bench', text: '', color: '#ffd36b' };
     this.hud.visible = !!lines;
     if (lines) {
       const key = JSON.stringify(lines);
@@ -203,8 +226,9 @@ class ClassTools {
       this.dim.material.opacity = this.dimLevel;
     }
     // Look Here: an arrow towards the teacher, and a ring above them
-    const teacher = student && looking ? this.teacherHead() : null;
-    this.beacon.visible = !!teacher;
+    // (watching: the arrow brings a student who looks away back to the bench in front of them; no ring)
+    const teacher = student && (looking || (watching && app.watchingCopy)) ? this.teacherHead() : null;
+    this.beacon.visible = !!teacher && looking;
     this.arrow.visible = false;
     if (teacher) {
       this.beacon.position.copy(teacher).add(new THREE.Vector3(0, 0.32, 0));

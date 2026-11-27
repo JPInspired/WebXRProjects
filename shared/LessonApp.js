@@ -852,9 +852,17 @@ export class LessonApp {
     this.refresh();
   }
 
-  /** Is the copy of a bench wanted behind every bench? (My Bench, or the teacher is showing a student's work.) */
+  /** Is the copy of a bench wanted? (My Bench, a student's work being shown, or Watch My Bench.) */
   get copyWanted() {
-    return this.behind === 'bench' || !!this.showWork;
+    return this.behind === 'bench' || !!this.showWork || !!this.classTools?.watch;
+  }
+
+  /**
+   * Watch My Bench (Teacher menu → Class): this student's own bench and menus are hidden and the bench on the copy
+   * comes to the front, until the teacher stops. Not the teacher, and not the student whose work is being shown.
+   */
+  get watchingCopy() {
+    return !!this.classTools?.watch && !this.isAdmin && !!this.mirror?.stage.visible && this.mirror.sourceId !== this.presence?.selfId;
   }
 
   /** Student: what the teacher has put behind every bench. */
@@ -1283,6 +1291,12 @@ export class LessonApp {
     panelFrame();
     this.update(dt, frame);
     this.mirror?.update(dt);
+    // while watching the teacher's bench, this student's own bench and menus step aside (and come back as they were)
+    const watching = this.watchingCopy && (this.mirror.front ?? 0) > 0.5;
+    if (watching !== !!this.benchHidden) {
+      this.benchHidden = watching;
+      this.lab.visible = !watching;
+    }
     this.realRoom?.update(); // after the lesson has placed its board
     this.grounding?.update(dt);
     if (this.presence) {

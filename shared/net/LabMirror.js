@@ -47,9 +47,10 @@ import { makeShadowBlob } from '../util/contactShadows.js';
 export const CLASS_COPY = {
   enabled: true,
   scale: 1.7, // the copy's size, compared with your own bench
-  back: 1.1, // how far behind your bench (m)
+  back: 2.2, // how far behind your bench (m)
   lift: 0.3, // how far above your bench (m)
   tilt: 0.4, // (about 23°) tipped towards you (radians), like the angled mirror over a demonstration bench
+  frontTime: 0.6, // Watch My Bench: how long the copy takes to glide to the front (and back), in seconds
   hz: 12, // updates a second from whoever is on the copy
   glide: 0.07, // how quickly the copy's parts catch up (s): about three times this behind the teacher
   shapeHz: 5, // bent shapes (ropes, waves) at most this often
@@ -851,9 +852,17 @@ class LabMirror {
     }
     this.stage.visible = wanted && !!src && src !== pr?.selfId && this.haveFull;
     if (this.stage.visible) {
+      // Watch My Bench: the copy glides forward into the student's own bench's place, at real size and flat
+      const toFront = app.watchingCopy ? 1 : 0;
+      this.front = THREE.MathUtils.clamp((this.front ?? 0) + Math.sign(toFront - (this.front ?? 0)) * (dt / CLASS_COPY.frontTime), 0, 1);
+      const k = this.front * this.front * (3 - 2 * this.front); // (eased)
+      const scale = THREE.MathUtils.lerp(CLASS_COPY.scale, 1, k);
+      this.copy?.scale.setScalar(scale);
+      this.label.mesh.position.set(0, 0.5 * scale, 0.3 * scale);
+      this.label.mesh.scale.setScalar(1 - 0.45 * k); // (smaller up close)
       app.lab.updateMatrixWorld();
-      this.stage.position.set(0, CLASS_COPY.lift, -CLASS_COPY.back).applyMatrix4(app.lab.matrixWorld);
-      this.stage.quaternion.copy(app.lab.getWorldQuaternion(new THREE.Quaternion())).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), CLASS_COPY.tilt));
+      this.stage.position.set(0, THREE.MathUtils.lerp(CLASS_COPY.lift, 0, k), THREE.MathUtils.lerp(-CLASS_COPY.back, 0, k)).applyMatrix4(app.lab.matrixWorld);
+      this.stage.quaternion.copy(app.lab.getWorldQuaternion(new THREE.Quaternion())).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), CLASS_COPY.tilt * (1 - k)));
       const name = this.labelText();
       if (name !== this.label.text) this.label.draw(name);
       this.glide(dt);
