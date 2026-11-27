@@ -162,8 +162,8 @@ const CLASS = `
         <h2>Running It With a Class</h2>
         <ol class="steps">
           <li><b>Start the Class Session</b>Open the lesson and choose Start a Class Session. The lesson shows a four-character class code and who has joined.</li>
-          <li><b>Students Join With the Code</b>Students type the code and their name into Joining a Class? at the top of the lessons page. They are taken straight into this lesson and press Enter. Each student sees your bench, live, behind their own.</li>
-          <li><b>Lead From the Teacher Menu</b>The Lesson tab sets the activity for everyone, the Students tab shows progress and the Class tab holds the class tools.</li>
+          <li><b>Students Join With the Code</b>Students type the code and their name into Joining a Class? at the top of the lessons page. They are taken straight into this lesson and press Enter. When you choose My Bench, each student sees your bench, live, behind their own.</li>
+          <li><b>Lead From the Teacher Menu</b>The Lesson tab sets the activity for everyone, and the Board tab chooses what stands behind every bench: nothing at the start, the class board or your own bench, live. The Students tab shows progress and can show one student’s work to everyone; the Class tab holds the class tools.</li>
         </ol>
       </div>
       <div>
@@ -221,7 +221,7 @@ ${g.steps.map(([n, t]) => `        <li><b>${esc(n)}</b>${esc(t)}</li>`).join('\n
       </ol>
       <p style="color:var(--ink-3);font-size:14px;margin:16px 0 0">In a class session, the teacher chooses the activity and level for the whole class from the Teacher Menu.</p>
     </section>
-${/virtual reality/i.test(g.mode) ? '' : g.id === 'reef-dive' ? CLASS.replace('Each student sees your bench, live, behind their own.', 'Each student’s reef appears around them, and your settings reach everyone.') : g.id === 'bounce-lab' ? CLASS.replace('Each student sees your bench, live, behind their own.', 'Each student’s drop station appears on the floor around them, and your results show on the class board.') : CLASS}
+${/virtual reality/i.test(g.mode) ? '' : g.id === 'reef-dive' ? CLASS.replace('When you choose My Bench, each student sees your bench, live, behind their own.', 'Each student’s reef appears around them, and your settings reach everyone.').replace(', and the Board tab chooses what stands behind every bench: nothing at the start, the class board or your own bench, live.', '.').replace(' and can show one student’s work to everyone', '') : g.id === 'bounce-lab' ? CLASS.replace('When you choose My Bench, each student sees your bench, live, behind their own.', 'Each student’s drop station appears on the floor around them, and your results show on the class board.').replace('nothing at the start, the class board or your own bench, live', 'nothing at the start, or the class board').replace(' and can show one student’s work to everyone', '') : CLASS}
     <nav class="pager" aria-label="Other guides">
       ${prev ? `<a href="../${prev.id}/">Previous guide<b>${esc(prev.title)}</b></a>` : ''}
       ${next ? `<a class="next" href="../${next.id}/">Next guide<b>${esc(next.title)}</b></a>` : `<a class="next" href="../">All guides<b>Teacher Guides</b></a>`}

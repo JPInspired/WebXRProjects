@@ -97,8 +97,9 @@ export class MoleculeBuilder {
     atom.mesh = new THREE.Mesh(this.sphere, this.material(sym));
     atom.mesh.scale.setScalar(this.ballRadius(sym));
     atom.mesh.position.copy(pos);
-    atom.mesh.userData = { handler: this, atom };
+    atom.mesh.userData = { handler: this, atom, mirror: { id: `ball${atom.id}`, type: `ball:${sym}` } }; // (the class copy: shared/net/LabMirror.js)
     atom.halo = new THREE.Sprite(this.haloMat);
+    atom.halo.userData.mirror = { id: `halo${atom.id}`, type: 'halo' };
     this.content.add(atom.mesh, atom.halo);
     this.atoms.push(atom);
     return atom;
@@ -113,7 +114,7 @@ export class MoleculeBuilder {
   }
 
   addBond(a, b, order = 1) {
-    const bond = { a, b, order, meshes: [] };
+    const bond = { a, b, order, meshes: [], uid: (this.nextBond = (this.nextBond ?? 0) + 1) };
     this.bonds.push(bond);
     this.makeBondMeshes(bond);
     return bond;
@@ -126,12 +127,13 @@ export class MoleculeBuilder {
     bond.pairs = [];
     for (let i = 0; i < bond.order; i++) {
       const m = new THREE.Mesh(this.cylinder, this.bondMat);
-      m.userData = { handler: this, bond, tapOnly: true }; // tapped with a ray/click, never grabbed by reach
+      m.userData = { handler: this, bond, tapOnly: true, mirror: { id: `bond${bond.uid}-${i}`, type: 'bond' } }; // tapped with a ray/click, never grabbed by reach
       m.visible = this.style !== 'space';
       this.content.add(m);
       bond.meshes.push(m);
       // Each shared pair of electrons, drawn where it sits: closer to the atom that pulls harder.
       const pair = new THREE.Mesh(this.pairGeo, this.pairMat);
+      pair.userData.mirror = { id: `pair${bond.uid}-${i}`, type: 'pair' };
       this.content.add(pair);
       bond.pairs.push(pair);
     }

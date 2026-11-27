@@ -47,10 +47,12 @@ export class Tray {
       m.scale.setScalar(it.radius);
       m.position.set(x0 + i * step, 0, 0);
       m.userData.trayItem = it.kind;
+      m.userData.mirror = { id: `trayball${i}`, type: 'trayball' }; // (the class copy: shared/net/LabMirror.js; colour comes with it)
       m.userData.handler = handler;
       this.items.add(m);
       const label = makeLabel(it.label, { height: 0.024, size: 40 });
       label.position.set(m.position.x, 0.05 + it.radius * 0.4, 0);
+      label.userData.mirror = { id: `traylabel${i}`, type: `traylabel:${String(it.label).slice(0, 60)}` };
       this.items.add(label);
     });
   }

@@ -25,7 +25,7 @@ class App extends LessonApp {
       ...this.state,
       mode: 'notes',
       level: 'core',
-      big: true,
+      big: false, // (the class board starts hidden: switched on in Settings, or by the teacher: Teacher menu → Board)
       revealed: false,
       answers: false, // the teacher's "show the answers" (ghosts in every skeleton)
       system: null,
@@ -480,6 +480,16 @@ class App extends LessonApp {
   }
 
   // ───────────── wiring ─────────────
+
+  /**
+   * The class copy of a bench (shared/net/LabMirror.js): the organs and the function cards move between the tray,
+   * the desk and the skeleton, so they are named and followed wherever they go.
+   */
+  mirrorParts() {
+    const b = this.body;
+    if (!b) return [];
+    return [...b.pieces.map((p) => ({ id: `organ:${p.id}`, obj: p.group })), ...b.cards.map((k) => ({ id: `card:${k.id}`, obj: k.group }))];
+  }
 
   grabTargets() {
     return this.body?.targets ?? [];

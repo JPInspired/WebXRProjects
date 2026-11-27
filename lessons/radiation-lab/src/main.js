@@ -26,7 +26,7 @@ class App extends LessonApp {
       ...this.state,
       mode: 'start',
       level: 'core',
-      big: true,
+      big: false, // (the class board starts hidden: switched on in Settings, or by the teacher: Teacher menu → Board)
       tongs: false,
       xray: false,
       dose: 0, // µSv from the sources

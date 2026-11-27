@@ -31,7 +31,7 @@ class App extends LessonApp {
       ...this.state,
       mode: 'predict',
       level: 'core',
-      big: true,
+      big: false, // (the class board starts hidden: switched on in Settings, or by the teacher: Teacher menu → Board)
       round: 0,
       revealed: false,
       vote: null,

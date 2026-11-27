@@ -348,7 +348,7 @@ export class Bench {
       h.scale.set(0.024, 0.015, 0.03);
       const home = new THREE.Vector3(base.x + d * 0.034, base.y, base.z);
       h.position.copy(home);
-      h.userData = { handler: this, half: true, where: 'tile', home };
+      h.userData = { handler: this, half: true, where: 'tile', home, mirror: { id: `half${d}`, type: 'liverhalf' } }; // (mirror: the class copy, shared/net/LabMirror.js)
       this.group.add(h);
       return h;
     });
@@ -421,6 +421,8 @@ export class Bench {
     ring.position.set(TROUGH.x, y, TROUGH.z);
     const l = makeLabel(`${t} s`, { height: 0.009, size: 36, color: '#ff9a9a' });
     l.position.set(TROUGH.x - CYL_R - 0.016, y, TROUGH.z);
+    ring.userData.mirror = { id: `markring${t}`, type: 'markring' }; // (the class copy: shared/net/LabMirror.js)
+    l.userData.mirror = { id: `marklabel${t}`, type: `marklabel:${t}` };
     this.marks.add(ring, l);
     this.app.onMark(t, v);
   }

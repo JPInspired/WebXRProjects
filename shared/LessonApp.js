@@ -18,7 +18,7 @@ import { makeClassTools } from './ui/ClassTools.js';
 import { makeRoomLineUp } from './net/RoomLineUp.js';
 import { makeRealRoom } from './fx/RealRoom.js';
 import { makeGrounding } from './fx/Grounding.js';
-import { makeLabMirror, CLASS_COPY } from './net/LabMirror.js';
+import { makeLabMirror } from './net/LabMirror.js';
 
 // Everything every WebXR lesson needs, so each lesson only adds its own content:
 //  • three.js scene, desktop camera + orbit controls, lights, floor grid
@@ -99,7 +99,16 @@ export class LessonApp {
       this.initPlayerList();
       this.initAdmin();
       this.showWork = null; // { id, name }: the student whose work the teacher is showing on every board
+      // what stands behind every bench: 'none' (every lesson starts so), 'board' (the class board) or 'bench' (a live
+      // copy of the teacher's bench, shared/net/LabMirror.js). The teacher chooses (Teacher menu → Board).
+      this.behind = 'none';
+      // the lesson's own board buttons (e.g. Heart Lab's Shown / Hidden) go through the same choice for the teacher
+      for (const name of ['toggleBoard', 'toggleBig']) {
+        const own = this[name]?.bind(this);
+        if (own) this[name] = () => (this.isAdmin ? this.setBehind(this.behind === 'board' ? 'none' : 'board') : own());
+      }
       this.mirror = makeLabMirror(this); // the teacher's bench behind yours (shared/net/LabMirror.js)
+      if (session.host) setTimeout(() => { if (this.isAdmin && !this.presenting) this.teacherHint(false); }, 1500);
     }
     // house style: the explanation card fits round its words (shared/ui/CanvasPanel.js STYLE)
     if (STYLE.enabled) this.explainPanel?.setFit(0.1);
@@ -714,9 +723,15 @@ export class LessonApp {
       return;
     }
     if (tab === 'board') {
-      if (this.toggleBoard && 'big' in this.state) {
-        ui.heading('Class board', { size: 22 });
-        ui.buttons([{ id: 'admin-board', label: this.state.big ? 'Showing (Tap to Hide)' : 'Hidden (Tap to Show)', active: this.state.big, onClick: () => this.toggleBoard() }], { height: 52, size: 20 });
+      const options = this.behindOptions();
+      if (options.length > 1) {
+        ui.heading('Behind Each Bench', { size: 22 });
+        ui.buttons(options.map(([id, label]) => ({ id: `behind-${id}`, label, active: this.behind === id, onClick: () => this.setBehind(id) })), { cols: options.length, height: 52, size: 20, gap: 8 });
+        ui.text({
+          none: 'Nothing stands behind the benches: every student sees only their own.',
+          board: 'Every student sees the class board behind their bench.',
+          bench: this.showWork ? `Every student sees ${this.showWork.name}’s bench, live, behind their own.` : 'Every student sees your bench, live, behind their own, with your hands over it.',
+        }[this.behind], { size: 19, color: THEME.dim });
       }
       for (const s of sections.filter(isBoard)) draw(s);
       return;
@@ -780,7 +795,7 @@ export class LessonApp {
 
   /** Everything the admin has set, sent to everyone now and then (and to anyone who joins). */
   broadcastAdmin(to) {
-    if (this.isAdmin) this.adminSend({ k: 'state', lock: this.admin.lock, effects: this.admin.effects, lesson: this.adminLessonState?.() ?? null, tools: this.classTools?.snapshot() ?? null, lineup: this.roomLineUp?.adminMode, removed: this.admin.removed ?? [], show: this.showWork }, to);
+    if (this.isAdmin) this.adminSend({ k: 'state', lock: this.admin.lock, effects: this.admin.effects, lesson: this.adminLessonState?.() ?? null, tools: this.classTools?.snapshot() ?? null, lineup: this.roomLineUp?.adminMode, removed: this.admin.removed ?? [], show: this.showWork, behind: this.behind }, to);
   }
 
   onPeerJoinedAdmin(id) {
@@ -804,8 +819,48 @@ export class LessonApp {
 
   /** Teacher: put one student's bench on every board (null: back to the teacher's own). */
   setShowWork(person) {
-    this.showWork = person ? { id: person.id, name: String(person.plain ?? person.name ?? 'A student').slice(0, 24) } : null;
+    if (person) {
+      // showing a student's work puts the copy behind every bench; stopping puts back what was there before
+      if (!this.showWork) this.behindBefore = this.behind;
+      this.showWork = { id: person.id, name: String(person.plain ?? person.name ?? 'A student').slice(0, 24) };
+      this.setBehind('bench', true);
+    } else {
+      this.showWork = null;
+      this.setBehind(this.behindBefore ?? 'none', true);
+      this.behindBefore = null;
+    }
+  }
+
+  /** What the teacher can put behind every bench in this lesson: Nothing, the Class Board (if it has one), My Bench (if it can be copied). */
+  behindOptions() {
+    const out = [['none', 'Nothing']];
+    if ('big' in this.state && (this.toggleBoard || this.toggleBig)) out.push(['board', this.toggleBoard ? 'Class Board' : 'Class Heart']);
+    if (this.mirror) out.push(['bench', 'My Bench']);
+    return out;
+  }
+
+  /** Teacher: what stands behind every bench (the board and the copy take turns, so they never overlap). */
+  setBehind(mode, keepShow = false) {
+    if (!this.behindOptions().some(([id]) => id === mode)) mode = 'none';
+    if (!keepShow && mode !== 'bench' && this.showWork) {
+      this.showWork = null; // (choosing something else ends showing a student's work)
+      this.behindBefore = null;
+    }
+    this.behind = mode;
+    if ('big' in this.state) this.state.big = mode === 'board'; // (students' boards follow the teacher's)
     this.broadcastAdmin();
+    this.refresh();
+  }
+
+  /** Is the copy of a bench wanted behind every bench? (My Bench, or the teacher is showing a student's work.) */
+  get copyWanted() {
+    return this.behind === 'bench' || !!this.showWork;
+  }
+
+  /** Student: what the teacher has put behind every bench. */
+  applyBehind(mode) {
+    if (!['none', 'board', 'bench'].includes(mode) || mode === this.behind) return;
+    this.behind = mode;
     this.refresh();
   }
 
@@ -871,6 +926,7 @@ export class LessonApp {
       if (Array.isArray(d.removed) && d.removed.includes(this.presence?.selfId)) this.removedByTeacher(); // (in case the one-off message was missed)
       this.onAdminLesson?.(d.lesson);
       this.applyShowWork(d.show);
+      this.applyBehind(d.behind);
     } else if (d.k === 'kick') {
       this.removedByTeacher();
     } else if (d.k === 'refind' && this.roomLineUp) {
@@ -898,13 +954,25 @@ export class LessonApp {
     }
   }
 
-  /** While the teacher's bench is copied behind yours, the class board moves up to sit above the copy. */
-  liftBoard() {
-    const b = this.boardStage;
-    if (!b || !this.mirror.stage.visible) return;
-    if (this.boardLifted && b.position.equals(this.boardLifted)) return; // (the lesson has not moved it since)
-    b.position.y += CLASS_COPY.boardLift;
-    (this.boardLifted ??= new THREE.Vector3()).copy(b.position);
+  /**
+   * The teacher's welcome card: the Teacher menu (the first time ever, in the headset), and what can stand behind
+   * every bench (the first time in each lesson with a class, on a computer or in the headset).
+   */
+  teacherHint(inHeadset = false) {
+    const get = (k) => { try { return localStorage.getItem(k); } catch { return '1'; } };
+    const set = (k) => { try { localStorage.setItem(k, '1'); } catch {} };
+    const menuKey = 'webxr-classes:teacher-hint';
+    const behindKey = `webxr-classes:behind-hint:${this.lessonId}`;
+    const menu = inHeadset && !get(menuKey);
+    const behind = this.behindOptions?.().length > 1 && !get(behindKey);
+    if (!menu && !behind) return;
+    if (menu) set(menuKey);
+    if (behind) set(behindKey);
+    const what = this.mirror && this.behindOptions().some(([id]) => id === 'board') ? 'the class board or your own bench, live' : this.mirror ? 'your own bench, live' : 'the class board';
+    const behindText = `Behind every bench you can show ${what}: Teacher menu › Board.`;
+    this.explain(menu
+      ? { title: 'Your Teacher Menu', text: `The Teacher menu is on your left. Use it to choose the activity for everyone, pause the class, start a timer and see who has joined.${behind ? ` ${behindText}` : ''}` }
+      : { title: 'Behind Every Bench', text: behindText });
   }
 
   // ───────────── B (right controller): hide / show all menus ─────────────
@@ -954,7 +1022,7 @@ export class LessonApp {
       // …and tells them which teacher to trust (shared/net/teacherKey.js)
       this.presence?.keyReady.then(() => { if (this.presence.key) url.searchParams.set('teacher', this.presence.key.fp); });
       // what a first-time teacher needs: the code, big; what students do; who has joined (updated live)
-      const where = session.sameRoom ? 'Everyone is in this room: the lessons line up with the classroom.' : this.mirror ? 'Each student’s lesson appears in front of them, with a live copy of your bench behind their own.' : 'Each student’s lesson appears around them, and your settings reach everyone.';
+      const where = session.sameRoom ? 'Everyone is in this room: the lessons line up with the classroom.' : this.mirror ? 'Each student’s lesson appears in front of them. From the Teacher menu (Board) you can show the class board or your own bench, live, behind every student’s.' : 'Each student’s lesson appears around them, and your settings reach everyone.';
       box.innerHTML = session.host
         ? `<p class="label">Your Class Code</p>
         <div class="bigcode" aria-label="Class code">${session.code}</div>
@@ -964,7 +1032,7 @@ export class LessonApp {
         <div class="buttons"><button class="secondary" id="copy-link">Copy the Link for Students</button><button class="secondary" id="leave-session">End the Class Session</button></div>`
         : `<p class="label">You Are in Class <span class="code">${session.code}</span></p>
         <p class="who" id="session-who" role="status">Connecting to the class…</p>
-        <p class="note">${this.mirror ? 'Your lesson appears in front of you, with your teacher’s bench behind it.' : 'Your lesson appears around you.'} Press the big <b>Enter</b> button to begin.</p>
+        <p class="note">${this.mirror ? 'Your lesson appears in front of you. Your teacher can show their own bench behind it.' : 'Your lesson appears around you.'} Press the big <b>Enter</b> button to begin.</p>
         <div class="buttons"><button class="secondary" id="copy-link">Copy the Link</button><button class="secondary" id="leave-session">Leave the Class</button></div>`;
       box.querySelector('#copy-link').onclick = (e) => {
         navigator.clipboard?.writeText(url.toString()).then(() => { e.target.textContent = 'Link Copied'; }).catch(() => prompt('Copy this link:', url.toString()));
@@ -1118,14 +1186,7 @@ export class LessonApp {
     this.perf?.start();
     this.loading?.enterXR();
     this.onXRStart?.(session, isAR);
-    if (this.isAdmin) {
-      let seen = null;
-      try { seen = localStorage.getItem('webxr-classes:teacher-hint'); } catch {}
-      if (!seen) {
-        try { localStorage.setItem('webxr-classes:teacher-hint', '1'); } catch {}
-        this.explain({ title: 'Your Teacher Menu', text: 'The Teacher menu is on your left. Use it to choose the activity for everyone, pause the class, start a timer and see who has joined.' });
-      }
-    }
+    if (this.isAdmin) this.teacherHint(true);
     // recentring (or lost tracking) moves the headset's coordinates: the room line-up must be redone
     this.renderer.xr.getReferenceSpace()?.addEventListener?.('reset', () => this.onTrackingReset());
 
@@ -1221,10 +1282,7 @@ export class LessonApp {
     this.loading?.update(dt);
     panelFrame();
     this.update(dt, frame);
-    if (this.mirror) {
-      this.mirror.update(dt);
-      this.liftBoard();
-    }
+    this.mirror?.update(dt);
     this.realRoom?.update(); // after the lesson has placed its board
     this.grounding?.update(dt);
     if (this.presence) {

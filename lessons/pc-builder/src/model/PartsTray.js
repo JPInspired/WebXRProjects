@@ -38,6 +38,7 @@ export class PartsTray {
     for (let r = 0; r < rows; r++) {
       const shelf = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.01, 0.13), this.shelfMat);
       shelf.position.copy(ROW).multiplyScalar(r).add(new THREE.Vector3(0, -0.05, 0));
+      shelf.userData.mirror = { id: `shelf:${r}`, type: 'shelf' }; // (the class copy: shared/net/LabMirror.js)
       this.shelves.add(shelf);
     }
     ids.forEach((id, i) => {
@@ -55,6 +56,7 @@ export class PartsTray {
       model.position.copy(box.getCenter(new THREE.Vector3())).multiplyScalar(-scale);
       model.scale.setScalar(scale);
       holder.add(model);
+      holder.userData.mirror = { id: `tray:${id}`, type: `tray:${id}` };
       holder.rotation.x = -0.5; // tilt towards you so the face is visible
       holder.position.set((col - (inRow - 1) / 2) * STEP, 0.02, 0).add(base);
       holder.traverse((o) => {
@@ -64,6 +66,7 @@ export class PartsTray {
       const p = PARTS[id];
       const label = makeLabel(p.short, { height: 0.022, size: 40 });
       label.position.set(holder.position.x, base.y - 0.035, base.z + 0.06);
+      label.userData.mirror = { id: `traylabel:${id}`, type: `traylabel:${id}` };
       this.items.add(label);
     });
   }

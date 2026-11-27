@@ -26,7 +26,7 @@ class App extends LessonApp {
       ...this.state,
       mode: 'predict',
       level: 'core',
-      big: true,
+      big: false, // (the class board starts hidden: switched on in Settings, or by the teacher: Teacher menu → Board)
       seed: 1 + Math.floor(Math.random() * 9000),
       round: 0,
       revealed: false,

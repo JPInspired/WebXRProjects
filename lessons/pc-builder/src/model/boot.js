@@ -121,11 +121,13 @@ export class TourFX {
       for (let i = 0; i < 10; i++) {
         const d = new THREE.Mesh(this.dot, mat);
         d.userData.t = i / 10;
+        d.userData.mirror = { id: `flow:${this.flows.length}:${i}`, type: `dot:${kind}` }; // (the class copy: shared/net/LabMirror.js)
         this.group.add(d);
         dots.push(d);
       }
       const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(30)),
         new THREE.LineBasicMaterial({ color: COLORS[kind], transparent: true, opacity: 0.35 }));
+      line.userData.mirror = { id: `flowline:${this.flows.length}`, type: `flowline:${kind}`, shape: true };
       this.group.add(line);
       this.flows.push({ curve, dots });
     }
@@ -136,6 +138,7 @@ export class TourFX {
         new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15, depthWrite: false, blending: THREE.AdditiveBlending }));
       glow.position.copy(p);
       glow.userData.pulse = true;
+      glow.userData.mirror = { id: `glow:${what}`, type: 'glow' };
       this.group.add(glow);
     }
   }

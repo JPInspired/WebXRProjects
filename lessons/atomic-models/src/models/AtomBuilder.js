@@ -52,6 +52,7 @@ export class AtomBuilder {
     const mesh = new THREE.Mesh(this.geo, glossy(COLORS[kind], { emissive: kind === 'electron' ? 0x1a8fd0 : 0x000000 }));
     mesh.scale.setScalar(kind === 'electron' ? 0.012 : 0.016);
     mesh.position.copy(app.lab.worldToLocal(world.clone()));
+    mesh.userData.mirror = { id: 'particle', type: `particle:${kind}` }; // (the class copy: shared/net/LabMirror.js)
     app.lab.add(mesh);
 
     let felt = false;

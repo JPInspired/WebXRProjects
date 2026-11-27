@@ -28,7 +28,7 @@ class App extends LessonApp {
       ...this.state,
       mode: 'predict',
       level: 'core',
-      big: true,
+      big: false, // (the class board starts hidden: switched on in Settings, or by the teacher: Teacher menu → Board)
       w: { f: 4, a: 5, t: 4 }, // the rope: frequency, amplitude, tension (0–10)
       link: 'rope',
       k: { f: 5, a: 7, d: 5 }, // the ripple tank: frequency, amplitude, depth (0–10)

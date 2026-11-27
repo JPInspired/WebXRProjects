@@ -64,6 +64,8 @@ export class AtomModel {
     const key = `${p}/${n}/${e}/${view}`;
     if (key === this.key) return;
     this.key = key;
+    // (the class copy of a bench, shared/net/LabMirror.js: rebuilt from these numbers on a copy that has another atom)
+    if (this.group.name === 'atom') this.group.userData.mirror = { id: 'atom', type: `atom:${p}:${n}:${e}:${view}` };
     this.buildNucleus(p, n);
     this.buildElectrons(e, view);
   }

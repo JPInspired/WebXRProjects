@@ -118,6 +118,7 @@ export class PCBuild {
     const b = this.build;
     const c = CASES[b.case];
     const shell = caseMesh(b.case);
+    shell.userData.mirror = { id: 'case', type: `case:${b.case}` }; // (the class copy: shared/net/LabMirror.js)
     this.content.add(shell);
     shell.traverse((o) => {
       if (o.userData.powerButton) {
@@ -131,12 +132,17 @@ export class PCBuild {
       if (!id) continue;
       const m = partMesh(id);
       m.position.copy(slot.pos);
+      m.userData.mirror = { id: `part:${slot.id}`, type: `part:${id}` };
       this.content.add(m);
       this.objects.set(slot.id, m);
       m.traverse((o) => {
         if (o.isMesh) Object.assign(o.userData, { handler: this, slotId: slot.id, partId: id });
       });
-      if (PARTS[id].kind === 'aio') this.content.add(radiatorMesh(c, slot.pos, PARTS[id].radiator));
+      if (PARTS[id].kind === 'aio') {
+        const rad = radiatorMesh(c, slot.pos, PARTS[id].radiator);
+        rad.userData.mirror = { id: `rad:${slot.id}`, type: `rad:${b.case}:${PARTS[id].radiator}:${slot.pos.toArray().map((v) => v.toFixed(3)).join(':')}` };
+        this.content.add(rad);
+      }
     }
     this.content.traverse((o) => {
       if (o.userData.spin) this.fans.push(o);
@@ -162,6 +168,7 @@ export class PCBuild {
       tag.position.set(c.x, c.y, CASES[this.build.case].d / 2 + 0.03);
       tag.material.depthTest = false;
       tag.renderOrder = 6;
+      tag.userData.mirror = { id: `label:${slotId}`, type: `label:${id}` };
       this.labels.add(tag);
     }
   }
@@ -181,6 +188,7 @@ export class PCBuild {
         if (o.isMesh) o.material.opacity = 0.12;
       });
       g.userData.slotId = slot.id;
+      g.userData.mirror = { id: `marker:${slot.id}`, type: `marker:${partId}:${ok ? 1 : 0}` };
       this.markers.add(g);
     }
   }
@@ -232,6 +240,7 @@ export class PCBuild {
     const model = partMesh(id);
     model.position.copy(this.centreOffset(id)).negate();
     held.add(model);
+    held.userData.mirror = { id: 'held', type: `held:${id}` };
     held.position.copy(this.group.worldToLocal(world.clone()));
     this.group.add(held);
     this.showMarkers(id);
@@ -259,6 +268,7 @@ export class PCBuild {
           if (best) {
             const ok = canInstall(id, best, this.build).ok;
             this.preview = ghostOf(id, ok);
+            this.preview.userData.mirror = { id: 'preview', type: `ghost:${id}:${ok ? 1 : 0}` };
             this.preview.position.copy(best.pos);
             this.group.add(this.preview);
             app.interaction.pulse(ok ? 0.3 : 0.6, 25);

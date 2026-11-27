@@ -35,7 +35,7 @@ class App extends LessonApp {
       checked: false,
       goggles: false,
       substance: null, // { id, known } shown on the info panel (pH scale activity)
-      big: true,
+      big: false, // (the class board starts hidden: switched on in Settings, or by the teacher: Teacher menu → Board)
       bio: { qid: null, answer: null },
       explain: {
         title: 'Welcome to the Acid Lab',

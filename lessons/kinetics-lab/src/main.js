@@ -26,7 +26,7 @@ class App extends LessonApp {
       ...this.state,
       mode: 'predict',
       level: 'core',
-      big: true,
+      big: false, // (the class board starts hidden: switched on in Settings, or by the teacher: Teacher menu → Board)
       factor: 'temperature',
       round: 0,
       revealed: false,
@@ -52,7 +52,7 @@ class App extends LessonApp {
     this.explainPanel.mesh.rotation.x = 0.2;
     this.lab.add(this.explainPanel.mesh);
     this.panels = [this.controlPanel, this.infoPanel, this.explainPanel];
-    this.bench = new Bench(this);
+    this.bench = new Bench(this);
     this.collisions = new Collisions(this); // collision theory, magnified (model/Collisions.js)
     // a glowing "Look Inside" button beside the apparatus (shared/ui/LookInside.js)
     this.lookBtn = lookInside(this, { at: new THREE.Vector3(-0.36, -0.14, -0.04), isOn: () => this.collisions.on, onClick: () => this.toggleCollisions() });

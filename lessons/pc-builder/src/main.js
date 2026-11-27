@@ -7,6 +7,9 @@ import { CASES } from './data/parts.js';
 import { emptyBuild } from './data/rules.js';
 import { PCBuild } from './model/PCBuild.js';
 import { PartsTray } from './model/PartsTray.js';
+import { PARTS, CATEGORIES } from './data/parts.js';
+import { caseMesh, partMesh, ghostOf, radiatorMesh } from './model/parts3d.js';
+import { makeLabel } from '../../../shared/ui/labels.js';
 import { bootScript, TourFX } from './model/boot.js';
 import { drawControls, drawInfo, drawCard } from './ui/panels.js';
 import * as T from './ui/explain.js';
@@ -106,6 +109,43 @@ class App extends LessonApp {
   ask(qid) {
     this.state.tech = { qid, answer: T.ANSWERS[qid] };
     this.say(T.ANSWERS[qid]);
+  }
+
+  /**
+   * The class copy of a bench (shared/net/LabMirror.js): the case, the parts, their labels and outlines, the tray
+   * and the tour's flows are made afresh as the build changes (each tagged with userData.mirror where it is made).
+   * This makes one of a type, for a copy whose own lab does not have it. Only known part and case names are used.
+   */
+  mirrorMake(type) {
+    const [kind, a, b, ...rest] = String(type).split(':');
+    const part = PARTS[a] ? a : null;
+    const flow = { power: 0xffd166, data: 0x4cc9ff, image: 0x7ee2a8, heat: 0xff6b4a };
+    if (kind === 'case' && CASES[a]) return caseMesh(a);
+    if ((kind === 'part' || kind === 'tray' || kind === 'held') && part) {
+      const m = partMesh(part);
+      if (kind === 'part') return m;
+      const g = new THREE.Group(); // (the part inside a holder: its own place and size come with the copy)
+      g.add(m);
+      return g;
+    }
+    if (kind === 'rad' && CASES[a] && rest.length === 3) return radiatorMesh(CASES[a], new THREE.Vector3(...rest.map(Number)), Number(b) || 240);
+    if ((kind === 'marker' || kind === 'ghost') && part) {
+      const g = ghostOf(part, b === '1');
+      if (kind === 'marker') g.traverse((o) => { if (o.isMesh) { o.material = o.material.clone(); o.material.opacity = 0.12; } });
+      return g;
+    }
+    if (kind === 'label' && part) {
+      const tag = makeLabel(`${CATEGORIES[PARTS[part].cat].name}\n${PARTS[part].short}`, { height: 0.034, size: 40 });
+      tag.material.depthTest = false;
+      tag.renderOrder = 6;
+      return tag;
+    }
+    if (kind === 'traylabel' && part) return makeLabel(PARTS[part].short, { height: 0.022, size: 40 });
+    if (kind === 'shelf') return new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.01, 0.13), this.tray.shelfMat);
+    if (kind === 'dot' && flow[a]) return new THREE.Mesh(new THREE.SphereGeometry(0.006, 10, 8), new THREE.MeshBasicMaterial({ color: flow[a], toneMapped: false }));
+    if (kind === 'flowline' && flow[a]) return new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: flow[a], transparent: true, opacity: 0.35 }));
+    if (kind === 'glow') return new THREE.Mesh(new THREE.SphereGeometry(0.05, 20, 14), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15, depthWrite: false, blending: THREE.AdditiveBlending }));
+    return null;
   }
 
   grabTargets() {

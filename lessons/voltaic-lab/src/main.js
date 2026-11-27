@@ -5,7 +5,7 @@ import { studioReflections } from '../../../shared/util/reflections.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
 import { PREDICTIONS, ANSWERS, METALS, ELECTROLYTES, BATTERIES, cellEMF } from './data/voltaic.js';
-import { Bench } from './model/Bench.js';
+import { Bench, makeStrip } from './model/Bench.js';
 import { Particles } from './model/Particles.js';
 import { Batteries } from './model/Batteries.js';
 import { Board } from './model/Board.js';
@@ -32,7 +32,7 @@ class App extends LessonApp {
       ...this.state,
       mode: 'predict',
       level: 'core',
-      big: true,
+      big: false, // (the class board starts hidden: switched on in Settings, or by the teacher: Teacher menu → Board)
       round: 0,
       revealed: false,
       vote: null,
@@ -473,6 +473,12 @@ class App extends LessonApp {
   }
 
   // ───────────── wiring ─────────────
+
+  /** The class copy of a bench (shared/net/LabMirror.js): a metal strip, for a copy whose own lab has none there. */
+  mirrorMake(type) {
+    const [kind, metal] = String(type).split(':');
+    return kind === 'strip' && METALS[metal] ? makeStrip(metal) : null;
+  }
 
   grabTargets() {
     const m = this.state.mode;

@@ -37,9 +37,21 @@ function solid(o) {
   return ok;
 }
 
+/** One shadow blob (also made by the class copy of a bench, shared/net/LabMirror.js). */
+export function makeShadowBlob(geo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2)) {
+  const b = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: blobTexture(), transparent: true, depthWrite: false, toneMapped: false }));
+  b.renderOrder = -1;
+  b.raycast = () => {};
+  return b;
+}
+
+let layers = 0; // (each bench's shadows, numbered in the order the lesson makes them: the same on every device)
+
 export function addContactShadows(app, group, benchY, { skip = () => false, maxSize = 0.45, strength = 0.8 } = {}) {
   const layer = new THREE.Group();
   layer.name = 'contact-shadows';
+  const L = layers++;
+  let made = 0;
   group.add(layer);
   const geo = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
   const blobs = new Map(); // object → blob mesh
@@ -80,9 +92,8 @@ export function addContactShadows(app, group, benchY, { skip = () => false, maxS
       seen.add(o);
       let b = blobs.get(o);
       if (!b) {
-        b = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: blobTexture(), transparent: true, depthWrite: false, toneMapped: false }));
-        b.renderOrder = -1;
-        b.raycast = () => {};
+        b = makeShadowBlob(geo);
+        b.userData.mirror = { id: `cs${L}-${made++}`, type: 'contact-shadow' }; // (the class copy: shared/net/LabMirror.js)
         layer.add(b);
         blobs.set(o, b);
       }

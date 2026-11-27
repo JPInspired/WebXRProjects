@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { LessonApp } from '../../../shared/LessonApp.js';
+import { makeLabel } from '../../../shared/ui/labels.js';
 import { studioReflections } from '../../../shared/util/reflections.js';
 import { getElement, MAX_Z, bySymbol } from './data/elements.js';
-import { AtomModel } from './models/AtomModel.js';
+import { AtomModel, COLORS } from './models/AtomModel.js';
 import { MoleculeModel } from './models/MoleculeModel.js';
 import { ScaleExplorer } from './models/ScaleExplorer.js';
 import { MoleculeBuilder } from './models/MoleculeBuilder.js';
@@ -308,6 +309,35 @@ class App extends LessonApp {
       };
     }
     return out;
+  }
+
+  /**
+   * The class copy of a bench (shared/net/LabMirror.js): a part the copy's own lab does not have, made from its
+   * type (the atom and the molecule are rebuilt from their numbers; the workbench's atoms, bonds and held particle).
+   */
+  mirrorMake(type) {
+    const [kind, ...v] = String(type).split(':');
+    if (kind === 'atom' && v.length === 4) {
+      const [p, n, e] = v.slice(0, 3).map((x) => Math.max(0, Math.min(200, Math.floor(Number(x)) || 0)));
+      const atom = new AtomModel();
+      atom.group.name = 'atom-copy';
+      atom.set({ p, n, e, view: v[3] });
+      return atom.group;
+    }
+    if (kind === 'molecule' && v.length >= 2) {
+      const m = new MoleculeModel();
+      try { m.set(v[0], v[1]); } catch { return null; }
+      return m.group;
+    }
+    const b = this.builder;
+    if (kind === 'ball' && b && bySymbol(v[0])) return new THREE.Mesh(b.sphere, b.material(v[0]));
+    if (kind === 'halo' && b) return new THREE.Sprite(b.haloMat);
+    if (kind === 'bond' && b) return new THREE.Mesh(b.cylinder, b.bondMat);
+    if (kind === 'pair' && b) return new THREE.Mesh(b.pairGeo, b.pairMat);
+    if (kind === 'trayball' && this.tray) return new THREE.Mesh(this.tray.sphere, new THREE.MeshStandardMaterial({ roughness: 0.35 }));
+    if (kind === 'traylabel') return makeLabel(String(type).slice(10, 70), { height: 0.024, size: 40 });
+    if (kind === 'particle' && this.atomBuilder && COLORS[v[0]]) return new THREE.Mesh(this.atomBuilder.geo, new THREE.MeshStandardMaterial({ color: COLORS[v[0]] }));
+    return null;
   }
 
   /** A colleague's work: their atom, or the molecules on their workbench. */

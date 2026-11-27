@@ -55,7 +55,7 @@ class App extends LessonApp {
       rate: 'rest',
       cond: 'healthy',
       selected: null,
-      big: true,
+      big: false, // (the class board starts hidden: switched on in Settings, or by the teacher: Teacher menu → Board)
       bio: { qid: null, answer: null },
       explain: {
         title: 'Welcome to the Heart Lab',

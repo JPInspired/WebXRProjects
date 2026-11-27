@@ -39,6 +39,7 @@ export class MoleculeModel {
     const key = `${id}/${style}`;
     if (key === this.key) return;
     this.key = key;
+    this.group.userData.mirror = { id: 'molecule', type: `molecule:${id}:${style}` }; // (the class copy: shared/net/LabMirror.js)
     clearGroup(this.content, new Set([this.sphere, this.bondMat, ...this.materials.values()]));
     this.content.rotation.set(0, 0, 0);
 

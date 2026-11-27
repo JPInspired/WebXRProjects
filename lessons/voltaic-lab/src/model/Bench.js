@@ -44,7 +44,7 @@ function canvasTex(w, h) {
   return { c, t, x: c.getContext('2d') };
 }
 
-function makeStrip(metal) {
+export function makeStrip(metal) {
   const g = new THREE.Group();
   const m = METALS[metal];
   const body = new THREE.Mesh(new RoundedBoxGeometry(STRIP.w, STRIP.h, STRIP.d, 1, 0.0008), metalMaterial(metal, m.color).clone()); // its own copy: it darkens as the cell runs down
@@ -304,6 +304,7 @@ export class Bench {
     cell.curve = [];
     if (metal) {
       const s = makeStrip(metal);
+      s.userData.mirror = { id: `strip${cell.kind}${cell.i}-${k}`, type: `strip:${metal}` }; // (the class copy: shared/net/LabMirror.js)
       s.position.copy(cell.slots[k]);
       s.userData.body.userData = { handler: this, placed: { cell: cell.i, side } };
       this.group.add(s);
@@ -572,6 +573,7 @@ export class Bench {
         this.setStrip(c, u.placed.side, null);
       }
       const s = makeStrip(metal);
+      s.userData.mirror = { id: 'heldstrip', type: `strip:${metal}` };
       s.position.copy(this.group.worldToLocal(world.clone()));
       this.group.add(s);
       const move = this.follow(s, world);

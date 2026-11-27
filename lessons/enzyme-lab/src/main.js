@@ -7,6 +7,7 @@ import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
 import { TEMPS, MARKS, QUIZ, QUIZ_ADVANCED, ANSWERS } from './data/enzymes.js';
 import { Bench } from './model/Bench.js';
+import { makeLabel } from '../../../shared/ui/labels.js';
 import { Board } from './model/Board.js';
 import { Molecules } from './model/Molecules.js';
 import { drawControls, drawInfo, drawCard, MODES } from './ui/panels.js';
@@ -28,7 +29,7 @@ class App extends LessonApp {
       ...this.state,
       mode: 'quiz',
       level: 'core',
-      big: true,
+      big: false, // (the class board starts hidden: switched on in Settings, or by the teacher: Teacher menu → Board)
       quiz: { i: 0, picked: null, score: 0, answered: 0 },
       run: { reads: {}, tries: 0, rate: null },
       results: {}, // T → cm³ after 2 min (the student's own reading)
@@ -412,6 +413,15 @@ class App extends LessonApp {
   }
 
   // ───────────── wiring ─────────────
+
+  /** The class copy of a bench (shared/net/LabMirror.js): the liver halves and the timing marks are made as the experiment runs. */
+  mirrorMake(type) {
+    const [kind, t] = String(type).split(':');
+    if (kind === 'liverhalf') return new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), this.bench.liverMat);
+    if (kind === 'markring') return new THREE.Mesh(new THREE.TorusGeometry(0.0142, 0.0009, 6, 32).rotateX(Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xff3b3b }));
+    if (kind === 'marklabel' && /^d{1,4}$/.test(t ?? '')) return makeLabel(`${t} s`, { height: 0.009, size: 36, color: '#ff9a9a' });
+    return null;
+  }
 
   grabTargets() {
     return this.bench.targets;
