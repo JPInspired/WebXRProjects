@@ -39,8 +39,13 @@ jobs:
           site="https://$(echo "${{ github.repository_owner }}" | tr "[:upper:]" "[:lower:]").github.io/${{ github.event.repository.name }}"
           bad=0
           while IFS= read -r f; do
-            live=$(curl -sfL --compressed "$site/$f?watchdog=$GITHUB_RUN_ID" | sha256sum | cut -d' ' -f1) || live=missing
             mine=$(sha256sum "$f" | cut -d' ' -f1)
+            # (a file that differs is fetched again, up to three times, so a momentary hiccup is not an alarm)
+            for try in 1 2 3; do
+              live=$(curl -sfL --compressed "$site/$f?watchdog=$GITHUB_RUN_ID-$try" | sha256sum | cut -d' ' -f1)
+              [ "$live" = "$mine" ] && break
+              sleep 10
+            done
             if [ "$live" != "$mine" ]; then echo "::error::Different on the live site: $f"; bad=1; fi
           done < <(git ls-files '*.html' '*.js' '*.mjs' '*.css' '*.json' | grep -v -E '^(tools|\.github)/')
           echo "bad=$bad" >> "$GITHUB_ENV"
