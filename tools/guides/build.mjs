@@ -161,7 +161,7 @@ const CLASS = `
       <div>
         <h2>Running It With a Class</h2>
         <ol class="steps">
-          <li><b>Start the Class Session</b>Open the lesson and choose Start a Class Session. The lesson shows a four-character class code and who has joined.</li>
+          <li><b>Start the Class Session</b>Open the lesson and choose Start a Class Session. The lesson shows a six-character class code and who has joined.</li>
           <li><b>Students Join With the Code</b>Students type the code and their name into Joining a Class? at the top of the lessons page. They are taken straight into this lesson and press Enter. When you choose My Bench, each student sees your bench, live, behind their own.</li>
           <li><b>Lead From the Teacher Menu</b>The Lesson tab sets the activity for everyone, and the Board tab chooses what stands behind every bench: nothing at the start, the class board or your own bench, live. The Students tab shows progress and can show one student’s work to everyone; the Class tab holds the class tools.</li>
         </ol>
@@ -261,7 +261,7 @@ const index = `    <div style="padding:52px 0 30px">
       <div>
         <h2>During the Lesson</h2>
         <ul class="tips">
-          <li>Students join with the four-character code at the top of the lessons page.</li>
+          <li>Students join with the six-character code at the top of the lessons page.</li>
           <li>The Teacher Menu’s Class tab can pause the class, point every student towards you and run a timer.</li>
           <li>A headset that drops out rejoins by itself, so there is no need to restart the session.</li>
         </ul>
@@ -271,3 +271,6 @@ ${groups}`;
 mkdirSync(join(ROOT, 'guide'), { recursive: true });
 writeFileSync(join(ROOT, 'guide', 'index.html'), page({ title: 'Teacher Guides · WebXR Library', description: 'Learning aims, lesson structure and teaching tips for every WebXR Library lesson.', up: '../', current: true, body: index }));
 console.log(`${GUIDES.length} guides written`);
+
+// every page gets the site's security rule again (tools/security/csp.mjs)
+await import('../security/csp.mjs');

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-ON2fjFqTommKjaBR1mMh2SE+EKl1H+y6woCXC9vg6qI=' 'sha256-mbUPjhBDccTfTeoI1V/sd6oZuUx+zqHR4NHtqUDLFE0=' 'sha256-h9pHyWs+c5amuUgi43ZyuRLkYHgZz5XoEPMtqU1toAY=' 'sha256-YLmJy+vLaD3ZcBOVUs3bCbXPG8DqgAeh6QPw+gaNPYM=' 'sha256-ftZE1LeHKmu48DAjUwxzfzNsDVD/k/cBI4WbHTE9Z48='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob: wss://nos.lol wss://relay.primal.net wss://nostr.mom; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>WebXR Library</title>
   <meta name="description" content="Mixed reality lessons in science, computing, art and the humanities that run in the browser: open them on a Meta Quest or any screen, alone or as a whole class.">
@@ -26,7 +27,7 @@
     try { const t = localStorage.getItem('webxr-classes:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
   </script>
   <script type="importmap">
-    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+    { "imports": { "three": "shared/vendor/three/build/three.module.js", "three/addons/": "shared/vendor/three/examples/jsm/" } }
   </script>
   <style>
     :root {

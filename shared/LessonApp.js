@@ -740,6 +740,7 @@ export class LessonApp {
     ui.heading('Students', { size: 22 });
     ui.buttons([
       { id: 'lock-students', label: this.admin.lock ? 'Menus: Locked' : 'Menus: Unlocked', active: this.admin.lock, onClick: () => this.toggleStudentLock() },
+      { id: 'close-class', label: this.admin.closed ? 'Class Closed (Tap to Open)' : 'Close the Class', active: !!this.admin.closed, onClick: () => this.toggleClassClosed() },
       ...(this.presence.sameRoom ? [{ id: 'refind', label: 'Re-find Room (All)', onClick: () => { this.adminSend({ k: 'refind' }); this.roomLineUp?.changed(); } }] : []),
     ], { height: 52, size: 21, gap: 8 });
     if (this.roomLineUp) {
@@ -800,6 +801,13 @@ export class LessonApp {
 
   onPeerJoinedAdmin(id) {
     this.broadcastAdmin(id);
+    // a closed class: someone new is removed once their name arrives (anyone in the class when it closed may rejoin)
+    if (this.admin.closed) setTimeout(() => {
+      const p = this.presence?.peers.get(id);
+      if (!this.admin.closed || !p || this.admin.members?.has(p.name)) return;
+      this.removeNow(id);
+      this.explain({ title: 'Someone Tried to Join', text: `${p.name} tried to join while the class was closed, and was turned away. Tap Class Closed to let people in again.` });
+    }, 4000);
     if (this.roomRefOut) this.presence.roomCh?.send(this.roomRefOut, id);
   }
 
@@ -884,6 +892,13 @@ export class LessonApp {
   }
 
   /** Remove someone from the session (press twice). */
+  /** Teacher: close the class to newcomers, or open it again. */
+  toggleClassClosed() {
+    this.admin.closed = !this.admin.closed;
+    if (this.admin.closed) this.admin.members = new Set([...(this.presence?.peers.values() ?? [])].map((p) => p.name));
+    this.refresh();
+  }
+
   kick(id) {
     const armed = this.kickArmed?.id === id && performance.now() - this.kickArmed.t < 3000;
     if (!armed) {
@@ -893,6 +908,11 @@ export class LessonApp {
       return;
     }
     this.kickArmed = null;
+    this.removeNow(id);
+  }
+
+  /** Remove a headset from the class straight away (kick, once confirmed; or a newcomer to a closed class). */
+  removeNow(id) {
     if (this.showWork?.id === id) this.showWork = null;
     this.adminSend({ k: 'kick' }, id);
     // everyone else stops listening to them too (the list goes out with the class settings)

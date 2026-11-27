@@ -69,7 +69,7 @@ To run on a computer without GitHub: serve the folder with any static web server
 
 | What | Used for | Where it's set |
 | --- | --- | --- |
-| `cdn.jsdelivr.net` | three.js (3D engine) and the 3D-model decoders | the `importmap` in each lesson's `index.html` |
+| (none since 27 Nov 2026) | three.js and the model decoders are kept in `shared/vendor/three/` | the `importmap` in each page |
 | Nostr relays `nos.lol`, `relay.primal.net`, `nostr.mom` | introducing devices in a shared session | `shared/net/config.js` |
 | STUN servers (Google, Cloudflare) | checking devices are on the same network; connecting them | `shared/net/config.js` |
 | GitHub Pages | hosting | `.github/workflows/pages.yml` |
@@ -111,12 +111,46 @@ The project's own code has **no licence file yet**: the owner should choose one 
 
 Full sources: `lessons/reef-dive/models/CREDITS.md`.
 
+## Security (since 27 November 2026; restore point `v2.8` is just before it)
+
+**What visitors cannot do.** Pressing F12 (the browser's developer tools) only changes that visitor's own copy of a
+page, until they reload. The website itself comes from this repository: only someone who can push to it can change it.
+So the real protection is the GitHub account, then the repository, then the class sessions.
+
+**The accounts** (the owner's to keep): two-step sign-in (an authenticator app or a passkey) on every account that can
+push, the recovery codes kept safe, GitHub's sign-in alerts on, and old sessions, keys and apps reviewed now and then
+(Settings › Sessions, SSH and GPG keys, Applications).
+
+**The repositories** (WebXRProjects, WebXRPrototypes, Edge-Academy, Edge-Preview): a ruleset, *Protect main*, stops
+`main` being overwritten (force-pushed) or deleted, even with a stolen token; normal pushes are unaffected. Secret
+scanning and push protection refuse passwords and keys before they reach GitHub. Dependabot alerts warn of known
+problems in anything the project uses. The publishing workflow has only the permissions it needs.
+
+**The site.** The 3D engine (three.js 0.161) is kept inside the project (`shared/vendor/three/`, with its licence)
+instead of being loaded from an outside file host, so a compromised host cannot slip code into the lessons. Every page
+carries a security rule (Content Security Policy) allowing scripts only from this site (and the page's own small inline
+scripts, by fingerprint), network connections only to this site and the three class relays, and nothing else.
+`node tools/security/csp.mjs` writes it into every page: **run it after changing an inline script in a page, or after
+adding an outside service** (add the service to the script first). The teacher guides' builder runs it by itself.
+
+**Class sessions.** Codes are six characters from the browser's secure random numbers (about 887 million codes).
+Only the teacher's headset holds the teacher's key (`shared/net/teacherKey.js`), and students check it before
+obeying any teacher command; messages from other headsets are checked before use. **Close the Class** (Teacher menu ›
+Students) turns away anyone new once everyone is in (people who were in the class when it closed may rejoin; the
+teacher is told when someone is turned away), and **Remove** takes a headset out. Names lose any hidden or
+direction-flipping characters and are cut to 24 characters. Students never sign in to anything.
+
+**If an account is ever compromised:** change its password, sign out every session, remove unknown keys, apps and
+tokens, then check the repository's recent commits; the restore points (tags) and the offline bundles in
+`Documents/WebXR-Backups/` put everything back (see "Where it lives now").
+
 ## Rule for all future changes
 
 Keep the project self-contained and portable:
 
 - no hard-coded account names, personal addresses or absolute links to one GitHub account;
 - no secrets in the repository (it is served publicly);
+- no code from outside file hosts: keep libraries in `shared/vendor/`, and run `node tools/security/csp.mjs` after changing a page's inline scripts;
 - never trust another headset's messages: check them (see "Security and safeguarding" in the README), and keep
   teacher-only actions behind the teacher's key (`shared/net/teacherKey.js`);
 - every new model, texture or sound gets its source and licence recorded in a `CREDITS.md` beside it;

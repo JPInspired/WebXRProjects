@@ -278,7 +278,7 @@ export class Presence {
       if (!d || typeof d !== 'object') return;
       const p = this.ensure(id);
       this.heard(id);
-      p.name = String(d.name ?? 'Guest').slice(0, 24);
+      p.name = String(d.name ?? '').replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/g, '').trim().slice(0, 24) || 'Guest'; // (no hidden or direction-flipping characters)
       p.trust = typeof d.trust === 'string' && FP_RE.test(d.trust) ? d.trust : null;
       p.claims = !!d.host; // (says it is a teacher: no vote in decideTeacher)
       if (!this.secure) p.host = !!d.host; // (no cryptography here: as before)
