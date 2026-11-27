@@ -1,2 +1,5 @@
 node_modules/
 .DS_Store
+
+# the picture tools run only on this computer: their exact package versions stay local
+tools/lesson-images/package-lock.json
