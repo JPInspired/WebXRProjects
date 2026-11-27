@@ -1,0 +1,54 @@
+name: Live site watchdog
+
+# Every hour: download the live site's code and pages (HTML, JavaScript, CSS, JSON) and compare each file with the
+# version that was last published from main. If any file differs (someone or something changed the live site), this
+# run fails, so GitHub emails the account owner, and the site is published again from the repository.
+# Pictures, models and sounds are not compared (they cannot run code, and comparing them hourly would waste bandwidth).
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write # (to publish the site again when something is wrong)
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find the version last published
+        id: live
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(gh api "repos/${{ github.repository }}/actions/workflows/pages.yml/runs?branch=main&status=success&per_page=1" --jq '.workflow_runs[0].head_sha')
+          age=$(gh api "repos/${{ github.repository }}/actions/workflows/pages.yml/runs?branch=main&status=success&per_page=1" --jq '.workflow_runs[0].updated_at')
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Last published: $sha at $age"
+          # just published: the site's cache may still hold the previous version for a few minutes
+          if [ $(( $(date +%s) - $(date -d "$age" +%s) )) -lt 1200 ]; then echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        if: steps.live.outputs.skip != '1'
+        with:
+          ref: ${{ steps.live.outputs.sha }}
+      - name: Compare every code file with the live site
+        if: steps.live.outputs.skip != '1'
+        run: |
+          site="https://$(echo "${{ github.repository_owner }}" | tr "[:upper:]" "[:lower:]").github.io/${{ github.event.repository.name }}"
+          bad=0
+          while IFS= read -r f; do
+            live=$(curl -sfL --compressed "$site/$f?watchdog=$GITHUB_RUN_ID" | sha256sum | cut -d' ' -f1) || live=missing
+            mine=$(sha256sum "$f" | cut -d' ' -f1)
+            if [ "$live" != "$mine" ]; then echo "::error::Different on the live site: $f"; bad=1; fi
+          done < <(git ls-files '*.html' '*.js' '*.mjs' '*.css' '*.json' | grep -v -E '^(tools|\.github)/')
+          echo "bad=$bad" >> "$GITHUB_ENV"
+      - name: Publish the repository's version again
+        if: env.bad == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run pages.yml --repo "${{ github.repository }}" --ref main
+          echo "::error::The live site did not match the repository. It is being published again from main; check the repository's recent changes."
+          exit 1

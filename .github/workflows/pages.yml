@@ -1,7 +1,8 @@
 name: Deploy to GitHub Pages
 
 # Publishes the site on every push to main (or when run by hand).
-# Two jobs, as in GitHub's own template: "build" packs the site and uploads it, then "deploy" publishes it.
+# Each step is a GitHub-made action pinned to an exact version (its fingerprint), so it cannot change under us;
+# the repository only allows GitHub-made actions (Settings > Actions). Two jobs, as in GitHub's own template: "build" packs the site and uploads it, then "deploy" publishes it.
 # (Since 23 November 2026: with both in one job, the publish step sometimes looked for the package before
 # GitHub had registered the upload, and failed with "No artifacts named github-pages were found".)
 
@@ -23,9 +24,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/configure-pages@v6
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: .
 
@@ -37,4 +38,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
