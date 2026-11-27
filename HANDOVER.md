@@ -124,7 +124,7 @@ push, the recovery codes kept safe, GitHub's sign-in alerts on, and old sessions
 **The repositories** (WebXRProjects, WebXRPrototypes, Edge-Academy, Edge-Preview): a ruleset, *Protect main*, stops
 `main` being overwritten (force-pushed) or deleted, even with a stolen token; normal pushes are unaffected. Secret
 scanning and push protection refuse passwords and keys before they reach GitHub. Dependabot alerts warn of known
-problems in anything the project uses. The publishing workflow has only the permissions it needs.
+problems in anything the project uses. The publishing workflow has only the permissions it needs. Only GitHub-made actions may run (Settings › Actions), each pinned to an exact version by its fingerprint in `.github/workflows/pages.yml`, and only `main` may publish. **The live-site watchdog** (`.github/workflows/watchdog.yml`) compares every code file and page on the live site with the version last published, every hour; if anything differs, the run fails (GitHub emails the owner) and the site is published again from the repository. (Edge-Academy has the same watchdog and a strict security rule on its page.)
 
 **The site.** The 3D engine (three.js 0.161) is kept inside the project (`shared/vendor/three/`, with its licence)
 instead of being loaded from an outside file host, so a compromised host cannot slip code into the lessons. Every page
