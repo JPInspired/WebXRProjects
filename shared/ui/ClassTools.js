@@ -8,7 +8,7 @@ import { sound } from '../util/sound.js';
 //  • Watch My Bench (lessons with a copy of the teacher's bench, shared/net/LabMirror.js): every student's own bench
 //    and menus step aside and the teacher's bench glides into their place, at real size, until the teacher stops.
 //    While a student's work is being shown it reads Watch This Bench, and everyone watches that bench instead.
-//    (Lessons with no bench to copy, such as Reef Dive, Hiroshima and Bounce Lab, have no attention button.)
+//    (Lessons with no bench to copy, Reef Dive and Hiroshima, have no attention button.)
 //    The older Look Here (an arrow and a ring for 8 seconds) is kept in the code below but no longer offered.
 //  • Timer: 1, 2, 5 or 10 minutes, counting down near the top of everyone's view, with a chime at the end.
 // They travel with the rest of the teacher's settings (LessonApp.broadcastAdmin → onAdmin), so anyone who joins

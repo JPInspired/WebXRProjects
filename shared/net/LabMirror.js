@@ -42,7 +42,7 @@ import { makeShadowBlob } from '../util/contactShadows.js';
 // listened to; numbers must be numbers, sizes are limited, and pictures must be pictures from this site.
 //
 // Switches: CLASS_COPY.enabled = false turns it off everywhere; a lesson sets `classCopy = false` to have none
-// (Reef Dive: one shared reef round everyone; Hiroshima: a place to stand in; Bounce Lab: on the real floor).
+// (Reef Dive: one shared reef round everyone; Hiroshima: a place to stand in). Bounce Lab copies its floor drop station.
 
 export const CLASS_COPY = {
   enabled: true,
@@ -92,6 +92,14 @@ function stateOf(o, out) {
   return out;
 }
 const SLEN = 15;
+
+/**
+ * Where this lesson's copy goes: CLASS_COPY, with the lesson's own changes (app.copyPlacement), e.g. Bounce Lab:
+ * { scale: 1, back: 2.5, lift: 0, tilt: 0, floorKey: '@zone' } (real size, 2.5 m away, its drop zone kept on the floor).
+ */
+function placement(app) {
+  return { ...CLASS_COPY, ...(app.copyPlacement ?? {}) };
+}
 
 export function makeLabMirror(app) {
   if (!CLASS_COPY.enabled || app.classCopy === false) return null;
@@ -159,6 +167,7 @@ class LabMirror {
       }
     };
     find(this.app.lab);
+    for (const l of [...list]) if (l?.obj?.isObject3D && !this.app.lab.getObjectById(l.obj.id)) find(l.obj); // (named parts outside the lab)
     const seen = new Set();
     return list.filter((l) => l?.obj?.isObject3D && ID_RE.test(String(l.id)) && !seen.has(l.id) && seen.add(l.id));
   }
@@ -199,7 +208,7 @@ class LabMirror {
     this.drivers = new Set();
     this.clearExtras();
     const copy = new THREE.Group();
-    copy.scale.setScalar(CLASS_COPY.scale);
+    copy.scale.setScalar(placement(this.app).scale);
     const parents = new Map([['', copy]]);
     let n = 0;
     this.walk((o, key, l) => {
@@ -240,7 +249,7 @@ class LabMirror {
       }
     }
     if (!src?.isObject3D) return null;
-    const root = cloneTree(src, `@${id}`, this.nodes, (o) => this.skip(o));
+    const root = cloneTree(src, `@${id}`, this.nodes, (o) => this.skip(o) || (o !== src && !!o.userData.mirror)); // (tagged parts inside come on their own)
     root.userData.mirrorType = type ?? '';
     this.loose.set(id, root);
     return root;
@@ -856,13 +865,20 @@ class LabMirror {
       const toFront = app.watchingCopy ? 1 : 0;
       this.front = THREE.MathUtils.clamp((this.front ?? 0) + Math.sign(toFront - (this.front ?? 0)) * (dt / CLASS_COPY.frontTime), 0, 1);
       const k = this.front * this.front * (3 - 2 * this.front); // (eased)
-      const scale = THREE.MathUtils.lerp(CLASS_COPY.scale, 1, k);
+      const P = placement(app);
+      const scale = THREE.MathUtils.lerp(P.scale, 1, k);
       this.copy?.scale.setScalar(scale);
       this.label.mesh.position.set(0, 0.5 * scale, 0.3 * scale);
       this.label.mesh.scale.setScalar(1 - 0.45 * k); // (smaller up close)
       app.lab.updateMatrixWorld();
-      this.stage.position.set(0, THREE.MathUtils.lerp(CLASS_COPY.lift, 0, k), THREE.MathUtils.lerp(-CLASS_COPY.back, 0, k)).applyMatrix4(app.lab.matrixWorld);
-      this.stage.quaternion.copy(app.lab.getWorldQuaternion(new THREE.Quaternion())).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), CLASS_COPY.tilt * (1 - k)));
+      this.stage.position.set(0, THREE.MathUtils.lerp(P.lift, 0, k), THREE.MathUtils.lerp(-P.back, 0, k)).applyMatrix4(app.lab.matrixWorld);
+      this.stage.quaternion.copy(app.lab.getWorldQuaternion(new THREE.Quaternion())).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), P.tilt * (1 - k)));
+      // a part that belongs on the floor (Bounce Lab's drop zone) stays on the real floor, whatever the lab's height
+      const floorPart = P.floorKey && this.nodes.get(P.floorKey);
+      if (floorPart?.parent) {
+        this.stage.updateMatrixWorld(true);
+        this.stage.position.y -= floorPart.getWorldPosition(new THREE.Vector3()).y - (P.floorY ?? 0);
+      }
       const name = this.labelText();
       if (name !== this.label.text) this.label.draw(name);
       this.glide(dt);

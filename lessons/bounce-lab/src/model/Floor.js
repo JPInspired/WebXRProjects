@@ -203,6 +203,13 @@ function levelLine(color) {
   return g;
 }
 
+/** A dent left in the sand by a ball (also made by the class copy, shared/net/LabMirror.js). */
+export function makeDent(ballId) {
+  const b = BALLS[ballId];
+  if (!b) return null;
+  return new THREE.Mesh(new THREE.CircleGeometry(b.r * 1.3, 20).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xb59457, transparent: true, opacity: 0.85 }));
+}
+
 export class Floor {
   constructor(app) {
     this.app = app;
@@ -386,7 +393,8 @@ export class Floor {
     if (sim.surf === 'trampoline') this.dip = 1;
     if (sim.squash) ball.mesh.scale.set(1.3, 0.6, 1.3);
     if (sim.surf === 'sand') {
-      const dent = new THREE.Mesh(new THREE.CircleGeometry(BALLS[sim.ball].r * 1.3, 20).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xb59457, transparent: true, opacity: 0.85 }));
+      const dent = makeDent(sim.ball);
+      dent.userData.mirror = { id: `dent${(this.dentCount = (this.dentCount ?? 0) + 1)}`, type: `dent:${sim.ball}` }; // (the class copy)
       const p = sampleAt(sim, sim.impacts[0].t, new THREE.Vector3());
       dent.position.set(p.x, topOf('sand') + 0.001, p.z);
       this.dents.add(dent);

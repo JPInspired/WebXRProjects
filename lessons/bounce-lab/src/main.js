@@ -4,7 +4,7 @@ import { studioReflections } from '../../../shared/util/reflections.js';
 import { CanvasPanel } from '../../../shared/ui/CanvasPanel.js';
 import { sound } from '../../../shared/util/sound.js';
 import { BALLS, BALL_IDS, SURFACES, SURFACE_IDS, PREDICTIONS, ANSWERS } from './data/bounce.js';
-import { Floor, matX, topOf } from './model/Floor.js';
+import { Floor, matX, topOf, makeDent } from './model/Floor.js';
 import { Balls } from './model/Balls.js';
 import { Board } from './model/Board.js';
 import { drawControls, drawInfo, drawCard, MODES } from './ui/panels.js';
@@ -46,7 +46,9 @@ class App extends LessonApp {
       },
     };
     this.initLesson();
-    this.classCopy = false; // (the drops happen on the real floor round each student, not on a bench: shared/net/LabMirror.js)
+    // The class copy (shared/net/LabMirror.js): the teacher's whole drop station (mats, ruler, balls, replay and the
+    // shelf) at real size, on the real floor, about 2.5 m beyond the student's own mats, so heights read true.
+    this.copyPlacement = { scale: 1, back: 2.5, lift: 0, tilt: 0, floorKey: '@zone' };
     this.start();
     this.recenter();
   }
@@ -478,6 +480,17 @@ class App extends LessonApp {
 
   // ───────────── wiring ─────────────
 
+  /** The class copy: the drop zone stands on the floor (outside the lab), so it is named and followed. */
+  mirrorParts() {
+    return this.floor ? [{ id: 'zone', obj: this.floor.group }] : [];
+  }
+
+  /** The class copy: a dent in the sand, for a copy that has none there. */
+  mirrorMake(type) {
+    const [kind, ball] = String(type).split(':');
+    return kind === 'dent' ? makeDent(ball) : null;
+  }
+
   grabTargets() {
     return this.balls.targets;
   }
@@ -489,6 +502,7 @@ class App extends LessonApp {
 
   update(dt) {
     this.floor.place(this.lab);
+    this.floor.group.visible = !this.benchHidden; // (Watch My Bench: their own drop station steps aside too)
     this.balls.update();
     this.floor.update(dt, this.balls.list);
 
