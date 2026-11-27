@@ -4,6 +4,7 @@ import { benchTop, glassMaterial, liquidMaterial, bubbleTexture, metalMaterial }
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { sound } from '../../../../shared/util/sound.js';
 import { V_MAX, CYL, RUN, MARKS, rateConstant } from '../data/enzymes.js';
+import { shapeRecipe, glider } from '../../../../shared/net/LabMirror.js';
 
 // The bench, set up as in the original lesson: a piece of liver and a scalpel on a white tile, a conical
 // flask of hydrogen peroxide on a hot plate (− / + buttons), a stopper whose delivery tube runs to an
@@ -74,6 +75,58 @@ function panelTexture(w, h) {
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return { c, t };
+}
+
+/** The delivery tube from the stopper at s, over into the trough and up into the cylinder. */
+function tubeGeometry(s) {
+  const end = new THREE.Vector3(TROUGH.x, CYL_BOTTOM + 0.012, TROUGH.z);
+  const pts = [
+    new THREE.Vector3(s.x, s.y + 0.011, s.z),
+    new THREE.Vector3(s.x, s.y + 0.06, s.z),
+    new THREE.Vector3((s.x + TROUGH.x - 0.08) / 2, Math.max(s.y, TOP + TROUGH_H) + 0.07, (s.z + TROUGH.z) / 2),
+    new THREE.Vector3(TROUGH.x - 0.07, TOP + TROUGH_H + 0.02, TROUGH.z),
+    new THREE.Vector3(TROUGH.x - 0.06, TOP + 0.01, TROUGH.z),
+    new THREE.Vector3(TROUGH.x - 0.02, TOP + 0.006, TROUGH.z),
+    end,
+  ];
+  return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 48, 0.0028, 8);
+}
+
+/** A set of bubbles (positions, lives, kinds) for a Points geometry of n points. */
+function makeBubbles(n) {
+  return { pos: new Float32Array(n * 3), life: new Float32Array(n), kind: new Uint8Array(n), n, acc: 0, acc2: 0 };
+}
+
+/**
+ * Oxygen bubbles: rising in the flask while the liver is in (rate from the reaction), and into the cylinder once
+ * the stopper is on. q = { inFlask, stopperOn, rate (cm³/s), level (water in the cylinder), flaskY, flaskBase }.
+ */
+function stepBubbles(b, geo, dt, q) {
+  if (q.inFlask) b.acc += Math.min(60, q.rate * 40) * dt;
+  if (q.stopperOn) b.acc2 += Math.min(40, q.rate * 30) * dt;
+  const spawn = (kind) => {
+    for (let i = 0; i < b.n; i++) {
+      if (b.life[i] > 0) continue;
+      b.life[i] = 1;
+      b.kind[i] = kind;
+      if (kind === 0) b.pos.set([PLATE.x + (Math.random() - 0.5) * 0.03, q.flaskBase + 0.012, PLATE.z + (Math.random() - 0.5) * 0.02], i * 3);
+      else b.pos.set([TROUGH.x + (Math.random() - 0.5) * 0.008, CYL_BOTTOM + 0.014, TROUGH.z + (Math.random() - 0.5) * 0.008], i * 3);
+      return;
+    }
+  };
+  while (b.acc >= 1) { b.acc--; spawn(0); }
+  while (b.acc2 >= 1) { b.acc2--; spawn(1); }
+  for (let i = 0; i < b.n; i++) {
+    if (b.life[i] <= 0) {
+      b.pos[i * 3 + 1] = -100;
+      continue;
+    }
+    b.pos[i * 3 + 1] += dt * (b.kind[i] ? 0.12 : 0.05);
+    b.pos[i * 3] += (Math.random() - 0.5) * 0.0006;
+    const stop = b.kind[i] ? q.level : q.flaskY;
+    if (b.pos[i * 3 + 1] >= stop) b.life[i] = 0;
+  }
+  geo.attributes.position.needsUpdate = true;
 }
 
 export class Bench {
@@ -152,6 +205,19 @@ export class Bench {
     this.group.add(this.stopper);
     this.tubeMat = new THREE.MeshStandardMaterial({ color: 0xf4f7ff, transparent: true, opacity: 0.6, roughness: 0.2 });
     this.tube = new THREE.Mesh(new THREE.BufferGeometry(), this.tubeMat);
+    // the class copy (shared/net/LabMirror.js): the recipe is where the stopper is; the copy glides it and redraws
+    shapeRecipe(this.tube, () => this.tubeAt ?? null, (copy) => {
+      const g = glider();
+      return {
+        set: (a) => g.to(a),
+        tick: (dt) => {
+          const v = g.step(dt);
+          if (!v) return;
+          copy.geometry.dispose();
+          copy.geometry = tubeGeometry(new THREE.Vector3(v[0], v[1], v[2]));
+        },
+      };
+    });
     this.group.add(this.tube);
     this.tubeKey = '';
 
@@ -188,11 +254,21 @@ export class Bench {
 
     // bubbles
     const n = 220;
-    this.bub = { pos: new Float32Array(n * 3), life: new Float32Array(n), kind: new Uint8Array(n), n, acc: 0, acc2: 0 };
+    this.bub = makeBubbles(n);
     const geo = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(this.bub.pos, 3));
     this.bubbles = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.0055, map: bubbleTexture(), transparent: true, opacity: 0.95, depthWrite: false }));
     this.bubbles.frustumCulled = false;
     this.group.add(this.bubbles);
+    // the class copy: the same bubbles, made by the copy from the teacher's reaction (rate, liver in, stopper on)
+    shapeRecipe(this.bubbles, () => this.bubQ ? [this.bubQ.inFlask ? 1 : 0, this.bubQ.stopperOn ? 1 : 0, this.bubQ.rate, this.bubQ.level, this.bubQ.flaskY, this.bubQ.flaskBase] : null, (copy) => {
+      const b = makeBubbles(n);
+      copy.geometry.setAttribute('position', new THREE.BufferAttribute(b.pos, 3));
+      let q = null;
+      return {
+        set: (a) => { q = { inFlask: a[0] > 0.5, stopperOn: a[1] > 0.5, rate: a[2], level: a[3], flaskY: a[4], flaskBase: a[5] }; },
+        tick: (dt) => { if (q) stepBubbles(b, copy.geometry, dt, q); },
+      };
+    });
 
     this.T = 30;
     this.reset(true);
@@ -432,50 +508,16 @@ export class Bench {
     const key = `${s.x.toFixed(3)}|${s.y.toFixed(3)}|${s.z.toFixed(3)}`;
     if (key === this.tubeKey) return;
     this.tubeKey = key;
-    const end = new THREE.Vector3(TROUGH.x, CYL_BOTTOM + 0.012, TROUGH.z);
-    const pts = [
-      new THREE.Vector3(s.x, s.y + 0.011, s.z),
-      new THREE.Vector3(s.x, s.y + 0.06, s.z),
-      new THREE.Vector3((s.x + TROUGH.x - 0.08) / 2, Math.max(s.y, TOP + TROUGH_H) + 0.07, (s.z + TROUGH.z) / 2),
-      new THREE.Vector3(TROUGH.x - 0.07, TOP + TROUGH_H + 0.02, TROUGH.z),
-      new THREE.Vector3(TROUGH.x - 0.06, TOP + 0.01, TROUGH.z),
-      new THREE.Vector3(TROUGH.x - 0.02, TOP + 0.006, TROUGH.z),
-      end,
-    ];
+    this.tubeAt = s.toArray();
     this.tube.geometry.dispose();
-    this.tube.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 48, 0.0028, 8);
+    this.tube.geometry = tubeGeometry(s);
   }
 
   updateBubbles(dt, cm3PerS, level) {
-    const b = this.bub;
-    const flaskY = this.liquidTop;
-    if (this.inFlask) b.acc += Math.min(60, cm3PerS * 40) * dt;
-    if (this.stopperOn) b.acc2 += Math.min(40, cm3PerS * 30) * dt;
-    const spawn = (kind) => {
-      for (let i = 0; i < b.n; i++) {
-        if (b.life[i] > 0) continue;
-        b.life[i] = 1;
-        b.kind[i] = kind;
-        if (kind === 0) b.pos.set([PLATE.x + (Math.random() - 0.5) * 0.03, this.flaskBase + 0.012, PLATE.z + (Math.random() - 0.5) * 0.02], i * 3);
-        else b.pos.set([TROUGH.x + (Math.random() - 0.5) * 0.008, CYL_BOTTOM + 0.014, TROUGH.z + (Math.random() - 0.5) * 0.008], i * 3);
-        return;
-      }
-    };
+    this.bubQ = { inFlask: this.inFlask, stopperOn: this.stopperOn, rate: cm3PerS, level, flaskY: this.liquidTop, flaskBase: this.flaskBase };
     // the bubbling you hear follows the bubbles you see
     const loud = this.inFlask ? Math.min(1, Math.min(60, cm3PerS * 40) / 30) : 0;
     if (loud > 0 || this.bubbling) (this.bubbling ??= sound.loop('bubbles')).set(loud);
-    while (b.acc >= 1) { b.acc--; spawn(0); }
-    while (b.acc2 >= 1) { b.acc2--; spawn(1); }
-    for (let i = 0; i < b.n; i++) {
-      if (b.life[i] <= 0) {
-        b.pos[i * 3 + 1] = -100;
-        continue;
-      }
-      b.pos[i * 3 + 1] += dt * (b.kind[i] ? 0.12 : 0.05);
-      b.pos[i * 3] += (Math.random() - 0.5) * 0.0006;
-      const stop = b.kind[i] ? level : flaskY;
-      if (b.pos[i * 3 + 1] >= stop) b.life[i] = 0;
-    }
-    this.bubbles.geometry.attributes.position.needsUpdate = true;
+    stepBubbles(this.bub, this.bubbles.geometry, dt, this.bubQ);
   }
 }

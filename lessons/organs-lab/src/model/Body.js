@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { ORGANS, CARDS, SYSTEMS, organsFor, cardsFor } from '../data/organs.js';
 import { tissueMaterial, kindOf } from './tissue.js';
+import { mirrorLine } from '../../../../shared/net/LabMirror.js'; // (the class copy draws these lines from their points)
 
 // Each student's own life-size skeleton, standing on the floor beside their desk, and the organs on the desk
 // (shown at 60% size so they fit; they grow to life size when picked up). Put each organ in its place:
@@ -196,7 +197,7 @@ export class Body {
       const group = new THREE.Group();
       group.add(mesh);
       mesh.userData = { handler: this, card: c.id };
-      const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 }));
+      const line = mirrorLine(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 })));
       line.visible = false;
       this.skel.add(line);
       // the empty spot where this card sticks: a dashed outline, with a dot where its line starts and ends

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { benchTop, steel, brass, standBase, bossHead, slottedMassGeometry } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { G, DROP_OBJECTS, SPRINGS } from '../data/kinematics.js';
+import { mirrorLine } from '../../../../shared/net/LabMirror.js'; // (the class copy draws these lines from their points)
 
 // The bench, with one station on it at a time (chosen on the panel):
 //  - Drop tower: a 1:20 model of the original's measuring pole and glass balcony (5, 10 or 15 m). Press
@@ -132,7 +133,7 @@ export class Bench {
     const prot = new THREE.Mesh(new THREE.RingGeometry(0.06, 0.1, 48, 1, Math.PI * 1.17, Math.PI * 0.66), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
     prot.position.set(STAND.x, PIVOT_Y, STAND.z - 0.012);
     g.add(base, rod, arm, prot);
-    this.string = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0xf2efe6 }));
+    this.string = mirrorLine(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0xf2efe6 })));
     this.bob = new THREE.Mesh(new THREE.SphereGeometry(0.02, 32, 20), brass()); // a brass pendulum bob
     this.bob.userData = { handler: this, bob: true };
     g.add(this.string, this.bob);

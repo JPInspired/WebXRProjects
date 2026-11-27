@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import { TYPES, ABSORBERS } from '../data/radiation.js';
 import { HOLDER, SLOT_X } from './Bench.js';
+import { shapeRecipe } from '../../../../shared/net/LabMirror.js';
+
+const ABS = Object.keys(ABSORBERS);
 
 // "X-ray vision": the radiation drawn as streaks flying out of every source. Alpha (red) only gets a few
 // centimetres and is stopped by any absorber; beta (blue) flies further and is stopped by aluminium or lead;
@@ -28,6 +31,23 @@ export class Rays {
     this.colors = Object.fromEntries(Object.entries(TYPES).map(([k, t]) => [k, new THREE.Color(t.color)]));
     this.on = false;
     this.acc = {};
+    this.recipe = null;
+    // the class copy (shared/net/LabMirror.js): the same streaks, made by the copy from where the teacher's sources
+    // are, how strong they are and which absorber is in the holder (not each streak)
+    shapeRecipe(this.lines, () => this.recipe, (copy) => {
+      const twin = Object.assign(Object.create(Rays.prototype), { parts: [], acc: {}, lines: copy, colors: this.colors });
+      copy.geometry.setAttribute('color', copy.geometry.getAttribute('color').clone());
+      let em = [];
+      let ab = 'none';
+      return {
+        set: (a) => {
+          ab = ABS[a[0]] ?? 'none';
+          em = [];
+          for (let i = 1; i + 6 < a.length; i += 7) em.push({ p: new THREE.Vector3(a[i], a[i + 1], a[i + 2]), a: a[i + 3], b: a[i + 4], g: a[i + 5], holder: a[i + 6] > 0.5 });
+        },
+        tick: (dt) => twin.step(dt, em, ab),
+      };
+    });
   }
 
   update(dt) {
@@ -37,8 +57,15 @@ export class Rays {
       return;
     }
     const b = this.bench;
+    const em = b.emitters();
+    this.recipe = [Math.max(0, ABS.indexOf(b.absorber)), ...em.flatMap((e) => [...e.p.toArray(), e.a, e.b, e.g, e.holder ? 1 : 0])];
+    this.step(dt, em, b.absorber);
+  }
+
+  /** New streaks from the emitters, moving, stopped by the absorber `ab`; drawn into this.lines. */
+  step(dt, emitters, ab) {
     // new streaks
-    b.emitters().forEach((e, i) => {
+    emitters.forEach((e, i) => {
       for (const k of ['a', 'b', 'g']) {
         if (!e[k]) continue;
         const key = `${i}${k}`;
@@ -53,7 +80,6 @@ export class Rays {
       }
     });
     // move them; absorbers stop them
-    const ab = b.absorber;
     for (const q of this.parts) {
       if (q.holder && ab !== 'none' && q.d.x > 0 && q.stopAt === Infinity) {
         const t = (SLOT_X - q.p.x) / q.d.x;

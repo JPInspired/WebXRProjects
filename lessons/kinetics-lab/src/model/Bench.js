@@ -3,6 +3,7 @@ import { benchTop, glassMaterial, liquidMaterial, bubbleTexture, metalMaterial }
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { sound } from '../../../../shared/util/sound.js';
 import { FACTORS, V_MAX, RUN, volumeAt } from '../data/kinetics.js';
+import { shapeRecipe } from '../../../../shared/net/LabMirror.js';
 
 // The bench changes with the factor being investigated.
 //
@@ -65,6 +66,39 @@ function syringeScale() {
   return t;
 }
 
+/** Bubbles for a Points geometry of n points. */
+function makeFizz(n) {
+  return { pos: new Float32Array(n * 3), life: new Float32Array(n), stop: new Float32Array(n), n, acc: 0 };
+}
+
+/** New bubbles at p ([x, y, z]), rate a second, rising until `top`. */
+function spawnFizz(f, p, top, rate, dt) {
+  f.acc += rate * dt;
+  while (f.acc >= 1) {
+    f.acc--;
+    for (let i = 0; i < f.n; i++) {
+      if (f.life[i] > 0) continue;
+      f.life[i] = 1;
+      f.stop[i] = top;
+      f.pos.set([p[0] + (Math.random() - 0.5) * 0.02, p[1], p[2] + (Math.random() - 0.5) * 0.02], i * 3);
+      break;
+    }
+  }
+}
+
+/** The bubbles rise, and stop at their top. */
+function riseFizz(f, geo, dt) {
+  for (let i = 0; i < f.n; i++) {
+    if (f.life[i] <= 0) {
+      f.pos[i * 3 + 1] = -100;
+      continue;
+    }
+    f.pos[i * 3 + 1] += dt * 0.06;
+    if (f.pos[i * 3 + 1] > f.stop[i]) f.life[i] = 0;
+  }
+  geo.attributes.position.needsUpdate = true;
+}
+
 export class Bench {
   constructor(app) {
     this.app = app;
@@ -78,10 +112,25 @@ export class Bench {
 
     // bubbles
     const n = 300;
-    this.fx = { pos: new Float32Array(n * 3), life: new Float32Array(n), stop: new Float32Array(n), n };
+    this.fx = makeFizz(n);
+    this.emitters = []; // where bubbles came from this frame: [x, y, z, top, rate] each
     this.bubbles = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(this.fx.pos, 3)), new THREE.PointsMaterial({ color: 0xffffff, size: 0.005, map: bubbleTexture(), transparent: true, opacity: 0.95, depthWrite: false }));
     this.bubbles.frustumCulled = false;
     this.group.add(this.bubbles);
+    // the class copy (shared/net/LabMirror.js): the same bubbles, made by the copy from where and how fast the
+    // teacher's reactions fizz (not each bubble)
+    shapeRecipe(this.bubbles, () => this.emitters.slice(0, 8).flat(), (copy) => {
+      const fz = makeFizz(n);
+      copy.geometry.setAttribute('position', new THREE.BufferAttribute(fz.pos, 3));
+      let em = [];
+      return {
+        set: (a) => { em = []; for (let i = 0; i + 4 < a.length; i += 5) em.push(a.slice(i, i + 5)); },
+        tick: (dt) => {
+          for (const e of em) spawnFizz(fz, e, e[3], e[4], dt);
+          riseFizz(fz, copy.geometry, dt);
+        },
+      };
+    });
     this.targetsList = [];
     this.runs = []; // timing runs in progress
     this.gas = null; // the gas syringe run in progress
@@ -385,18 +434,8 @@ export class Bench {
 
   bubble(p, top, rate, dt) {
     this.fizzLevel = Math.max(this.fizzLevel ?? 0, rate / 40); // how loud the fizzing is (set each frame)
-    this.acc = (this.acc ?? 0) + rate * dt;
-    const f = this.fx;
-    while (this.acc >= 1) {
-      this.acc--;
-      for (let i = 0; i < f.n; i++) {
-        if (f.life[i] > 0) continue;
-        f.life[i] = 1;
-        f.stop[i] = top;
-        f.pos.set([p.x + (Math.random() - 0.5) * 0.02, p.y, p.z + (Math.random() - 0.5) * 0.02], i * 3);
-        break;
-      }
-    }
+    (this.emitNow ??= []).push([p.x, p.y, p.z, top, rate]);
+    spawnFizz(this.fx, [p.x, p.y, p.z], top, rate, dt);
   }
 
   update(dt) {
@@ -433,16 +472,9 @@ export class Bench {
         this.drawGas();
       }
     }
-    const f = this.fx;
-    for (let i = 0; i < f.n; i++) {
-      if (f.life[i] <= 0) {
-        f.pos[i * 3 + 1] = -100;
-        continue;
-      }
-      f.pos[i * 3 + 1] += dt * 0.06;
-      if (f.pos[i * 3 + 1] > f.stop[i]) f.life[i] = 0;
-    }
-    this.bubbles.geometry.attributes.position.needsUpdate = true;
+    riseFizz(this.fx, this.bubbles.geometry, dt);
+    this.emitters = (this.emitNow ?? []).map((e) => e.map((v) => Math.round(v * 1000) / 1000));
+    this.emitNow = [];
     // the fizzing you hear follows the bubbles you see
     if (this.fizzLevel > 0 || this.fizz) (this.fizz ??= sound.loop('fizz')).set(Math.min(1, this.fizzLevel ?? 0));
     this.fizzLevel = 0;

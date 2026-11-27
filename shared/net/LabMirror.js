@@ -32,6 +32,12 @@ import { makeShadowBlob } from '../util/contactShadows.js';
 // A lesson can also tag a part where it makes it: part.userData.mirror = { id, type, shape } (shape: true for a
 // line or mesh it draws to order, whose points are always sent). Tagged parts are found by themselves.
 //
+// A lesson whose shapes bend or whose effects run on their own (a rope, strings, cables, bubbles, rays) gives those
+// parts a RECIPE instead: a few numbers that say how to draw them (the rope's wave settings, a string's two ends,
+// how hard a reaction fizzes). The teacher's headset sends the numbers; the student's headset draws the part from
+// them with the lesson's own code, every frame, so it moves smoothly (see shapeRecipe, mirrorLine, glider below).
+//   part.userData.mirrorShape = { get: () => [numbers], make: (copyPart) => ({ set(numbers), tick(dt) }) }
+//
 // Messages are checked: only the teacher (proven by the teacher's key), or the student the teacher chose, is
 // listened to; numbers must be numbers, sizes are limited, and pictures must be pictures from this site.
 //
@@ -52,6 +58,7 @@ export const CLASS_COPY = {
 const MAX_NODES = 6000;
 const MAX_IMG = 400000; // characters in one picture
 const MAX_SHAPE = 3000; // numbers in one bent shape (1000 points)
+const MAX_RECIPE = 512; // numbers in one recipe
 const KEY_RE = /^(@[A-Za-z0-9:_-]{1,40}|\d{1,4})(\.\d{1,4}){0,24}$/;
 const ID_RE = /^[A-Za-z0-9:_-]{1,40}$/;
 const q3 = (v) => Math.round(v * 1000) / 1000;
@@ -99,6 +106,8 @@ class LabMirror {
     this.nodes = new Map(); // key → copied part
     this.loose = new Map(); // id → copied loose part
     this.moving = new Set(); // copied parts still gliding to where they were sent
+    this.drivers = new Set(); // copied parts drawn from a recipe (see shapeRecipe)
+    this.recipeSent = new Map(); // (sender) key → the recipe last sent
     this.sourceId = null; // whose bench is on the copy
     this.haveFull = false;
     this.builtAt = 0;
@@ -186,6 +195,7 @@ class LabMirror {
     this.nodes.clear();
     this.loose.clear();
     this.moving.clear();
+    this.drivers = new Set();
     this.clearExtras();
     const copy = new THREE.Group();
     copy.scale.setScalar(CLASS_COPY.scale);
@@ -195,6 +205,7 @@ class LabMirror {
       if (l) return false; // (loose parts: made when they are first sent)
       if (n++ > MAX_NODES) return false;
       const c = cloneOne(o);
+      if (o.userData.mirrorShape) c.userData.srcShape = o.userData.mirrorShape;
       const dot = key.lastIndexOf('.');
       (parents.get(dot < 0 ? '' : key.slice(0, dot)) ?? copy).add(c);
       parents.set(key, c);
@@ -323,6 +334,7 @@ class LabMirror {
       if (c.isInstancedMesh && r[15] >= 0) c.count = Math.min(r[15], c.instanceMatrix.count);
     }
     if (Array.isArray(d.s)) for (const s of d.s.slice(0, 60)) this.applyShape(s);
+    if (Array.isArray(d.p)) for (const p of d.p.slice(0, 200)) this.applyRecipe(p);
     if (d.f === 1) this.haveFull = true;
     // the source has fixed parts this copy does not (the lesson made something new): copy this lab again, and ask
     // (only when this device's own lab has grown since the copy was made, e.g. a model that was still loading;
@@ -338,6 +350,36 @@ class LabMirror {
     }
     if (Array.isArray(d.h)) this.applyHands(d.h);
     if (Array.isArray(d.g)) this.applyGlow(d.g);
+  }
+
+  /** A part's recipe ([key, [numbers]]): its driver (made once, from this device's own part) draws it. */
+  applyRecipe(p) {
+    if (!Array.isArray(p) || p.length !== 2 || typeof p[0] !== 'string' || !KEY_RE.test(p[0]) || !Array.isArray(p[1])) return;
+    const a = p[1];
+    if (a.length > MAX_RECIPE || !a.every((v) => finite(v, 1e6))) return;
+    const c = this.nodes.get(p[0]);
+    const sh = c?.userData.srcShape;
+    if (!sh?.make) return;
+    if (!c.userData.drv) {
+      if (c.geometry && !c.userData.ownGeo) {
+        c.geometry = c.geometry.clone(); // (drawn on its own, never on this device's own part)
+        c.userData.ownGeo = true;
+      }
+      try {
+        c.userData.drv = sh.make(c) ?? { set() {} };
+      } catch (e) {
+        console.warn('Class copy: recipe', e);
+        c.userData.drv = { set() {} };
+      }
+      this.drivers.add(c);
+    }
+    try {
+      c.userData.lastRecipe = a; // (for checking)
+      c.userData.drv.set(a);
+    } catch (e) {
+      if (!c.userData.drvBad) console.warn('Class copy: recipe', e);
+      c.userData.drvBad = true;
+    }
   }
 
   /** A shape the source's lesson bent (a rope, a wave, a cable): [key, [x, y, z, …], [triangle order]?]. */
@@ -460,6 +502,7 @@ class LabMirror {
    */
   collect(full, pictures = null, shapes = null) {
     const rows = [];
+    const recipes = (this.recipes = []);
     const keys = new Set();
     const loose = this.looseParts();
     const looseRows = new Map();
@@ -473,6 +516,7 @@ class LabMirror {
         looseRows.set(key, { o, now, type: typeof l.type === 'string' ? l.type.slice(0, 80) : '' });
         return full || o.visible;
       }
+      if (o.userData.mirrorShape) this.noteRecipe(o, key, full, recipes);
       if (full) {
         rows.push([key, ...now]);
         const t = pictures && this.changedPicture(o, key);
@@ -518,6 +562,24 @@ class LabMirror {
     return rows;
   }
 
+  /** A part's recipe, if it changed since it was last sent (or for everything). */
+  noteRecipe(o, key, full, out) {
+    let a;
+    try {
+      a = o.userData.mirrorShape.get?.() ?? null;
+    } catch (e) {
+      return;
+    }
+    if (!Array.isArray(a) && !(a instanceof Float32Array)) return;
+    const r = Array.from(a.slice(0, MAX_RECIPE), (v) => (Number.isFinite(v) ? Math.round(v * 10000) / 10000 : 0));
+    const j = r.join(',');
+    if (!full) {
+      if (this.recipeSent.get(key) === j) return;
+      this.recipeSent.set(key, j);
+    }
+    out.push([key, r]);
+  }
+
   /** Has this part changed since it was last sent? (Remembers it as sent.) */
   changed(key, now, extra = null) {
     const last = this.sent.get(key);
@@ -559,7 +621,7 @@ class LabMirror {
   bentShapes(full) {
     const out = []; // candidates: { o, key, stamp, pos }
     for (const [o, key] of this.keyOf) {
-      if (!o.geometry || !(o.isMesh || o.isLine || o.isPoints) || o.isInstancedMesh || !o.visible) continue;
+      if (!o.geometry || !(o.isMesh || o.isLine || o.isPoints) || o.isInstancedMesh || !o.visible || this.inRecipe(o)) continue;
       const pos = o.geometry.getAttribute('position');
       if (!pos || pos.isInterleavedBufferAttribute || pos.array.length > MAX_SHAPE) continue;
       const stamp = `${o.geometry.uuid}:${pos.version}:${pos.array.length}`;
@@ -587,6 +649,12 @@ class LabMirror {
       const index = o.geometry.index;
       return index && index.count <= MAX_SHAPE * 2 ? [key, Array.from(pos.array, q3), Array.from(index.array)] : [key, Array.from(pos.array, q3), 0];
     });
+  }
+
+  /** Is this part (or something it is inside) drawn from a recipe? Then its shape is the recipe's business. */
+  inRecipe(o) {
+    for (let p = o; p && p !== this.app.lab; p = p.parent) if (p.userData.mirrorShape) return true;
+    return false;
   }
 
   /** How every picture and shape was when the lesson started (the same on every device). */
@@ -736,7 +804,7 @@ class LabMirror {
     const shapes = [];
     const rows = this.collect(true, pictures, shapes);
     const bent = this.bentShapes(true).filter((s) => shapes.includes(s[0]) || this.bent.has(s[0]));
-    this.app.presence.mirrorCh?.send({ f: 1, r: rows, s: bent, h: this.myHands(), g: this.myGlow() }, to);
+    this.app.presence.mirrorCh?.send({ f: 1, r: rows, s: bent, p: this.recipes, h: this.myHands(), g: this.myGlow() }, to);
     this.sendImages(pictures, to);
   }
 
@@ -766,6 +834,7 @@ class LabMirror {
       this.sourceId = src;
       this.haveFull = false;
       this.sent.clear(); // (sending afresh if it is me)
+      this.recipeSent.clear();
       this.shapeSent.clear();
       this.firstSend = true;
       if (wanted && src && src !== pr.selfId) {
@@ -788,6 +857,14 @@ class LabMirror {
       const name = this.labelText();
       if (name !== this.label.text) this.label.draw(name);
       this.glide(dt);
+      for (const c of this.drivers) {
+        try {
+          c.userData.drv.tick?.(dt);
+        } catch (e) {
+          if (!c.userData.drvBad) console.warn('Class copy: recipe', e);
+          c.userData.drvBad = true;
+        }
+      }
       const stale = performance.now() - this.handsAt > 1500;
       for (const h of this.hands) {
         if (stale) h.visible = false;
@@ -805,6 +882,7 @@ class LabMirror {
         this.firstSend = false;
         const rows = this.collect(first);
         const msg = { f: first ? 1 : 0, r: rows, h: this.myHands(), g: this.myGlow() };
+        if (this.recipes.length) msg.p = this.recipes;
         if (!first && this.goneLoose?.length) msg.x = this.goneLoose;
         if (first || this.shapeClock >= 1 / CLASS_COPY.shapeHz) {
           this.shapeClock = 0;
@@ -878,6 +956,91 @@ class LabMirror {
   }
 }
 
+// ───────────── recipes: helpers for lessons ─────────────
+
+/** Give a part a recipe: get() → numbers (on the sender); make(copyPart) → { set(numbers), tick(dt) } (on the copy). */
+export function shapeRecipe(obj, get, make) {
+  obj.userData.mirrorShape = { get, make };
+  return obj;
+}
+
+/**
+ * Numbers that glide towards the latest ones they are given (about 0.2 s behind), as the copy's parts do.
+ * step(dt) returns the current numbers while they move, and null once they have arrived.
+ */
+export function glider() {
+  let cur = null;
+  let to = null;
+  let moving = false;
+  return {
+    to(a) {
+      if (!cur || cur.length !== a.length) {
+        cur = Float32Array.from(a);
+        to = Float32Array.from(a);
+      } else to.set(a);
+      moving = true;
+    },
+    step(dt) {
+      if (!moving || !cur) return null;
+      const k = 1 - Math.exp(-dt / CLASS_COPY.glide);
+      let d = 0;
+      for (let i = 0; i < cur.length; i++) {
+        const x = to[i] - cur[i];
+        cur[i] += x * k;
+        d = Math.max(d, Math.abs(x));
+      }
+      if (d < 1e-5) {
+        cur.set(to);
+        moving = false;
+      }
+      return cur;
+    },
+    get now() {
+      return cur;
+    },
+  };
+}
+
+/** A small line or strip whose points the lesson moves (a string, a leader line, a cable): its recipe is its points. */
+export function mirrorLine(obj, maxPoints = 64) {
+  return shapeRecipe(obj, () => {
+    const p = obj.geometry?.getAttribute('position');
+    return p && p.count <= maxPoints ? Array.from(p.array).slice(0, p.count * 3) : null;
+  }, (copy) => {
+    const g = glider();
+    return {
+      set: (a) => g.to(a),
+      tick: (dt) => {
+        const v = g.step(dt);
+        if (!v) return;
+        let pos = copy.geometry.getAttribute('position');
+        if (!pos || pos.array.length !== v.length) {
+          pos = new THREE.BufferAttribute(new Float32Array(v.length), 3);
+          copy.geometry.setAttribute('position', pos);
+        }
+        pos.array.set(v);
+        pos.needsUpdate = true;
+        copy.geometry.setDrawRange(0, Infinity);
+        copy.geometry.computeBoundingSphere();
+        copy.geometry.computeBoundingBox();
+      },
+    };
+  });
+}
+
+/** Inside a copied group, the copy of one of the original group's parts (same place among the copied parts). */
+export function twinOf(copyRoot, origRoot, orig) {
+  const skip = (o) => !!(o.userData.panel || o.userData.noMirror || o.isLight || o.isCamera);
+  const path = [];
+  for (let o = orig; o && o !== origRoot; o = o.parent) {
+    if (!o.parent) return null;
+    path.unshift(o.parent.children.filter((c) => !skip(c)).indexOf(o));
+  }
+  let c = copyRoot;
+  for (const i of path) c = c?.children.filter((k) => !k.userData.ghost && !k.userData.glowOverlay && !k.userData.trail)[i];
+  return c ?? null;
+}
+
 // ───────────── copying parts ─────────────
 
 function cloneOne(o) {
@@ -909,6 +1072,7 @@ function cloneOne(o) {
 /** A copy of a part and everything inside it, each registered under its key. */
 function cloneTree(o, key, nodes, skip) {
   const c = cloneOne(o);
+  if (o.userData.mirrorShape) c.userData.srcShape = o.userData.mirrorShape;
   nodes.set(key, c);
   let i = 0;
   for (const k of o.children) {

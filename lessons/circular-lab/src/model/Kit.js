@@ -3,6 +3,7 @@ import { benchTop, steel, brass, castIron, glassMaterial, standBase, bossHead, s
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { G, BALLS, idealRps } from '../data/circular.js';
 import { fx } from './sounds.js';
+import { mirrorLine } from '../../../../shared/net/LabMirror.js'; // (the class copy draws these lines from their points)
 
 // The bench: the school circular-motion kit in a tall clamp stand, so the ball goes round above your head.
 //
@@ -137,6 +138,8 @@ export class Kit {
     const strMat = new THREE.LineBasicMaterial({ color: 0xf2efe6 });
     this.upper = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), strMat);
     this.lower = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), strMat);
+    mirrorLine(this.upper);
+    mirrorLine(this.lower);
     this.group.add(this.upper, this.lower);
     this.clip = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.008, 0.012), mat(0xe03030));
     this.group.add(this.clip);

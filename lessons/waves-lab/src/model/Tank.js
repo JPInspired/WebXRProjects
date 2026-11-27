@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { TANK, SETUP_INDEX } from '../data/waves.js';
+import { shapeRecipe } from '../../../../shared/net/LabMirror.js';
+const wrapAngle = (x) => Math.atan2(Math.sin(x), Math.cos(x));
 
 // A ripple tank seen from above. The water surface is worked out in a shader from the physics of each
 // set-up (so it costs almost nothing on a headset):
@@ -130,6 +132,38 @@ export class Tank {
     }
     this.p = { f: 2, a: 0.6, v: 0.15 };
     this.k = 60;
+
+    // The class copy (shared/net/LabMirror.js): the ripples are drawn on the graphics card from a few numbers, so
+    // the recipe is those numbers; the copy gets its own material, glides the wave's size and keeps it in step.
+    shapeRecipe(this.surface, () => {
+      const u = this.uniforms;
+      return [u.uPhase.value, u.uK.value, u.uAmp.value, u.uGap.value, u.uSetup.value, u.uRatio.value, this.p.f, this.frozen ? 1 : 0];
+    }, (copy) => {
+      copy.material = copy.material.clone(); // (its own settings, never this device's own tank's)
+      const u = copy.material.uniforms;
+      let t = null;
+      return {
+        set: (a) => {
+          const first = !t;
+          t = a;
+          u.uGap.value = a[3];
+          u.uSetup.value = a[4];
+          u.uRatio.value = a[5];
+          if (first) {
+            u.uPhase.value = a[0];
+            u.uK.value = a[1];
+            u.uAmp.value = a[2];
+          } else u.uPhase.value += wrapAngle(a[0] - u.uPhase.value) * 0.3;
+        },
+        tick: (dt) => {
+          if (!t) return;
+          const ease = Math.min(1, dt * 6);
+          u.uAmp.value += (t[2] - u.uAmp.value) * ease;
+          u.uK.value += (t[1] - u.uK.value) * ease;
+          if (!(t[7] > 0.5)) u.uPhase.value = (u.uPhase.value + 2 * Math.PI * t[6] * dt) % (2 * Math.PI);
+        },
+      };
+    });
   }
 
   /** f (Hz), a (0–1), v (m/s), setup id, gap width (m). */
@@ -140,6 +174,7 @@ export class Tank {
   }
 
   update(dt, frozen) {
+    this.frozen = frozen;
     const u = this.uniforms;
     const ease = Math.min(1, dt * 6);
     u.uAmp.value += (this.p.a - u.uAmp.value) * ease;

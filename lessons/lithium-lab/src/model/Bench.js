@@ -4,6 +4,7 @@ import { METALS } from '../data/lithium.js';
 import { pop, fizz, bang } from './sounds.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { benchTop, bunsenBurner, metalMaterial, glassMaterial, liquidMaterial, bubbleTexture } from '../../../../shared/lab/kit.js';
+import { shapeRecipe } from '../../../../shared/net/LabMirror.js';
 
 // The bench, as in the original lesson: five metal cubes (lithium, and four mystery metals B–E), a Bunsen
 // burner, and a tank of water — plus a safety screen that slides across in front of the tank.
@@ -30,6 +31,52 @@ const cubeGeo = () => new RoundedBoxGeometry(CUBE, CUBE, CUBE, 2, CUBE * 0.12); 
 /** A flame shape (turned): a wide soft outer flame, or a small inner cone. Origin at its base. */
 const flameShape = (pts) => new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r, y)), 24);
 
+/** Particles (hydrogen bubbles, sparks) for a Points geometry of n points. */
+function makeSparks(n) {
+  return { pos: new Float32Array(n * 3), vel: new Float32Array(n * 3), life: new Float32Array(n), n, acc: 0 };
+}
+
+function spawnSpark(f, p, v, life) {
+  for (let i = 0; i < f.n; i++) {
+    if (f.life[i] > 0) continue;
+    f.life[i] = life;
+    f.pos.set([p.x, p.y, p.z], i * 3);
+    f.vel.set([v.x, v.y, v.z], i * 3);
+    return;
+  }
+}
+
+/** Hydrogen bubbling up round a reacting metal at pos, `rate` a second. */
+function fizzSparks(f, pos, rate, dt) {
+  f.acc += dt * rate;
+  while (f.acc >= 1) {
+    f.acc--;
+    spawnSpark(f, new THREE.Vector3(pos.x + (Math.random() - 0.5) * 0.012, pos.y, pos.z + (Math.random() - 0.5) * 0.012), new THREE.Vector3((Math.random() - 0.5) * 0.02, 0.05 + Math.random() * 0.05, (Math.random() - 0.5) * 0.02), 0.5);
+  }
+}
+
+/** An explosion's sparks flying up and out from at, for a bang of size big. */
+function burstSparks(f, at, big) {
+  for (let i = 0; i < 25 * big; i++) {
+    const d = new THREE.Vector3().randomDirection();
+    d.y = Math.abs(d.y);
+    spawnSpark(f, at, d.multiplyScalar(0.15 + Math.random() * 0.25 * big), 0.7);
+  }
+}
+
+/** The particles move, slow as they rise, and fade. */
+function stepSparks(f, geo, dt) {
+  for (let i = 0; i < f.n; i++) {
+    if (f.life[i] <= 0) {
+      f.pos[i * 3 + 1] = -100;
+      continue;
+    }
+    f.life[i] -= dt;
+    for (let a = 0; a < 3; a++) f.pos[i * 3 + a] += f.vel[i * 3 + a] * dt;
+    f.vel[i * 3 + 1] -= (f.vel[i * 3 + 1] > 0.3 ? 0.6 : 0) * dt;
+  }
+  geo.attributes.position.needsUpdate = true;
+}
 export class Bench {
   constructor(app) {
     this.app = app;
@@ -111,10 +158,32 @@ export class Bench {
 
     // effects: bubbles, a hydrogen flame on the water, an explosion flash
     const n = 260;
-    this.fx = { pos: new Float32Array(n * 3), vel: new Float32Array(n * 3), life: new Float32Array(n), n, acc: 0 };
+    this.fx = makeSparks(n);
+    this.fizzAt = null; // [x, y, z, rate] while a metal reacts
+    this.burst = [0, 0, 0, 0, 0]; // [count, x, y, z, big]: the latest explosion
     this.particles = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(this.fx.pos, 3)), new THREE.PointsMaterial({ color: 0xffffff, size: 0.0065, map: bubbleTexture(), transparent: true, opacity: 0.95, depthWrite: false }));
     this.particles.frustumCulled = false;
     this.group.add(this.particles);
+    // the class copy (shared/net/LabMirror.js): the same bubbles and sparks, made by the copy from where and how
+    // hard the teacher's metal reacts, and each explosion (not each particle)
+    shapeRecipe(this.particles, () => [...(this.fizzAt ?? [0, 0, 0, 0]), ...this.burst], (copy) => {
+      const fx = makeSparks(n);
+      copy.geometry.setAttribute('position', new THREE.BufferAttribute(fx.pos, 3));
+      let fizz = null;
+      let bursts = null;
+      return {
+        set: (a) => {
+          fizz = a[3] > 0 ? new THREE.Vector3(a[0], a[1], a[2]) : null;
+          fizz && (fizz.rate = a[3]);
+          if (bursts !== null && a[4] !== bursts) burstSparks(fx, new THREE.Vector3(a[5], a[6], a[7]), a[8]);
+          bursts = a[4];
+        },
+        tick: (dt) => {
+          if (fizz) fizzSparks(fx, fizz, fizz.rate, dt);
+          stepSparks(fx, copy.geometry, dt);
+        },
+      };
+    });
     this.h2Flame = new THREE.Mesh(new THREE.ConeGeometry(0.01, 0.035, 12, 1, true), new THREE.MeshBasicMaterial({ color: 0xffb343, transparent: true, opacity: 0.8, depthWrite: false }));
     this.h2Flame.visible = false;
     this.group.add(this.h2Flame);
@@ -236,14 +305,7 @@ export class Bench {
   }
 
   spawn(p, v, life) {
-    const f = this.fx;
-    for (let i = 0; i < f.n; i++) {
-      if (f.life[i] > 0) continue;
-      f.life[i] = life;
-      f.pos.set([p.x, p.y, p.z], i * 3);
-      f.vel.set([v.x, v.y, v.z], i * 3);
-      return;
-    }
+    spawnSpark(this.fx, p, v, life);
   }
 
   update(dt) {
@@ -273,11 +335,9 @@ export class Bench {
       }
       r.c.mesh.scale.setScalar(Math.max(0.05, 1 - k * 0.95));
       // bubbles of hydrogen
-      this.fx.acc += dt * (20 + 50 * r.m.violence);
-      while (this.fx.acc >= 1) {
-        this.fx.acc--;
-        this.spawn(new THREE.Vector3(pos.x + (Math.random() - 0.5) * 0.012, pos.y, pos.z + (Math.random() - 0.5) * 0.012), new THREE.Vector3((Math.random() - 0.5) * 0.02, 0.05 + Math.random() * 0.05, (Math.random() - 0.5) * 0.02), 0.5);
-      }
+      const rate = 20 + 50 * r.m.violence;
+      this.fizzAt = [pos.x, pos.y, pos.z, rate];
+      fizzSparks(this.fx, pos, rate, dt);
       // the hydrogen catches fire for the more reactive metals
       this.h2Flame.visible = r.m.violence >= 1 && !r.sinks && (r.m.violence >= 2 || k > 0.5);
       if (this.h2Flame.visible) {
@@ -287,18 +347,9 @@ export class Bench {
       }
       if (r.t >= r.dur) this.finish(r);
     }
+    if (!this.reaction) this.fizzAt = null;
     // particles
-    const f = this.fx;
-    for (let i = 0; i < f.n; i++) {
-      if (f.life[i] <= 0) {
-        f.pos[i * 3 + 1] = -100;
-        continue;
-      }
-      f.life[i] -= dt;
-      for (let a = 0; a < 3; a++) f.pos[i * 3 + a] += f.vel[i * 3 + a] * dt;
-      f.vel[i * 3 + 1] -= (f.vel[i * 3 + 1] > 0.3 ? 0.6 : 0) * dt;
-    }
-    this.particles.geometry.attributes.position.needsUpdate = true;
+    stepSparks(this.fx, this.particles.geometry, dt);
     // explosion flash fades
     if (this.flash.visible) {
       this.flashT += dt;
@@ -321,11 +372,8 @@ export class Bench {
       this.flashSize = 0.025 * big;
       this.flash.material.color.set(r.m.flame).lerp(new THREE.Color(0xffffff), 0.5);
       this.flash.position.copy(pos).setY(Math.max(pos.y, WATER_Y));
-      for (let i = 0; i < 25 * big; i++) {
-        const d = new THREE.Vector3().randomDirection();
-        d.y = Math.abs(d.y);
-        this.spawn(this.flash.position, d.multiplyScalar(0.15 + Math.random() * 0.25 * big), 0.7);
-      }
+      burstSparks(this.fx, this.flash.position, big);
+      this.burst = [this.burst[0] + 1, ...this.flash.position.toArray(), big];
       bang(big);
     } else pop();
     // the cube is used up; a fresh piece comes from the oil jar

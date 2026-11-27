@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { benchTop, standBase, bossHead } from '../../../../shared/lab/kit.js';
 import { makeLabel } from '../../../../shared/ui/labels.js';
 import { BOBS, dragK } from '../data/pendulum.js';
+import { mirrorLine } from '../../../../shared/net/LabMirror.js'; // (the class copy draws these lines from their points)
 
 // The bench rig, as in the original lesson: a big protractor board (0–90° each side) with the pendulum hanging
 // in front of it and up / down buttons for the length. Grab the bob, pull it out to an angle and let go (or
@@ -214,7 +215,7 @@ export class Rig {
     const clamp = bossHead();
     clamp.position.set(PIVOT.x, PIVOT.y + 0.012, PIVOT.z - 0.012);
     this.benchGroup.add(prot, post, post2, beam, clamp);
-    this.string = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0x222222 }));
+    this.string = mirrorLine(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0x222222 })));
     this.benchGroup.add(this.string);
     this.bobMesh = makeBob('steel');
     this.bobMesh.userData.ball.userData = { handler: this, bob: 'bench' };
@@ -275,7 +276,7 @@ export class Rig {
     this.group.add(this.giantGroup);
     const mount = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.03, 0.15), mat(0x5a6070));
     mount.position.y = GIANT_PIVOT_H;
-    this.giantString = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0xdddddd }));
+    this.giantString = mirrorLine(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0xdddddd })));
     this.giantBob = new THREE.Mesh(new THREE.SphereGeometry(0.06, 24, 16), mat(0xd4a83a, { metalness: 0.8, roughness: 0.25 }));
     this.giantBob.userData = { handler: this, bob: 'giant' };
     this.giantArc = new THREE.Mesh(new THREE.RingGeometry(0.4, 0.42, 64, 1, Math.PI * 1.25, Math.PI * 0.5), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));

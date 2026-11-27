@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { ROPE, lightHue } from '../data/waves.js';
+import { shapeRecipe, twinOf } from '../../../../shared/net/LabMirror.js';
+const wrapAngle = (x) => Math.atan2(Math.sin(x), Math.cos(x));
 
 // A rope shaken at its left end. The wave really travels: every point on the rope does what the end did a
 // moment earlier (x / speed seconds ago), so a change of frequency or amplitude can be watched moving along.
@@ -70,6 +72,7 @@ export function makeGhost({ f, a, v }, color, length = ROPE.length) {
 
 export class Rope {
   constructor({ length = ROPE.length, points = 190, radius = 0.006, stand = true } = {}) {
+    this.opts = { length, points, radius, stand };
     this.L = length;
     this.n = points;
     this.r = radius;
@@ -155,6 +158,61 @@ export class Rope {
 
     this.lookKey = '';
     this.settle();
+
+    // The class copy (shared/net/LabMirror.js): the recipe is the wave (frequency, amplitude, speed, where the shaken
+    // end is in its swing, frozen or not). The copy runs its own rope with that wave, kept in step with the teacher's,
+    // and shapes the copied rope, beads, sea and boat from it: the wave travels along the copy just as it does here.
+    shapeRecipe(this.group, () => [this.p.f, this.p.a, this.p.v, this.phase, this.frozen ? 1 : 0], (copy) => {
+      const sim = new Rope(this.opts);
+      sim.tube.visible = true;
+      sim.sea.visible = true;
+      const twin = (o) => twinOf(copy, this.group, o);
+      const tube = twin(this.tube);
+      const top = twin(this.seaTop);
+      const front = twin(this.seaFront);
+      for (const m of [tube, top, front]) if (m) m.geometry = m.geometry.clone();
+      const beads = this.beads.map(twin);
+      const shaker = twin(this.shaker);
+      const boat = twin(this.boat);
+      let frozen = false;
+      let first = true;
+      return {
+        set: (a) => {
+          sim.set({ f: a[0], a: a[1], v: a[2] });
+          frozen = a[4] > 0.5;
+          if (first || frozen) {
+            sim.phase = a[3];
+            if (first) sim.settle();
+            sim.fresh = true;
+            first = false;
+          } else sim.phase += wrapAngle(a[3] - sim.phase) * 0.3; // (eased into step with the teacher's swing)
+        },
+        tick: (dt) => {
+          if (first) return;
+          sim.update(dt, frozen);
+          const copyArr = (from, to) => {
+            if (!to) return;
+            for (const k of ['position', 'normal']) {
+              const s = from.geometry.getAttribute(k);
+              const d = to.geometry.getAttribute(k);
+              if (s && d && s.array.length === d.array.length) {
+                d.array.set(s.array);
+                d.needsUpdate = true;
+              }
+            }
+          };
+          copyArr(sim.tube, tube);
+          copyArr(sim.seaTop, top);
+          copyArr(sim.seaFront, front);
+          sim.beads.forEach((b, i) => { if (beads[i]) beads[i].position.y = b.position.y; });
+          if (shaker) shaker.position.y = sim.shaker.position.y;
+          if (boat) {
+            boat.position.y = sim.boat.position.y;
+            boat.rotation.z = sim.boat.rotation.z;
+          }
+        },
+      };
+    });
   }
 
   /** f (Hz), a (m), v (m/s). */
@@ -212,6 +270,7 @@ export class Rope {
   }
 
   update(dt, frozen) {
+    this.frozen = frozen;
     if (frozen) {
       if (this.fresh) this.settle();
     } else {

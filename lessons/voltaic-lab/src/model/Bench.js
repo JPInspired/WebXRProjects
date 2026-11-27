@@ -3,6 +3,7 @@ import { makeLabel } from '../../../../shared/ui/labels.js';
 import { METALS, METAL_IDS, ELECTROLYTES, ELECTROLYTE_IDS, METER_R, cellEMF } from '../data/voltaic.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { makeBeaker, reagentBottle, benchTop, metalMaterial, liquidMaterial } from '../../../../shared/lab/kit.js';
+import { shapeRecipe, glider } from '../../../../shared/net/LabMirror.js';
 
 // The bench.
 //   Core: four beakers. Drag two metal strips from the tray into a beaker (one on each side) and pour an
@@ -59,15 +60,32 @@ export function makeStrip(metal) {
   return g;
 }
 
+/** Draw a cable on this mesh between two points, sagging a little. */
+function drawCable(mesh, a, b) {
+  const mid = a.clone().lerp(b, 0.5);
+  mid.y = Math.max(a.y, b.y) + 0.04 + a.distanceTo(b) * 0.08;
+  mesh.geometry.dispose();
+  mesh.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3([a, a.clone().lerp(mid, 0.5).setY(mid.y), mid, b.clone().lerp(mid, 0.5).setY(mid.y), b]), 24, 0.0018, 6, false);
+}
+
 /** A cable between two points, sagging a little. */
 function cable(color) {
   const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat(color, { roughness: 0.6 }));
   mesh.userData.set = (a, b) => {
-    const mid = a.clone().lerp(b, 0.5);
-    mid.y = Math.max(a.y, b.y) + 0.04 + a.distanceTo(b) * 0.08;
-    mesh.geometry.dispose();
-    mesh.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3([a, a.clone().lerp(mid, 0.5).setY(mid.y), mid, b.clone().lerp(mid, 0.5).setY(mid.y), b]), 24, 0.0018, 6, false);
+    mesh.userData.ends = [...a.toArray(), ...b.toArray()];
+    drawCable(mesh, a, b);
   };
+  // the class copy (shared/net/LabMirror.js): the recipe is the two ends; the copy glides them and redraws
+  shapeRecipe(mesh, () => mesh.userData.ends ?? null, (copy) => {
+    const g = glider();
+    return {
+      set: (e) => g.to(e),
+      tick: (dt) => {
+        const v = g.step(dt);
+        if (v) drawCable(copy, new THREE.Vector3(v[0], v[1], v[2]), new THREE.Vector3(v[3], v[4], v[5]));
+      },
+    };
+  });
   return mesh;
 }
 

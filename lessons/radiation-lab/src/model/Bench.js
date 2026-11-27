@@ -3,6 +3,7 @@ import { makeLabel } from '../../../../shared/ui/labels.js';
 import { SOURCES, LAB_IDS, HOME_IDS, ABSORBERS, BACKGROUND, D0, PA, HALF_LIFE } from '../data/radiation.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { benchTop, metalMaterial } from '../../../../shared/lab/kit.js';
+import { mirrorLine } from '../../../../shared/net/LabMirror.js'; // (the class copy draws these lines from their points)
 
 /** A small square picture drawn in code (warning signs, grilles), as a texture. */
 function drawn(size, draw) {
@@ -329,7 +330,7 @@ export class Bench {
     this.inClip = true;
     this.probe.position.copy(WINDOW);
     const n = 32;
-    this.cable = new THREE.Line(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3)), new THREE.LineBasicMaterial({ color: 0x15171c }));
+    this.cable = mirrorLine(new THREE.Line(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3)), new THREE.LineBasicMaterial({ color: 0x15171c })));
     this.cable.frustumCulled = false;
     this.group.add(this.cable);
 
